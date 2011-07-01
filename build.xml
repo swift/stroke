@@ -1,0 +1,87 @@
+<!--
+ * Copyright (c) 2010, Isode Limited, London, England.
+ * All rights reserved.
+ -->
+<project name="Stroke" default="dist" basedir=".">
+    <description>
+        XMPP Library porting Swiften to Java.
+    </description>
+  <property name="src" location="src"/>
+  <property name="src.tests" location="test"/>
+  <property name="test.results" location="test-results"/>
+  <property name="build" location="build"/>
+  <property name="dist"  location="dist"/>
+  <property name="jar" value="${dist}/lib/stroke.jar"/>
+  <property name="main-class" value="com.isode.stroke.examples.gui.StrokeGUI"/>
+  <property name="compile.debug" value="true"/>
+  <property name="testsuiteclass" value="com.isode.stroke.unittest.StrokeTestSuite" />
+
+  <path id="classpath">
+    <fileset dir="../third-party/xpp" includes="xpp.jar"/>
+  </path>
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init"
+        description="compile the source " >
+    <javac srcdir="${src}" destdir="${build}" classpathref="classpath" debug="${compile.debug}"/>
+  </target>
+
+  <target name="dist" depends="compile"
+        description="generate the distribution" >
+    <mkdir dir="${dist}/lib"/>
+
+    <jar jarfile="${jar}" basedir="${build}"/>
+    <manifest file="MANIFEST.MF">
+        <attribute name="Main-Class" value="${main-class}"/>
+    </manifest>
+  </target>
+
+<target name="compile-tests" depends="dist"
+        description="compile the test sources " >
+    <javac srcdir="${src.tests}" destdir="${src.tests}" debug="${compile.debug}">
+        <classpath>
+            <pathelement location="${jar}"/>
+            <pathelement location="${JUNIT_JAR}"/>
+        </classpath>
+    </javac>
+  </target>
+
+  <target name="test" depends="compile-tests">
+      <delete dir="${test.results}"/>
+      <mkdir dir="${test.results}"/>
+    <junit fork="false">
+        <formatter type="plain"/>
+        <classpath>
+            <pathelement location="${JUNIT_JAR}"/>
+            <pathelement location="${jar}"/>
+            <pathelement location="${src.tests}"/>
+	    <path refid="classpath"/>
+        </classpath>
+        <batchtest fork="yes" todir="${test.results}">
+            <fileset dir="${src.tests}">
+                <include name="**/*Test.java"/>
+                <!--<exclude name="**/AllTests.java"/>-->
+            </fileset>
+        </batchtest>
+    </junit>
+  </target>
+
+  <target name="clean"
+        description="clean up" >
+    <delete dir="${build}"/>
+    <delete dir="${test.results}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+  <target name="run" description="Run the demo" depends="dist">
+      <java fork="true" classname="${main-class}">
+          <classpath>
+            <path refid="classpath"/>
+            <path location="${jar}"/>
+          </classpath>
+      </java>
+  </target>
+</project>

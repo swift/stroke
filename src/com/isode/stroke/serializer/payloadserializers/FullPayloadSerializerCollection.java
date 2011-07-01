@@ -1,0 +1,52 @@
+/*
+ * Copyright (c) 2010, Isode Limited, London, England.
+ * All rights reserved.
+ */
+/*
+ * Copyright (c) 2010, Remko Tronçon.
+ * All rights reserved.
+ */
+package com.isode.stroke.serializer.payloadserializers;
+
+import com.isode.stroke.serializer.PayloadSerializerCollection;
+
+public class FullPayloadSerializerCollection extends PayloadSerializerCollection {
+
+    public FullPayloadSerializerCollection() {
+        /*FIXME: Implement what's needed. */
+        //addSerializer(new IBBSerializer());
+	addSerializer(new BodySerializer());
+	//addSerializer(new SubjectSerializer());
+	//addSerializer(new ChatStateSerializer());
+	//addSerializer(new PrioritySerializer());
+	addSerializer(new ErrorSerializer());
+	addSerializer(new RosterSerializer());
+	//addSerializer(new MUCPayloadSerializer());
+	//addSerializer(new MUCUserPayloadSerializer());
+	//addSerializer(new MUCOwnerPayloadSerializer(this));
+	addSerializer(new SoftwareVersionSerializer());
+	//addSerializer(new StatusSerializer());
+	//addSerializer(new StatusShowSerializer());
+	//addSerializer(new DiscoInfoSerializer());
+	//addSerializer(new DiscoItemsSerializer());
+	//addSerializer(new CapsInfoSerializer());
+	addSerializer(new ResourceBindSerializer());
+	addSerializer(new StartSessionSerializer());
+	//addSerializer(new SecurityLabelSerializer());
+	//addSerializer(new SecurityLabelsCatalogSerializer());
+	//addSerializer(new StreamInitiationSerializer());
+	//addSerializer(new BytestreamsSerializer());
+	//addSerializer(new VCardSerializer());
+	//addSerializer(new VCardUpdateSerializer());
+	addSerializer(new RawXMLPayloadSerializer());
+	//addSerializer(new StorageSerializer());
+	//addSerializer(new DelaySerializer());
+	//addSerializer(new FormSerializer());
+	//addSerializer(new PrivateStorageSerializer(this));
+	//addSerializer(new CommandSerializer());
+	//addSerializer(new NicknameSerializer());
+        addSerializer(new SearchPayloadSerializer());
+        addSerializer(new LastSerializer());
+    }
+
+}

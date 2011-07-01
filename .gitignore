@@ -1,0 +1,13 @@
+MANIFEST.MF
+*\~
+build/
+dist/
+nbproject/
+*.class
+isode/Makefile
+isode/config.log
+isode/config.status
+isode/configure
+test-results/
+*.patch
+.DS_Store
