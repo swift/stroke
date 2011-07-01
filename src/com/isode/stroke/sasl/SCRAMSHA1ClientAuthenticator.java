@@ -60,6 +60,7 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
             for (int i = 0; i < clientProofData.length; ++i) {
                 clientProofData[i] ^= clientSignature.getData()[i];
             }
+            clientProof = new ByteArray(clientProofData);
             ByteArray result = getFinalMessageWithoutProof().append(",p=").append(Base64.encode(clientProof));
             return result;
         } else {

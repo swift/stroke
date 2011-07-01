@@ -10,6 +10,7 @@
 package com.isode.stroke.base;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Vector;
 
 /**
  *
@@ -36,8 +37,8 @@ public class ByteArray {
     }
 
     private void fromBytes(final byte[] b) {
-        data_ = new byte[b.length];
-        System.arraycopy(b, 0, data_, 0, b.length);
+        clear();
+        append(b);
     }
 
     /*public ByteArray(char[] c, int n) {
@@ -47,15 +48,20 @@ public class ByteArray {
     }*/
 
     /**
-     * These are the raw, modifyable data!
-     * @return
+     * @return array copy of internal data.
      */
     public byte[] getData() {
-        return data_;
+        if (dataCopy_ == null) {
+            dataCopy_ = new byte[getSize()];
+            for (int i = 0; i < data_.size(); i++) {
+                dataCopy_[i] = data_.get(i);
+            }
+        }
+        return dataCopy_;
     }
 
     public int getSize() {
-        return data_.length;
+        return data_.size();
     }
 
     public boolean isEmpty() {
@@ -87,22 +93,16 @@ public class ByteArray {
 
     /** Mutable add */
     private ByteArray append(byte[] b) {
-        int newLength = data_.length + b.length;
-        byte[] newData = new byte[newLength];
-        for (int i = 0; i < data_.length; i++) {
-            newData[i] = data_[i];
-        }
         for (int i = 0; i < b.length; i++) {
-            newData[i + data_.length] = b[i];
+            append(b[i]);
         }
-        data_ = newData;
         return this;
     }
 
     /** Mutable add */
     public ByteArray append(byte b) {
-        byte[] bytes = {b};
-        append(bytes);
+        dataCopy_ = null; /* Invalidate cache */
+        data_.add(b);
         return this;
     }
 
@@ -144,7 +144,7 @@ public class ByteArray {
     @Override
     public String toString() {
         try {
-            return new String(data_, "UTF-8");
+            return new String(getData(), "UTF-8");
         } catch (UnsupportedEncodingException ex) {
             throw new IllegalStateException("JVM has no 'UTF-8' encoding");
         }
@@ -155,8 +155,9 @@ public class ByteArray {
     }
 
     public void clear() {
-        data_ = new byte[]{};
+        data_ = new Vector<Byte>();
+        dataCopy_ = null;
     }
-    private byte[] data_ = {};
-
+    Vector<Byte> data_ = new Vector<Byte>();
+    byte[] dataCopy_ = null;
 }

@@ -24,6 +24,7 @@ public class PBKDF2 {
             }
             ++i;
         }
+        result = new ByteArray(resultData);
         return result;
     }
 }

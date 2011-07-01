@@ -34,6 +34,7 @@ public class HMACSHA1 {
         for (int i = 0; i < xInner.length; ++i) {
             xInner[i] ^= 0x36;
         }
+        x = new ByteArray(xInner);
         x.append(data);
 
         // Create the second value
@@ -42,6 +43,7 @@ public class HMACSHA1 {
         for (int i = 0; i < yInner.length; ++i) {
             yInner[i] ^= 0x5c;
         }
+        y = new ByteArray(yInner);
         y.append(SHA1.getHash(x));
 
         return SHA1.getHash(y);
