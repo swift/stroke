@@ -43,7 +43,6 @@ public class XMPPParser implements XMLParserClient {
             String ns,
             AttributeMap attributes) {
         if (!inStream()) {
-            logger_.warning("Not in stream");
             if (element.equals("stream") && ns.equals("http://etherx.jabber.org/streams")) {
                 ProtocolHeader header = new ProtocolHeader();
                 header.setFrom(attributes.getAttribute("from"));
