@@ -3,7 +3,8 @@ Stroke
 Stroke is a port of the C++ Swift library ( http://swift.im/swiften/ )
 The source is available from the Git repository at http://swift.im/git/stroke/
 
-It depends on the XmlPullParser from http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/index.html
+It depends on the XmlPullParser from http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/index.html. This is passed to Ant in the xpp-dir parameter. The passed folder should contain the XPP jar called xpp.jar (i.e. with no version numbering in the filename).
 
 To build, run:
 ant  -Dxpp-dir=path/to/directory/containing/xpp
+
