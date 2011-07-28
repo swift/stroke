@@ -17,9 +17,11 @@
   <property name="compile.debug" value="true"/>
   <property name="testsuiteclass" value="com.isode.stroke.unittest.StrokeTestSuite" />
   <property name="xpp-dir" value="../third-party/xpp"/>
+  <property name="jzlib-dir" value="third-party/jzlib"/>
 
   <path id="classpath">
     <fileset dir="${xpp-dir}" includes="xpp.jar"/>
+    <fileset dir="${jzlib-dir}" includes="jzlib.jar"/>
   </path>
   <target name="init">
     <tstamp/>

@@ -10,5 +10,6 @@ isode/config.log
 isode/config.status
 isode/configure
 test-results/
+third-party/
 *.patch
 .DS_Store

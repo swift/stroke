@@ -1,0 +1,32 @@
+<!--
+ * Copyright (c) 2010, Isode Limited, London, England.
+ * All rights reserved.
+ -->
+<project name="jzlib" default="dist" basedir=".">
+    <description>
+        Java zlib
+    </description>
+  <property name="src" location="com"/>
+  <property name="build" location="build"/>
+  <property name="dist"  location="."/>
+  <property name="jar" value="${dist}/jzlib.jar"/>
+  <property name="compile.debug" value="true"/>
+
+  <target name="init">
+    <tstamp/>
+    <mkdir dir="${build}"/>
+  </target>
+
+  <target name="compile" depends="init"
+        description="compile the source " >
+    <javac srcdir="${src}" destdir="${build}" debug="${compile.debug}"/>
+  </target>
+
+  <target name="dist" depends="compile"
+        description="generate the distribution" >
+    <mkdir dir="${dist}"/>
+
+    <jar jarfile="${jar}" basedir="${build}"/>
+  </target>
+
+</project>

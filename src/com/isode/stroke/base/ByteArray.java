@@ -149,8 +149,13 @@ public class ByteArray {
      * 
      * @return a reference to the updated object
      */
-    private ByteArray append(byte[] b) {
-        for (int i = 0; i < b.length; i++) {
+    public ByteArray append(byte[] b) {
+        return append(b, b.length);
+    }
+
+    /** Mutable add */
+    public ByteArray append(byte[] b, int len) {
+        for (int i = 0; i < len; i++) {
             append(b[i]);
         }
         return this;

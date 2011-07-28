@@ -5,6 +5,11 @@ The source is available from the Git repository at http://swift.im/git/stroke/
 
 It depends on the XmlPullParser from http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/index.html. This is passed to Ant in the xpp-dir parameter. The passed folder should contain the XPP jar called xpp.jar (i.e. with no version numbering in the filename).
 
-To build, run:
-ant  -Dxpp-dir=path/to/directory/containing/xpp
+It also depends upon http://www.jcraft.com/jzlib/, which is passed to ant in the jzlib-dir parameter. The passed folder should contain a jar called jzlib.jar.
 
+To build, run:
+ant  -Dxpp-dir=path/to/directory/containing/xpp -Djzlib-dir=path/to/directory/containing/jzlib
+
+
+Easy version:
+The included Makefile should, on Unixes with make/curl installed, grab the dependencies (once only) and build.
