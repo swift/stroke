@@ -16,12 +16,14 @@
   <property name="main-class" value="com.isode.stroke.examples.gui.StrokeGUI"/>
   <property name="compile.debug" value="true"/>
   <property name="testsuiteclass" value="com.isode.stroke.unittest.StrokeTestSuite" />
-  <property name="xpp-dir" value="../third-party/xpp"/>
+  <property name="xpp-dir" value="third-party/xpp"/>
   <property name="jzlib-dir" value="third-party/jzlib"/>
+  <property name="icu4j-dir" value="third-party"/>
 
   <path id="classpath">
     <fileset dir="${xpp-dir}" includes="xpp.jar"/>
     <fileset dir="${jzlib-dir}" includes="jzlib.jar"/>
+    <fileset dir="${icu4j-dir}" includes="icu4j.jar"/>
   </path>
   <target name="init">
     <tstamp/>

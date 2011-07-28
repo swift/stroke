@@ -8,6 +8,11 @@
  */
 package com.isode.stroke.jid;
 
+import com.ibm.icu.text.StringPrep;
+import com.ibm.icu.text.StringPrepParseException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  * JID helper.
  *
@@ -82,16 +87,30 @@ public class JID {
             bare = jid;
         }
         String[] nodeAndDomain = bare.split("@", 2);
+        String node;
+        String domain;
         if (nodeAndDomain.length == 1) {
-            node_ = "";
-            domain_ = nodeAndDomain[0];
-            resource_ = resource;
+            node = "";
+            domain = nodeAndDomain[0];
         } else {
-            node_ = nodeAndDomain[0];
-            domain_ = nodeAndDomain[1];
-            resource_ = resource;
+            node = nodeAndDomain[0];
+            domain = nodeAndDomain[1];
         }
-
+        StringPrep nodePrep = StringPrep.getInstance(StringPrep.RFC3491_NAMEPREP);
+        StringPrep domainPrep = StringPrep.getInstance(StringPrep.RFC3920_NODEPREP);
+        StringPrep resourcePrep = StringPrep.getInstance(StringPrep.RFC3920_RESOURCEPREP);
+        try {
+            node = nodePrep.prepare(node, StringPrep.DEFAULT);
+            domain = domainPrep.prepare(domain, StringPrep.DEFAULT);
+            resource = resource != null ? resourcePrep.prepare(resource, StringPrep.DEFAULT) : null;
+        } catch (StringPrepParseException ex) {
+            node = "";
+            domain = "";
+            resource = "";
+        }
+        node_ = node;
+        domain_ = domain;
+        resource_ = resource;
     }
 
     /**
@@ -118,10 +137,24 @@ public class JID {
      * @param resource JID resource part.
      */
     public JID(final String node, final String domain, final String resource) {
-        //FIXME: This doesn't nameprep!
-        node_ = node;
-        domain_ = domain;
-        resource_ = resource;
+        StringPrep nodePrep = StringPrep.getInstance(StringPrep.RFC3491_NAMEPREP);
+        StringPrep domainPrep = StringPrep.getInstance(StringPrep.RFC3920_NODEPREP);
+        StringPrep resourcePrep = StringPrep.getInstance(StringPrep.RFC3920_RESOURCEPREP);
+        String preppedNode;
+        String preppedDomain;
+        String preppedResource;
+        try {
+            preppedNode = nodePrep.prepare(node, StringPrep.DEFAULT);
+            preppedDomain = domainPrep.prepare(domain, StringPrep.DEFAULT);
+            preppedResource = resource != null ? resourcePrep.prepare(resource, StringPrep.DEFAULT) : null;
+        } catch (StringPrepParseException ex) {
+            preppedNode = "";
+            preppedDomain = "";
+            preppedResource = "";
+        }
+        node_ = preppedNode;
+        domain_ = preppedDomain;
+        resource_ = preppedResource;
 
     }
 
