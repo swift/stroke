@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Remko Tronçon
+ * Copyright (c) 2010 Remko Tron√ßon
  * All rights reserved.
  */
 /*

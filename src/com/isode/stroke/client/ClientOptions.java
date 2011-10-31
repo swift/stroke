@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 /*
- * Copyright (c) 2011 Remko Tronçon.
+ * Copyright (c) 2011 Remko Tron√ßon.
  * All rights reserved.
  */
 package com.isode.stroke.client;
