@@ -51,7 +51,7 @@ public class ClientError {
         type_ = type;
     }
 
-    Type getType() {
+    public Type getType() {
         return type_;
     }
 }
