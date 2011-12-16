@@ -2,6 +2,7 @@ MANIFEST.MF
 *\~
 build/
 dist/
+doc/
 nbproject/
 *.class
 isode/Makefile

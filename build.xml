@@ -7,6 +7,7 @@
         XMPP Library porting Swiften to Java.
     </description>
   <property name="src" location="src"/>
+  <property name="doc" location="doc"/>
   <property name="src.tests" location="test"/>
   <property name="test.results" location="test-results"/>
   <property name="build" location="build"/>
@@ -75,7 +76,24 @@
     <delete dir="${build}"/>
     <delete dir="${test.results}"/>
     <delete dir="${dist}"/>
+    <delete dir="${doc}"/>
   </target>
+
+  <target name="javadoc" depends="init">
+    <!-- Note that this may stall if no network connection is available
+         to the Oracle website -->
+    <javadoc packagenames="com.isode.**.**"
+     sourcepath="${src}"
+     destdir="${doc}"
+     windowtitle="Stroke">
+     <classpath> 
+       <fileset dir="${xpp-dir}" includes="xpp.jar"/>
+     </classpath>
+      <link href="http://docs.oracle.com/javase/6/docs/api/"/>
+   </javadoc>
+  </target>
+
+
 
   <target name="run" description="Run the demo" depends="dist">
       <java fork="true" classname="${main-class}">
