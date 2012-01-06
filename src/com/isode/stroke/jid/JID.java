@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -21,6 +21,11 @@ package com.isode.stroke.jid;
  *
  * Note that invalid JIDs shouldn't have any calls made to them beyond isValid().
  *
+ * JIDs may be invalid if received over the wire, and should be checked with {@link JID#isValid}
+ * before they're used.
+ *
+ * <p>
+ * This is an immutable class.
  */
 public class JID {
     public enum CompareType {
@@ -129,7 +134,7 @@ public class JID {
 
     /**
      * e.g. JID("node@domain").getNode() == "node"
-     * @return null for nodeless JIDs.
+     * @return Node, or null for nodeless JIDs.
      */
     public String getNode() {
         return node_;

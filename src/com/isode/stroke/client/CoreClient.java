@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -19,7 +19,6 @@ import com.isode.stroke.network.ConnectionFactory;
 import com.isode.stroke.network.Connector;
 import com.isode.stroke.network.NetworkFactories;
 import com.isode.stroke.network.PlatformDomainNameResolver;
-import com.isode.stroke.network.TimerFactory;
 import com.isode.stroke.parser.payloadparsers.FullPayloadParserFactoryCollection;
 import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.serializer.payloadserializers.FullPayloadSerializerCollection;
@@ -34,7 +33,6 @@ import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.PKCS12Certificate;
 import com.isode.stroke.tls.PlatformTLSFactories;
-import com.isode.stroke.tls.TLSContextFactory;
 
 /**
  * The central class for communicating with an XMPP server.
@@ -53,6 +51,22 @@ public class CoreClient {
     private SignalConnection connectorConnectFinishedConnection_;
     private final EventLoop eventLoop_;
 
+    /**
+     * Constructor.
+     * 
+     * @param eventLoop Event loop used by the class, must not be null. The
+     *            CoreClient creates threads to do certain tasks. However, it
+     *            posts events that it expects to be done in the application's
+     *            main thread to this eventLoop. The application should
+     *            use an appropriate EventLoop implementation for the application type. This
+     *            EventLoop is just a way for the CoreClient to pass these
+     *            events back to the main thread, and should not be used by the
+     *            application for its own purposes.
+     * @param jid User JID used to connect to the server, must not be null
+     * @param password User password to use, must not be null
+     * @param networkFactories An implementation of network interaction, must
+     *            not be null.
+     */
     public CoreClient(EventLoop eventLoop, JID jid, String password, NetworkFactories networkFactories) {
         jid_ = jid;
         password_ = password;
@@ -106,12 +120,24 @@ public class CoreClient {
     stanzaChannel_->onStanzaAcked.disconnect(boost::ref(onStanzaAcked));
     delete stanzaChannel_;
     }*/
+
+    /**
+     * Connect using the standard XMPP connection rules (i.e. SRV then A/AAAA).
+     * 
+     * @param o Client options to use in the connection, must not be null
+     */
     public void connect(ClientOptions o) {
         options = o;
         connect(jid_.getDomain());
     }
 
+    /**
+     * Connect to the specified host, overriding the standard lookup rules.
+     * 
+     * @param host Host to connect to, non-null.
+     */
     public void connect(String host) {
+        options = new ClientOptions();
         disconnectRequested_ = false;
         assert (connector_ == null);
         /* FIXME: Port Proxies */
@@ -185,6 +211,9 @@ public class CoreClient {
         }
     }
 
+    /**
+     * Close the stream and disconnect from the server.
+     */
     public void disconnect() {
         // FIXME: We should be able to do without this boolean. We just have to make sure we can tell the difference between
         // connector finishing without a connection due to an error or because of a disconnect.
@@ -334,6 +363,10 @@ public class CoreClient {
         stanzaChannel_.sendPresence(presence);
     }
 
+    /**
+     * Get the IQRouter responsible for all IQs on this connection.
+     * Use this to send IQs.
+     */
     public IQRouter getIQRouter() {
         return iqRouter_;
     }
@@ -342,13 +375,18 @@ public class CoreClient {
         return stanzaChannel_;
     }
 
+    /**
+     * @return session is available for sending/receiving stanzas.
+     */
     public boolean isAvailable() {
         return stanzaChannel_.isAvailable();
     }
 
     /**
-     * Returns the JID of the client.
-     * After the session was initialized, this returns the bound JID.
+     * @return JID of the client, will never be null. After the session was
+     *         initialized, this returns the bound JID (the JID provided by
+     *         the server during resource binding). Prior to this it returns 
+     *         the JID provided by the user.
      */
     public JID getJID() {
         if (session_ != null) {
@@ -357,12 +395,42 @@ public class CoreClient {
             return jid_;
         }
     }
+
+    /**
+     * The user should add a listener to this signal, which will be called when
+     * a stream or connection error (not stanza error) occurs.
+     */
     public final Signal1<ClientError> onError = new Signal1<ClientError>();
+
+    /**
+     * The user should add a listener to this signal, which will be called when
+     * the connection is established with the server.
+     */
     public final Signal onConnected = new Signal();
+
+    /**
+     * The user may add a listener to this signal, which will be called when
+     * data are received from the server. Useful for observing protocol exchange.
+     */
     public final Signal1<String> onDataRead = new Signal1<String>();
+
+    /**
+     * The user may add a listener to this signal, which will be called when
+     * data are sent to the server. Useful for observing protocol exchange.
+     */
     public final Signal1<String> onDataWritten = new Signal1<String>();
+
+    /**
+     * Called when a message stanza is received.
+     */
     public final Signal1<Message> onMessageReceived = new Signal1<Message>();
+    /**
+     * Called when a presence stanza is received.
+     */
     public final Signal1<Presence> onPresenceReceived = new Signal1<Presence>();
+    /**
+     * Called when a stanza has been received and acked by a server supporting XEP-0198.
+     */
     public final Signal1<Stanza> onStanzaAcked = new Signal1<Stanza>();
     private PlatformDomainNameResolver resolver_;
     private JID jid_;

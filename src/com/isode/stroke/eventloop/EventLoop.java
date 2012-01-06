@@ -1,26 +1,50 @@
 /*
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
+ * All rights reserved.
+ */
+/*
  * Copyright (c) 2010 Remko Tronçon
  * Licensed under the GNU General Public License v3.
  * See Documentation/Licenses/GPLv3.txt for more information.
- */
-/*
- * Copyright (c) 2010, Isode Limited, London, England.
- * All rights reserved.
  */
 package com.isode.stroke.eventloop;
 
 import java.util.ArrayList;
 import java.util.Vector;
 
+/**
+ * An event loop is a seemingly infinite loop (runs for the duration of the use
+ * of the library)  that waits for external events
+ * (e.g. incoming network packets, timers being activated, input happening) to
+ * happen; when such an event comes in, it notifies interested parties of this
+ * event, and then continues listening for the next event.
+ */
 public abstract class EventLoop {
 
+    /**
+     * Create an event loop
+     */
     public EventLoop() {
     }
 
+    /**
+     * Post an event to the loop.
+     * 
+     * @param callback Callback handler for the event, must not be null. This
+     *            will be called when the event is processed.
+     */
     public void postEvent(Event.Callback callback) {
         postEvent(callback, null);
     }
 
+    /**
+     * Post an event to the loop.
+     * 
+     * @param callback Callback handler for the event, must not be null. This
+     *            will be called when the event is processed.
+     * @param owner Owner of the event, non-null. This can be used to 
+     *              {@link EventLoop#removeEventsFromOwner} later.
+     */
     public void postEvent(Event.Callback callback, EventOwner owner) {
         Event event;
         synchronized (eventsMutex_) {
@@ -31,6 +55,13 @@ public abstract class EventLoop {
         post(event);
     }
 
+    /**
+     * Remove all events from the given owner.
+     * \p
+     * This does a reference check (==), not calling owner.equals().
+     * 
+     * @param owner Owner of the event, must not be null
+     */
     public void removeEventsFromOwner(EventOwner owner) {
         synchronized (eventsMutex_) {
             ArrayList<Event> matches = new ArrayList<Event>();
@@ -44,11 +75,15 @@ public abstract class EventLoop {
     }
 
     /**
-     * Reimplement this to call handleEvent(event) from the thread in which
-     * the event loop is residing.
+     * Reimplement this to call handleEvent(event) from the thread in which the
+     * event loop is residing.
      */
     protected abstract void post(Event event);
 
+    /**
+     * When reimplementing, call this from within the {@link EventLoop#post}
+     * method in the application's event loop (main thread).
+     */
     protected void handleEvent(Event event) {
         if (handlingEvents_) {
             // We're being called recursively. Push in the list of events to
