@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -34,8 +34,9 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	addFactory(new StartSessionParserFactory());
 	//addFactory(new SecurityLabelParserFactory());
 	//addFactory(new SecurityLabelsCatalogParserFactory());
-	//addFactory(new FormParserFactory());
-	//addFactory(new CommandParserFactory());
+        addFactory(new FormParserFactory());
+        addFactory(new GenericPayloadParserFactory<CommandParser>("command",
+                "http://jabber.org/protocol/commands", CommandParser.class));
         //addFactery(new InBandRegistrationPayloadParserFactory());
         addFactory(new SearchPayloadParserFactory());
 	//addFactory(new StreamInitiationParserFactory());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -41,9 +41,9 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	addSerializer(new RawXMLPayloadSerializer());
 	//addSerializer(new StorageSerializer());
 	//addSerializer(new DelaySerializer());
-	//addSerializer(new FormSerializer());
+        addSerializer(new FormSerializer());
 	//addSerializer(new PrivateStorageSerializer(this));
-	//addSerializer(new CommandSerializer());
+        addSerializer(new CommandSerializer());
 	//addSerializer(new NicknameSerializer());
         addSerializer(new SearchPayloadSerializer());
         addSerializer(new LastSerializer());

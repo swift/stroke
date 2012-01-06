@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -11,7 +11,7 @@ package com.isode.stroke.parser;
 
 import com.isode.stroke.eventloop.EventLoop;
 
-class PlatformXMLParserFactory {
+public class PlatformXMLParserFactory {
     /**
      * Unlike Swiften, this may be threaded, and therefore needs an eventloop.
      */

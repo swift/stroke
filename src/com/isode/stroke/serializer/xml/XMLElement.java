@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -8,13 +8,14 @@
  */
 package com.isode.stroke.serializer.xml;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 
 public class XMLElement implements XMLNode {
 
     private final String tag_;
-    private final HashMap<String, String> attributes_ = new HashMap<String, String>();
+    private final Map<String, String> attributes_ = new TreeMap<String, String>();
     private final Vector<XMLNode> childNodes_ = new Vector<XMLNode>();
 
     public XMLElement(String tag) {

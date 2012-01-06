@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -21,5 +21,16 @@ public class XMLTextNode implements XMLNode {
 
     public String serialize() {
         return text_;
+    }
+
+    /**
+     * Create new object.
+     * 
+     * @param text Text to create object with, must not be null
+     * 
+     * @return new object, will never be null
+     */
+    public static XMLTextNode create(String text) {
+        return new XMLTextNode(text);
     }
 }
