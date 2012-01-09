@@ -15,7 +15,7 @@ import java.util.HashMap;
  */
 public class AttributeMap extends HashMap<String, String> {
     public String getAttribute(String attribute) {
-        return this.get(attribute);
+        return this.containsKey(attribute) ? this.get(attribute) : "";
     }
 
     public String getAttributeValue(String attribute) {
