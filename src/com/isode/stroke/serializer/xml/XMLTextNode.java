@@ -31,6 +31,10 @@ public class XMLTextNode implements XMLNode {
      * @return new object, will never be null
      */
     public static XMLTextNode create(String text) {
+        if (text == null) {
+            throw new NullPointerException("'text' must not be null");
+        }
+
         return new XMLTextNode(text);
     }
 }

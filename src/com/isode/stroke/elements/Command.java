@@ -85,9 +85,9 @@ public class Command extends Payload {
 
         /**
          * Get status from its string form.
-         * 
+         *
          * @param stringForm String form of status, can be null
-         * 
+         *
          * @return Corresponding status if match found, otherwise
          *         {@link #NO_STATUS}. Will never be null.
          */
@@ -148,9 +148,9 @@ public class Command extends Payload {
 
         /**
          * Get action from its string form.
-         * 
+         *
          * @param stringForm String form of action, can be null
-         * 
+         *
          * @return Corresponding action if match found, otherwise
          *         {@link Action#NO_ACTION}. Will never be null.
          */
@@ -176,7 +176,7 @@ public class Command extends Payload {
 
     /**
      * This class contains information about the current status of the command.
-     * TODO: I am not sure why this is not an immutable class.
+     * This is an immutable class.
      */
     public static class Note {
         /**
@@ -207,9 +207,9 @@ public class Command extends Payload {
 
             /**
              * Get type from its string form.
-             * 
+             *
              * @param stringForm String form of type, can be null
-             * 
+             *
              * @return Corresponding type if match found, otherwise
              *         {@link Type#INFO}. Will never be null.
              */
@@ -235,15 +235,19 @@ public class Command extends Payload {
 
         /**
          * Create a note element for the Ad-Hoc command.
-         * 
-         * @param note user-readable text, can be null which will be stored as
-         *            an empty string
-         * @param type Severity of the note, can be null which will be stored as
-         *            {@link Type#INFO}
+         *
+         * @param note user-readable text, must not be null
+         * @param type Severity of the note, must not be null
          */
         public Note(String note, Type type) {
-            this.note = (note != null) ? note : "";
-            this.type = (type != null) ? type : Type.INFO;
+            if (note == null) {
+                throw new NullPointerException("'note' must not be null");
+            }
+            if (type == null) {
+                throw new NullPointerException("'type' must not be null");
+            }
+            this.note = note;
+            this.type = type;
         }
 
         /**
@@ -272,21 +276,20 @@ public class Command extends Payload {
         setSessionID(sessionID);
         setAction(action);
         setStatus(status);
-        setExecuteAction(null);
+        setExecuteAction(Action.NO_ACTION);
     }
 
     /**
      * Create an Ad-Hoc command with the given node, session ID, status and
      * {@link Action#NO_ACTION} action.
-     * 
-     * @param node Command identification, can be null which will be stored as
-     *            an empty string
+     *
+     * @param node Node, must not be null. Each command is identified by its
+     *            'node' attribute. This matches its 'node' attribute from the
+     *            service discovery.
      * @param sessionID The ID of the session within which the command exists,
-     *            can be null (which will be stored as an empty string) or empty
-     *            if this is the first stage of the command and the client does
-     *            not know it yet
-     * @param status Status of the command, can be null which will be stored as
-     *            {@link Status#NO_STATUS}
+     *            must not be null but can be empty if this is the first stage
+     *            of the command and the client does not know it yet
+     * @param status Status of the command, must not be null
      */
     public Command(String node, String sessionID, Status status) {
         assignData(node, sessionID, Action.NO_ACTION, status);
@@ -295,18 +298,17 @@ public class Command extends Payload {
     /**
      * Create an Ad-Hoc command with the given node, session ID, action and
      * {@link Status#NO_STATUS} status.
-     * 
-     * @param node Command identification, can be null which will be stored as
-     *            an empty string
+     *
+     * @param node Node, must not be null. Each command is identified by its
+     *            'node' attribute. This matches its 'node' attribute from the
+     *            service discovery.
      * @param sessionID The ID of the session within which the command exists,
-     *            can be null (which will be stored as an empty string) or empty
-     *            if this is the first stage of the command and the client does
-     *            not know it yet
-     * @param action action of the command, can be null which will be stored as
-     *            {@link Action#EXECUTE}
+     *            must not be null but can be empty if this is the first stage
+     *            of the command and the client does not know it yet
+     * @param action action of the command, must not be null
      */
     public Command(String node, String sessionID, Action action) {
-        assignData(node, sessionID, action, null);
+        assignData(node, sessionID, action, Status.NO_STATUS);
     }
 
     /**
@@ -314,24 +316,27 @@ public class Command extends Payload {
      * {@link Action#EXECUTE} action and {@link Status#NO_STATUS} status.
      */
     public Command() {
-        this(null, null, (Action) null);
+        this("", "", Action.EXECUTE);
     }
 
     /**
-     * @return The command ID, will never be null
+     * @return Node, will never be null
      */
     public String getNode() {
         return node_;
     }
 
     /**
-     * Set command ID.
-     * 
-     * @param node Command identification, can be null which will be stored as
-     *            an empty string
+     * Set command node.
+     *
+     * @param node Node, must not be null
      */
     public void setNode(String node) {
-        node_ = (node != null) ? node : "";
+        if (node == null) {
+            throw new NullPointerException("'node' must not be null");
+        }
+
+        node_ = node;
     }
 
     /**
@@ -345,14 +350,17 @@ public class Command extends Payload {
 
     /**
      * Set session ID.
-     * 
+     *
      * @param sessionID The ID of the session within which the command exists,
-     *            can be null (which will be stored as an empty string) or empty
-     *            if this is the first stage of the command and the client does
-     *            not know it yet
+     *            must not be null but can be empty if this is the first stage
+     *            of the command and the client does not know it yet
      */
     public void setSessionID(String sessionID) {
-        sessionID_ = (sessionID != null) ? sessionID : "";
+        if (sessionID == null) {
+            throw new NullPointerException("'sessionID' must not be null");
+        }
+
+        sessionID_ = sessionID;
     }
 
     /**
@@ -364,12 +372,15 @@ public class Command extends Payload {
 
     /**
      * Set action of the command.
-     * 
-     * @param action action of the command, can be null which will be stored as
-     *            {@link Action#EXECUTE}
+     *
+     * @param action action of the command, must not be null
      */
     public void setAction(Action action) {
-        action_ = (action != null) ? action : Action.EXECUTE;
+        if (action == null) {
+            throw new NullPointerException("'action' must not be null");
+        }
+
+        action_ = action;
     }
 
     /**
@@ -381,12 +392,15 @@ public class Command extends Payload {
 
     /**
      * Set execute action of the command.
-     * 
-     * @param action execute action of the command, can be null which will be
-     *            stored as {@link Action#NO_ACTION}
+     *
+     * @param action execute action of the command, must not be null
      */
     public void setExecuteAction(Action action) {
-        executeAction_ = (action != null) ? action : Action.NO_ACTION;
+        if (action == null) {
+            throw new NullPointerException("'action' must not be null");
+        }
+
+        executeAction_ = action;
     }
 
     /**
@@ -398,17 +412,21 @@ public class Command extends Payload {
 
     /**
      * Set status of the command.
-     * 
-     * @param status Status of the command, can be null which will be stored as
-     *            {@link Status#NO_STATUS}
+     *
+     * @param status Status of the command, must not be null
      */
     public void setStatus(Status status) {
-        status_ = (status != null) ? status : Status.NO_STATUS;
+        if (status == null) {
+            throw new NullPointerException("'status' must not be null");
+        }
+
+        status_ = status;
     }
 
     /**
      * @return List of allowed actions for this stage of execution, will never
-     *         be null
+     *         be null. The instance of the list stored in the object is not
+     *         returned, a copy is made.
      */
     public List<Action> getAvailableActions() {
         return new ArrayList<Action>(availableActions_);
@@ -416,18 +434,21 @@ public class Command extends Payload {
 
     /**
      * Add to the list of allowed actions for this stage of execution.
-     * 
-     * @param action Action to add, can be null in which case it will be ignored
+     *
+     * @param action Action to add, must not be null
      */
     public void addAvailableAction(Action action) {
-        if (action != null) {
-            availableActions_.add(action);
+        if (action == null) {
+            throw new NullPointerException("'action' must not be null");
         }
+
+        availableActions_.add(action);
     }
 
     /**
      * @return List of information elements for the current status of the
-     *         command, will never be null
+     *         command, will never be null. The instance of the list stored in
+     *         the object is not returned, a copy is made.
      */
     public List<Note> getNotes() {
         return new ArrayList<Note>(notes_);
@@ -436,13 +457,15 @@ public class Command extends Payload {
     /**
      * Add to the list of information elements for the current status of the
      * command.
-     * 
-     * @param note Note to add, can be null in which case it will be ignored
+     *
+     * @param note Note to add, must not be null
      */
     public void addNote(Note note) {
-        if (note != null) {
-            notes_.add(note);
+        if (note == null) {
+            throw new NullPointerException("'note' must not be null");
         }
+
+        notes_.add(note);
     }
 
     /**
@@ -455,7 +478,7 @@ public class Command extends Payload {
 
     /**
      * Set form for the command.
-     * 
+     *
      * @param payload Form for the command, can be null. The instance of the
      *            form is stored in the object, a copy is not made.
      */

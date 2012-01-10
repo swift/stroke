@@ -30,6 +30,10 @@ public class CommandSerializer extends GenericPayloadSerializer<Command> {
     }
 
     public String serializePayload(Command command) {
+        if (command == null) {
+            throw new NullPointerException("'command' must not be null");
+        }
+
         XMLElement commandElement = new XMLElement("command",
                 "http://jabber.org/protocol/commands");
         commandElement.setAttribute(Command.COMMAND_ATTRIBUTE_NODE, command
@@ -86,6 +90,10 @@ public class CommandSerializer extends GenericPayloadSerializer<Command> {
     }
 
     private String actionToString(Action action) {
+        if (action == null) {
+            throw new NullPointerException("'action' must not be null");
+        }
+
         return action.getStringForm();
     }
 

@@ -42,6 +42,10 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
     }
 
     public String serializePayload(Form form) {
+        if (form == null) {
+            throw new NullPointerException("'form' must not be null");
+        }
+
         XMLElement formElement = new XMLElement("x", "jabber:x:data");
         String type = form.getType().getStringForm();
         formElement.setAttribute(Form.FORM_ATTRIBUTE_TYPE, type);
@@ -59,6 +63,10 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
     }
 
     private XMLElement fieldToXML(FormField field) {
+        if (field == null) {
+            throw new NullPointerException("'field' must not be null");
+        }
+
         XMLElement fieldElement = new XMLElement(Form.FORM_ELEMENT_FIELD);
         if (!field.getName().isEmpty()) {
             fieldElement.setAttribute(FormField.FORM_FIELD_ATTRIBUTE_VAR, field
@@ -164,6 +172,13 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
 
     private void multiLineify(String text, String elementName,
             XMLElement element) {
+        if (text == null) {
+            throw new NullPointerException("'text' must not be null");
+        }
+        if (elementName == null) {
+            throw new NullPointerException("'elementName' must not be null");
+        }
+
         String unRdText = text.replaceAll("\r", "");
         String[] lines = unRdText.split("\n");
         for (String line : lines) {

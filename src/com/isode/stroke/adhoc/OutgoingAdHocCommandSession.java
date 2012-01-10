@@ -53,15 +53,15 @@ public class OutgoingAdHocCommandSession {
     };
 
     /**
-     * Emitted when the form for the next stage is available. The client should
-     * add a listener to this signal which will be called when the server sends
+     * Emitted when the form for the next stage is available. The caller should
+     * add a listener to this signal which will be invoked when the target sends
      * a form.
      */
     public final Signal1<Command> onNextStageReceived = new Signal1<Command>();
 
     /**
-     * Emitted on error. The client should add a listener to this signal which
-     * will be called when the server sends an error.
+     * Emitted on error. The caller should add a listener to this signal which
+     * will be invoked when the target sends an error.
      */
     public final Signal1<ErrorPayload> onError = new Signal1<ErrorPayload>();
 
@@ -75,13 +75,13 @@ public class OutgoingAdHocCommandSession {
     /**
      * Create an Ad-Hoc command session. The initial command will be sent to the
      * server on calling {@link #start()}.
-     * 
-     * @param to JID of the user for which the Ad-Hoc command is executed, must
-     *            not be null
+     *
+     * @param to JID of the entity that the Ad-Hoc command is executed on (user
+     *            JID, server JID, etc.), must not be null
      * @param commandNode Node part of the Ad-Hoc command as published by the
-     *            server (e.g. "http://isode.com/xmpp/commands#test"), must not
+     *            target (e.g. "http://isode.com/xmpp/commands#test"), must not
      *            be null
-     * @param iqRouter TODO: not sure how to explain this, must not be null
+     * @param iqRouter IQ router to be used for the session, must not be null
      */
     public OutgoingAdHocCommandSession(JID to, String commandNode,
             IQRouter iqRouter) {
@@ -156,7 +156,7 @@ public class OutgoingAdHocCommandSession {
     public void start() {
         Action action = null;
         GenericRequest<Command> commandRequest = new GenericRequest<Command>(
-                IQ.Type.Set, to_, new Command(commandNode_, null, action),
+                IQ.Type.Set, to_, new Command(commandNode_, "", action),
                 iqRouter_);
         commandRequest.onResponse.connect(new Slot2<Command, ErrorPayload>() {
             public void call(Command payload, ErrorPayload error) {

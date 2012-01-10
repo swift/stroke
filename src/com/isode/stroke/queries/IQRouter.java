@@ -8,13 +8,19 @@
  */
 package com.isode.stroke.queries;
 
+import java.util.Vector;
+
 import com.isode.stroke.elements.ErrorPayload;
 import com.isode.stroke.elements.IQ;
 import com.isode.stroke.signals.Slot1;
-import java.util.Vector;
 
 /**
- * Route IQs to handlers
+ * This class is responsible for routing all IQ stanzas to the handlers. It's
+ * needed because, unlike Message and Presence, there are strict rules about
+ * replying to IQ stanzas, replies need to be tracked, handled by the
+ * responsible bit of code, replied to, etc. and when it's an outgoing IQ, it
+ * needs to be tracked such that when the reply comes in, the callback is
+ * called.
  */
 public class IQRouter {
 

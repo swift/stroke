@@ -30,14 +30,12 @@ import com.isode.stroke.eventloop.DummyEventLoop;
 import com.isode.stroke.jid.JID;
 
 public class FormParserTest {
-    private static DummyEventLoop eventLoop;
-
     @BeforeClass
     public static void init() throws Exception {
-        eventLoop = new DummyEventLoop();
     }
 
     private static Form parse(String xmlString) {
+        DummyEventLoop eventLoop = new DummyEventLoop();
         PayloadsParserTester parser = new PayloadsParserTester(eventLoop);
         assertTrue(parser.parse(xmlString));
 

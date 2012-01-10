@@ -12,9 +12,8 @@ package com.isode.stroke.eventloop;
 import java.util.Vector;
 
 /**
- * Dummy event loop that can be used for tests, etc.
- * 
- * @since 15.2
+ * Dummy event loop that can be used for tests, etc. This class is thread-safe
+ * as it uses {@link Vector} which is thread-safe.
  */
 public class DummyEventLoop extends EventLoop {
     private Vector<Event> events_ = new Vector<Event>();
@@ -26,7 +25,9 @@ public class DummyEventLoop extends EventLoop {
     }
 
     /**
-     * Process pending events.
+     * Process pending events. This method is thread-safe as it is intended to
+     * be always called from the same thread for an instance of
+     * {@link DummyEventLoop}
      */
     public void processEvents() {
         while (!events_.isEmpty()) {

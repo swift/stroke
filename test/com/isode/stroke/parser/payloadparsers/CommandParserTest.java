@@ -27,14 +27,12 @@ import com.isode.stroke.elements.Command.Note.Type;
 import com.isode.stroke.eventloop.DummyEventLoop;
 
 public class CommandParserTest {
-    private static DummyEventLoop eventLoop;
-
     @BeforeClass
     public static void init() throws Exception {
-        eventLoop = new DummyEventLoop();
     }
 
     private static Command parse(String xmlString) {
+        DummyEventLoop eventLoop = new DummyEventLoop();
         PayloadsParserTester parser = new PayloadsParserTester(eventLoop);
         assertTrue(parser.parse(xmlString));
 

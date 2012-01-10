@@ -38,6 +38,10 @@ public class FormParser extends GenericPayloadParser<Form> {
         protected GenericFormField<T> field;
 
         public void addValue(String s) {
+            if (s == null) {
+                throw new NullPointerException("'s' must not be null");
+            }
+
             field.addRawValue(s);
         }
 
@@ -48,47 +52,47 @@ public class FormParser extends GenericPayloadParser<Form> {
 
     private static class BoolFieldParseHelper extends FieldParseHelper<Boolean> {
         public void addValue(String s) {
-            field.setValue(((s.equals("1")) || (s.equals("true"))));
             super.addValue(s);
+            field.setValue(((s.equals("1")) || (s.equals("true"))));
         }
     }
 
     private static class StringFieldParseHelper extends
             FieldParseHelper<String> {
         public void addValue(String s) {
+            super.addValue(s);
             if (field.getValue().isEmpty()) {
                 field.setValue(s);
             } else {
                 field.setValue(field.getValue() + "\n" + s);
             }
-            super.addValue(s);
         }
     };
 
     private static class JIDFieldParseHelper extends FieldParseHelper<JID> {
         public void addValue(String s) {
-            field.setValue(new JID(s));
             super.addValue(s);
+            field.setValue(new JID(s));
         }
     };
 
     private static class StringListFieldParseHelper extends
             FieldParseHelper<List<String>> {
         public void addValue(String s) {
+            super.addValue(s);
             List<String> l = field.getValue();
             l.add(s);
             field.setValue(l);
-            super.addValue(s);
         }
     };
 
     private static class JIDListFieldParseHelper extends
             FieldParseHelper<List<JID>> {
         public void addValue(String s) {
+            super.addValue(s);
             List<JID> l = field.getValue();
             l.add(new JID(s));
             field.setValue(l);
-            super.addValue(s);
         }
     };
 
@@ -208,7 +212,7 @@ public class FormParser extends GenericPayloadParser<Form> {
 
     private int level_;
     private String currentText_ = "";
-    private String currentOptionLabel_;
+    private String currentOptionLabel_ = "";
     private FieldParseHelper<?> currentFieldParseHelper_ = null;
 
     /**
@@ -221,7 +225,17 @@ public class FormParser extends GenericPayloadParser<Form> {
     }
 
     public void handleStartElement(String element, String ns,
-            AttributeMap attributes) {
+            final AttributeMap attributes) {
+        if (element == null) {
+            throw new NullPointerException("'element' must not be null");
+        }
+        if (ns == null) {
+            throw new NullPointerException("'ns' must not be null");
+        }
+        if (attributes == null) {
+            throw new NullPointerException("'attributes' must not be null");
+        }
+
         Form form = getPayloadInternal();
 
         if (level_ == TopLevel) {
@@ -296,6 +310,13 @@ public class FormParser extends GenericPayloadParser<Form> {
     }
 
     public void handleEndElement(String element, String ns) {
+        if (element == null) {
+            throw new NullPointerException("'element' must not be null");
+        }
+        if (ns == null) {
+            throw new NullPointerException("'ns' must not be null");
+        }
+
         --level_;
         Form form = getPayloadInternal();
 
@@ -337,6 +358,10 @@ public class FormParser extends GenericPayloadParser<Form> {
     }
 
     public void handleCharacterData(String text) {
+        if (text == null) {
+            throw new NullPointerException("'text' must not be null");
+        }
+
         currentText_ += text;
     }
 

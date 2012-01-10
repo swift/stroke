@@ -73,9 +73,9 @@ public class Form extends Payload {
 
         /**
          * Get type from its string form.
-         * 
+         *
          * @param stringForm String form of type, can be null
-         * 
+         *
          * @return Corresponding type if match found, otherwise
          *         {@link Type#FORM_TYPE}. Will never be null.
          */
@@ -106,8 +106,8 @@ public class Form extends Payload {
 
     /**
      * Create a form of the given type.
-     * 
-     * @param type Form type, if null then {@link Type#FORM_TYPE} is assumed
+     *
+     * @param type Form type, must not be null
      */
     public Form(Type type) {
         setType(type);
@@ -117,26 +117,28 @@ public class Form extends Payload {
      * Create a form of {@link Type#FORM_TYPE}.
      */
     public Form() {
-        this(null);
+        this(Type.FORM_TYPE);
     }
 
     /**
      * Add to the list of fields for the form.
-     * 
-     * @param field Field to add, can be null in which case it will be ignored.
-     *            The instance of the form field is stored in the object, a copy
-     *            is not made.
+     *
+     * @param field Field to add, must not be null. The instance of the form
+     *            field is stored in the object, a copy is not made.
      */
     public void addField(FormField field) {
-        if (field != null) {
-            fields_.add(field);
+        if (field == null) {
+            throw new NullPointerException("'field' must not be null");
         }
+
+        fields_.add(field);
     }
 
     /**
-     * @return List of fields for the form, will never be null. The instances of
-     *         the form fields stored in the object is returned, a copy is not
-     *         made.
+     * @return List of fields for the form, will never be null. The instance of
+     *         the list stored in the object is not returned, a copy is made.
+     *         But the instances of the form fields stored in the list is the
+     *         same as the list in the object, a copy is not made.
      */
     public List<FormField> getFields() {
         return new ArrayList<FormField>(fields_);
@@ -144,12 +146,15 @@ public class Form extends Payload {
 
     /**
      * Set title of the form.
-     * 
-     * @param title title of the form, can be null in which case an empty string
-     *            will be stored
+     *
+     * @param title title of the form, must not be null
      */
     public void setTitle(String title) {
-        title_ = (title != null) ? title : "";
+        if (title == null) {
+            throw new NullPointerException("'title' must not be null");
+        }
+
+        title_ = title;
     }
 
     /**
@@ -161,12 +166,15 @@ public class Form extends Payload {
 
     /**
      * Set natural-language instructions for the form.
-     * 
-     * @param instructions instructions for the form, can be null in which case
-     *            an empty string will be stored
+     *
+     * @param instructions instructions for the form, must not be null
      */
     public void setInstructions(String instructions) {
-        instructions_ = (instructions != null) ? instructions : "";
+        if (instructions == null) {
+            throw new NullPointerException("'instructions' must not be null");
+        }
+
+        instructions_ = instructions;
     }
 
     /**
@@ -178,11 +186,15 @@ public class Form extends Payload {
 
     /**
      * Set type of the form.
-     * 
-     * @param type Form type, if null then {@link Type#FORM_TYPE} is assumed
+     *
+     * @param type Form type, must not be null
      */
     public void setType(Type type) {
-        type_ = (type != null) ? type : Type.FORM_TYPE;
+        if (type == null) {
+            throw new NullPointerException("'type' must not be null");
+        }
+
+        type_ = type;
     }
 
     /**
@@ -214,20 +226,21 @@ public class Form extends Payload {
 
     /**
      * Get form field for the given name.
-     * 
-     * @param name Name of form field to retrieve, can be null in which case
-     *            null will be returned
-     * 
+     *
+     * @param name Name of form field to retrieve, must not be null
+     *
      * @return Form field with the given name if it is present in the form, null
      *         otherwise. The instance of the form field stored in the object is
      *         returned, a copy is not made.
      */
     public FormField getField(String name) {
-        if (name != null) {
-            for (FormField field : fields_) {
-                if (field.getName().equals(name)) {
-                    return field;
-                }
+        if (name == null) {
+            throw new NullPointerException("'name' must not be null");
+        }
+
+        for (FormField field : fields_) {
+            if (field.getName().equals(name)) {
+                return field;
             }
         }
 

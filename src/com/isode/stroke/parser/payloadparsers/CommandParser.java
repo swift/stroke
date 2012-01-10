@@ -33,7 +33,7 @@ public class CommandParser extends GenericPayloadParser<Command> {
     private Type noteType_;
     private FormParserFactory formParserFactory_;
     private FormParser formParser_;
-    private String currentText_;
+    private String currentText_ = "";
 
     /**
      * Constructor
@@ -51,7 +51,17 @@ public class CommandParser extends GenericPayloadParser<Command> {
     }
 
     public void handleStartElement(String element, String ns,
-            AttributeMap attributes) {
+            final AttributeMap attributes) {
+        if (element == null) {
+            throw new NullPointerException("'element' must not be null");
+        }
+        if (ns == null) {
+            throw new NullPointerException("'ns' must not be null");
+        }
+        if (attributes == null) {
+            throw new NullPointerException("'attributes' must not be null");
+        }
+
         ++level_;
         Command command = getPayloadInternal();
 
@@ -95,6 +105,13 @@ public class CommandParser extends GenericPayloadParser<Command> {
     }
 
     public void handleEndElement(String element, String ns) {
+        if (element == null) {
+            throw new NullPointerException("'element' must not be null");
+        }
+        if (ns == null) {
+            throw new NullPointerException("'ns' must not be null");
+        }
+
         if (formParser_ != null) {
             formParser_.handleEndElement(element, ns);
         }
@@ -122,6 +139,10 @@ public class CommandParser extends GenericPayloadParser<Command> {
     }
 
     public void handleCharacterData(String data) {
+        if (data == null) {
+            throw new NullPointerException("'data' must not be null");
+        }
+
         if (formParser_ != null) {
             formParser_.handleCharacterData(data);
         } else {
@@ -130,6 +151,10 @@ public class CommandParser extends GenericPayloadParser<Command> {
     }
 
     private static Action parseAction(String action) {
+        if (action == null) {
+            throw new NullPointerException("'action' must not be null");
+        }
+
         return Action.getAction(action);
     }
 

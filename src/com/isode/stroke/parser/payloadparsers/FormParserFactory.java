@@ -24,7 +24,18 @@ public class FormParserFactory implements PayloadParserFactory {
     public FormParserFactory() {
     }
 
-    public boolean canParse(String element, String ns, AttributeMap attributes) {
+    public boolean canParse(String element, String ns,
+            final AttributeMap attributes) {
+        if (element == null) {
+            throw new NullPointerException("'element' must not be null");
+        }
+        if (ns == null) {
+            throw new NullPointerException("'ns' must not be null");
+        }
+        if (attributes == null) {
+            throw new NullPointerException("'attributes' must not be null");
+        }
+
         return ns.equals("jabber:x:data");
     }
 
