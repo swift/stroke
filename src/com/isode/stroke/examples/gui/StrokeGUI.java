@@ -151,7 +151,7 @@ public class StrokeGUI extends javax.swing.JFrame {
             protected void post(final Event event) {
                 EventQueue.invokeLater(new Runnable() {
                     public void run() {
-                        event.callback.run();
+                        handleEvent(event);
                     }
                 });
             }

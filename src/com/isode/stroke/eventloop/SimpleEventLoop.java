@@ -12,6 +12,6 @@ package com.isode.stroke.eventloop;
 public class SimpleEventLoop extends EventLoop {
     @Override
     protected void post(Event event) {
-        event.callback.run();
+        handleEvent(event);
     }
 }

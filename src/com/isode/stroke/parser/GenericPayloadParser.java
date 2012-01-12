@@ -22,7 +22,7 @@ public abstract class GenericPayloadParser <T extends Payload> implements Payloa
         return payload_;
     }
 
-    protected T getPayloadInternal() {
+    public T getPayloadInternal() {
         return payload_;
     }
 }

@@ -19,8 +19,9 @@ public class SerializingParser {
 
     public void handleStartElement(String tag, String ns, AttributeMap attributes) {
         XMLElement element = new XMLElement(tag, ns);
-        for (String name : attributes.keySet()) {
-            element.setAttribute(name, attributes.get(name));
+        //FIXME: Ignoring attribute namespace
+        for (AttributeMap.Entry e : attributes.getEntries()) {
+            element.setAttribute(e.getAttribute().getName(), e.getValue());
         }
 
         if (elementStack_.isEmpty()) {

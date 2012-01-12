@@ -27,8 +27,8 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	addFactory(new SoftwareVersionParserFactory());
 	//addFactory(new StorageParserFactory());
 	addFactory(new RosterParserFactory());
-	//addFactory(new DiscoInfoParserFactory());
-	//addFactory(new DiscoItemsParserFactory());
+	addFactory(new GenericPayloadParserFactory<DiscoInfoParser>("query", "http://jabber.org/protocol/disco#info", DiscoInfoParser.class));
+	addFactory(new GenericPayloadParserFactory<DiscoItemsParser>("query", "http://jabber.org/protocol/disco#items", DiscoItemsParser.class));
 	//addFactory(new CapsInfoParserFactory());
 	addFactory(new ResourceBindParserFactory());
 	addFactory(new StartSessionParserFactory());

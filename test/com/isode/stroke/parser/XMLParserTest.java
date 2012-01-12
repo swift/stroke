@@ -73,13 +73,13 @@ public class XMLParserTest {
 
         assertEquals(Client.Type.StartElement, client_.events.get(0).type);
         assertEquals("iq", client_.events.get(0).data);
-        assertEquals(1, client_.events.get(0).attributes.size());
-        assertEquals("get", client_.events.get(0).attributes.get("type"));
+        assertEquals(1, client_.events.get(0).attributes.getEntries().size());
+        assertEquals("get", client_.events.get(0).attributes.getAttribute("type"));
         assertEquals("", client_.events.get(0).ns);
 
         assertEquals(Client.Type.StartElement, client_.events.get(1).type);
         assertEquals("query", client_.events.get(1).data);
-        assertEquals(0, client_.events.get(1).attributes.size());
+        assertEquals(0, client_.events.get(1).attributes.getEntries().size());
         assertEquals("jabber:iq:version", client_.events.get(1).ns);
 
         assertEquals(Client.Type.EndElement, client_.events.get(2).type);
@@ -104,7 +104,7 @@ public class XMLParserTest {
 
         assertEquals(Client.Type.StartElement, client_.events.get(0).type);
         assertEquals("query", client_.events.get(0).data);
-        assertEquals(0, client_.events.get(0).attributes.size());
+        assertEquals(0, client_.events.get(0).attributes.getEntries().size());
         assertEquals("jabber:iq:version", client_.events.get(0).ns);
 
         assertEquals(Client.Type.StartElement, client_.events.get(1).type);

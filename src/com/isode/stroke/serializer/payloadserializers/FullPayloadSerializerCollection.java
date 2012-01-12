@@ -27,8 +27,8 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	addSerializer(new SoftwareVersionSerializer());
 	//addSerializer(new StatusSerializer());
 	//addSerializer(new StatusShowSerializer());
-	//addSerializer(new DiscoInfoSerializer());
-	//addSerializer(new DiscoItemsSerializer());
+	addSerializer(new DiscoInfoSerializer());
+	addSerializer(new DiscoItemsSerializer());
 	//addSerializer(new CapsInfoSerializer());
 	addSerializer(new ResourceBindSerializer());
 	addSerializer(new StartSessionSerializer());

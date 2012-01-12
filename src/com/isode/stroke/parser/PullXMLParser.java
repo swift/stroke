@@ -78,7 +78,7 @@ class PullXMLParser extends XMLParser {
         if (eventType == XmlPullParser.START_TAG) {
             AttributeMap map = new AttributeMap();
             for (int i = 0; i < parser_.getAttributeCount(); i++) {
-                map.put(parser_.getAttributeName(i), parser_.getAttributeValue(i));
+                map.addAttribute(parser_.getAttributeName(i), parser_.getAttributeNamespace(i), parser_.getAttributeValue(i));
             }
             addEvent(new Event(parser_.getName(), parser_.getNamespace(), map));
             bump();
