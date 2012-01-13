@@ -53,4 +53,9 @@ public class Message extends Stanza {
     public void setType(Type type) {
         type_ = type;
     }
+    
+    @Override
+    public String toString() {
+        return "Message " + super.toString() + " subject=\"" + getSubject() + "\""; 
+    }
 }

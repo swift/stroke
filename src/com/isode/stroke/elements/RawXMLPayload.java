@@ -22,4 +22,9 @@ public class RawXMLPayload extends Payload {
     public String getRawXML() {
         return rawXML_;
     }
+    
+    @Override
+    public String toString() {
+        return "RawXMLPayload : " + rawXML_ == null ? "<null>" : rawXML_;
+    }
 }

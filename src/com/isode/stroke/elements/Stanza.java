@@ -82,5 +82,11 @@ public class Stanza implements Element {
     public void setID(String id) {
         id_ = id;
     }
+    
+    @Override
+    public String toString() {
+        return "Stanza from \"" + from_ + "\" to \"" + to_ + "\"" +
+        " id=\"" + id_ + "\"";
+    }
 
 }
