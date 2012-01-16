@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -11,7 +11,7 @@ package com.isode.stroke.elements;
 import com.isode.stroke.jid.JID;
 
 public class IQ extends Stanza {
-    public enum Type {Get, Set, Result, Error};
+    public enum Type {Get, Set, Result, Error}
 
     private Type type_;
 
@@ -55,4 +55,8 @@ public class IQ extends Stanza {
         return iq;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + " Type=" + type_; 
+    }
 }

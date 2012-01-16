@@ -4,7 +4,7 @@
  * See Documentation/Licenses/GPLv3.txt for more information.
  */
 /*
- * Copyright (c) 2010-2011, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.network;
@@ -169,6 +169,15 @@ public class JavaConnection extends Connection implements EventOwner {
     public HostAddressPort getLocalAddress() {
         return new HostAddressPort(new HostAddress(socket_.getLocalAddress()), socket_.getLocalPort());
     }
+    
+    @Override
+    public String toString()
+    {
+        return "JavaConnection " + 
+        (socket_ == null ? "with no socket configured" : "for " + getLocalAddress()) +
+        (disconnecting_ ? " (disconnecting)" : "");
+    }
+    
     private final EventLoop eventLoop_;
     private boolean disconnecting_ = false;
     private Socket socket_;

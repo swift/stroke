@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -26,4 +26,10 @@ public class Status extends Payload {
     public String getText() {
         return text_;
     }
+    
+    @Override
+    public String toString() {
+        return "Status : " + text_;
+    }
+    
 }

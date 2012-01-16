@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -65,5 +65,10 @@ public class Presence extends Stanza {
 
     public void setPriority(int priority) {
         updatePayload(new Priority(priority));
+    }
+
+    @Override
+    public String toString() {
+        return super.toString() + " Type=" + type_; 
     }
 }

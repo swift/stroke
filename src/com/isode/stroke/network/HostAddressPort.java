@@ -4,7 +4,7 @@
  * See Documentation/Licenses/GPLv3.txt for more information.
  */
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.network;
@@ -51,6 +51,11 @@ public class HostAddressPort {
 
     public boolean isValid() {
         return address_.isValid() && port_ > 0;
+    }
+    
+    @Override
+    public String toString() {
+        return address_ + ":" + port_;
     }
     private HostAddress address_;
     private int port_;

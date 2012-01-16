@@ -395,6 +395,13 @@ public class CoreClient {
             return jid_;
         }
     }
+    
+    @Override
+    public String toString()
+    {
+        return "CoreClient for \"" + jid_ + "\"" +
+        "; session " + (isAvailable() ? "" : "un") + "available"; 
+    }
 
     /**
      * The user should add a listener to this signal, which will be called when

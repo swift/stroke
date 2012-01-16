@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -13,9 +13,9 @@ import com.isode.stroke.jid.JID;
 import java.util.Vector;
 
 /**
- * Basic XMPP stanza.
+ * Base class for all types of XMPP stanza.
  */
-public class Stanza implements Element {
+public abstract class Stanza implements Element {
     private String id_;
     private JID from_;
     private JID to_;
@@ -83,9 +83,18 @@ public class Stanza implements Element {
         id_ = id;
     }
     
+    /**
+     * Returns debug-friendly String description of this Stanza, which will
+     * include the subclass's name (e.g. "Presence").
+     * @return a debug-friendly String.  
+     */
     @Override
     public String toString() {
-        return "Stanza from \"" + from_ + "\" to \"" + to_ + "\"" +
+        String className = this.getClass().getSimpleName();
+
+        // Include actual stanza type based on class name of the object
+        return className + 
+        " stanza from \"" + from_ + "\" to \"" + to_ + "\"" +
         " id=\"" + id_ + "\"";
     }
 

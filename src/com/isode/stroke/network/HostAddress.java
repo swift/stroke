@@ -26,6 +26,11 @@ public class HostAddress {
 
     @Override
     public String toString() {
+        // toString() should always be callable without risking 
+        // NullPointerException
+        if (address_ == null) {
+            return "<no address>";
+        }
         return address_.getHostAddress();
     }
 
@@ -51,6 +56,6 @@ public class HostAddress {
     InetAddress getInetAddress() {
         return address_;
     }
-
+    
     private final InetAddress address_;
 }

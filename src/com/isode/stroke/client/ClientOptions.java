@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Isode Limited, London, England.
+ * Copyright (c) 2011-2012 Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -9,7 +9,7 @@
 package com.isode.stroke.client;
 
 /**
- *
+ * Options for a client connection
  */
 public class ClientOptions {
 
@@ -17,13 +17,22 @@ public class ClientOptions {
 
         NeverUseTLS,
         UseTLSWhenAvailable
-    };
+    }
 
     public ClientOptions() {
         useStreamCompression = true;
         useTLS = UseTLS.UseTLSWhenAvailable;
         useStreamResumption = false;
     }
+    
+    @Override
+    public String toString() {
+        return  
+            "useStreamCompression:" + useStreamCompression +
+            "; useStreamResumption:" + useStreamResumption +
+            "; " + useTLS;
+    }
+
     /**
      * Whether ZLib stream compression should be used when available.
      *
@@ -42,4 +51,5 @@ public class ClientOptions {
      * Default: false
      */
     public boolean useStreamResumption;
+    
 }

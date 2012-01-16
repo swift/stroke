@@ -56,6 +56,6 @@ public class Message extends Stanza {
     
     @Override
     public String toString() {
-        return "Message " + super.toString() + " subject=\"" + getSubject() + "\""; 
+        return super.toString() + " subject=\"" + getSubject() + "\""; 
     }
 }
