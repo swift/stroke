@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -11,5 +11,5 @@ package com.isode.stroke.network;
 
 
 public interface TimerFactory {
-    Timer createTimer(int milliseconds);
+    Timer createTimer(long milliseconds);
 }

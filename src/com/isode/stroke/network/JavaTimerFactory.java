@@ -4,7 +4,7 @@
  * See Documentation/Licenses/GPLv3.txt for more information.
  */
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 
@@ -18,7 +18,7 @@ public class JavaTimerFactory implements TimerFactory {
         eventLoop_ = eventLoop;
     }
 
-    public Timer createTimer(int milliseconds) {
+    public Timer createTimer(long milliseconds) {
         return new JavaTimer(eventLoop_, milliseconds);
     }
 
