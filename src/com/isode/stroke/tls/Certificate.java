@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Isode Limited, London, England.
+ * Copyright (c) 2011-2012 Isode Limited, London, England.
  * All rights reserved.
  */
 /*

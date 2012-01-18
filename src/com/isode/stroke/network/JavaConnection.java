@@ -1,7 +1,6 @@
 /*
  * Copyright (c) 2010 Remko Tronçon
- * Licensed under the GNU General Public License v3.
- * See Documentation/Licenses/GPLv3.txt for more information.
+ * All rights reserved.
  */
 /*
  * Copyright (c) 2010-2012, Isode Limited, London, England.
@@ -9,23 +8,18 @@
  */
 package com.isode.stroke.network;
 
-import com.isode.stroke.base.ByteArray;
-import com.isode.stroke.eventloop.Event.Callback;
-import com.isode.stroke.eventloop.EventLoop;
-import com.isode.stroke.eventloop.EventOwner;
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.eventloop.Event.Callback;
+import com.isode.stroke.eventloop.EventLoop;
+import com.isode.stroke.eventloop.EventOwner;
 
 public class JavaConnection extends Connection implements EventOwner {
 
@@ -33,7 +27,7 @@ public class JavaConnection extends Connection implements EventOwner {
 
         private final HostAddressPort address_;
         private OutputStream write_;
-        private BufferedReader read_;
+        private InputStream read_;
         private final List<ByteArray> writeBuffer_ = Collections.synchronizedList(new ArrayList<ByteArray>());
 
         public Worker(HostAddressPort address) {
@@ -44,7 +38,7 @@ public class JavaConnection extends Connection implements EventOwner {
             try {
                 socket_ = new Socket(address_.getAddress().getInetAddress(), address_.getPort());
                 write_ = socket_.getOutputStream();
-                read_ = new BufferedReader(new InputStreamReader(socket_.getInputStream(), "utf-8"));
+                read_ = socket_.getInputStream();
             } catch (IOException ex) {
                 handleConnected(true);
                 return;
@@ -75,11 +69,13 @@ public class JavaConnection extends Connection implements EventOwner {
                 }
                 ByteArray data = new ByteArray();
                 try {
-                    while (read_.ready()) {
-                        char[] c = new char[1024];
-                        int i = read_.read(c, 0, c.length);
+                   while (read_.available() != 0) {
+                        byte[] b = new byte[1024];
+                        int i = read_.read(b,0,b.length);
                         if (i > 0) {
-                            data.append(new String(c, 0, i));
+                            for (int j=0; j<i; j++) {
+                                data.append(b[j]);
+                            }
                         }
                     }
                 } catch (IOException ex) {
@@ -107,7 +103,7 @@ public class JavaConnection extends Connection implements EventOwner {
         private void handleConnected(final boolean error) {
             eventLoop_.postEvent(new Callback() {
                 public void run() {
-                    onConnectFinished.emit(error);
+                    onConnectFinished.emit(Boolean.valueOf(error));
                 }
             });
         }
@@ -182,4 +178,5 @@ public class JavaConnection extends Connection implements EventOwner {
     private boolean disconnecting_ = false;
     private Socket socket_;
     private Worker worker_;
+
 }
