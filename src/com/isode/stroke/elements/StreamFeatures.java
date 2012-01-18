@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -87,6 +87,16 @@ public class StreamFeatures implements Element {
 
     public void setHasRosterVersioning() {
         hasRosterVersioning_ = true;
+    }
+    
+    @Override
+    public String toString() {
+        return "StreamFeatures: hasStartTLS=" + hasStartTLS_ +
+        "; hasResourceBind_=" + hasResourceBind_ +
+        "; hasSession_=" + hasSession_ +
+        "; hasStreamManagement_ =" + hasStreamManagement_ +
+        "; compression methods:" + compressionMethods_.size() +
+        "; authentication mechs:" + authenticationMechanisms_.size();
     }
 
     private boolean hasStartTLS_;

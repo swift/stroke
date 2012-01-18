@@ -1,10 +1,8 @@
 /*
  * Copyright (c) 2010 Remko Tronçon
- * Licensed under the GNU General Public License v3.
- * See Documentation/Licenses/GPLv3.txt for more information.
- */
+ * All rights reserved. */
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.session;
@@ -235,6 +233,12 @@ public class BasicSessionStream extends SessionStream {
     private void handleDataWritten(ByteArray data) {
         onDataWritten.emit(data.toString());
     }
+    @Override
+    public String toString() {
+            return super.toString() + 
+            "; available=" + available;
+    }
+
     private boolean available;
     private Connection connection;
     private PayloadParserFactoryCollection payloadParserFactories;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011 Isode Limited, London, England.
+ * Copyright (c) 2010-2012 Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -588,6 +588,15 @@ public class ClientSession {
 
     private JID getRemoteJID() {
         return new JID("", localJID.getDomain());
+    }
+    
+    @Override
+    public String toString() {
+        return "useTLS=" + useTLS + 
+        "; allowPLAINOverNonTLS=" + allowPLAINOverNonTLS +
+        "; certificatetrustChecker=" + certificateTrustChecker +
+        "; state=" + state +
+        "; error_=" + error_;
     }
 
     private JID localJID;
