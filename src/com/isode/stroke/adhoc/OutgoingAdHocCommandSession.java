@@ -154,10 +154,8 @@ public class OutgoingAdHocCommandSession {
      * Send initial request to the target.
      */
     public void start() {
-        Action action = null;
         GenericRequest<Command> commandRequest = new GenericRequest<Command>(
-                IQ.Type.Set, to_, new Command(commandNode_, "", action),
-                iqRouter_);
+                IQ.Type.Set, to_, new Command(commandNode_), iqRouter_);
         commandRequest.onResponse.connect(new Slot2<Command, ErrorPayload>() {
             public void call(Command payload, ErrorPayload error) {
                 handleResponse(payload, error);

@@ -297,8 +297,9 @@ public class Command extends Payload {
 
     /**
      * Create an Ad-Hoc command with the given node, session ID, action and
-     * {@link Status#NO_STATUS} status.
-     *
+     * {@link Status#NO_STATUS} status. This can be used when submitting further
+     * actions of an ongoing Ad-Hoc session.
+     * 
      * @param node Node, must not be null. Each command is identified by its
      *            'node' attribute. This matches its 'node' attribute from the
      *            service discovery.
@@ -312,8 +313,23 @@ public class Command extends Payload {
     }
 
     /**
+     * Create an Ad-Hoc command with the given node, empty session ID,
+     * {@link Action#EXECUTE} action and {@link Status#NO_STATUS} status. This
+     * can be used when initiating an Ad-Hoc command request.
+     * 
+     * @param node Node, must not be null. Each command is identified by its
+     *            'node' attribute. This matches its 'node' attribute from the
+     *            service discovery.
+     */
+    public Command(String node) {
+        this(node, "", Action.EXECUTE);
+    }
+
+    /**
      * Create an Ad-Hoc command with an empty node, empty session ID,
-     * {@link Action#EXECUTE} action and {@link Status#NO_STATUS} status.
+     * {@link Action#EXECUTE} action and {@link Status#NO_STATUS} status. This
+     * will need the attributes to be populated later as the object is not
+     * usable in this form.
      */
     public Command() {
         this("", "", Action.EXECUTE);
