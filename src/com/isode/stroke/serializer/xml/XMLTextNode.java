@@ -10,13 +10,13 @@ package com.isode.stroke.serializer.xml;
 
 public class XMLTextNode implements XMLNode {
 
-    private final String text_;
+    private String text_;
 
     public XMLTextNode(String text) {
         text_ = text;
-        text_.replaceAll("&", "&amp;"); // Should come first
-        text_.replaceAll("<", "&lt;");
-        text_.replaceAll(">", "&gt;");
+        text_ = text_.replaceAll("&", "&amp;"); // Should come first
+        text_ = text_.replaceAll("<", "&lt;");
+        text_ = text_.replaceAll(">", "&gt;");
     }
 
     public String serialize() {

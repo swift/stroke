@@ -57,11 +57,11 @@ public class XMLElement implements XMLNode {
 
     public void setAttribute(String attribute, String value) {
         String escapedValue = value;
-        escapedValue.replaceAll("&", "&amp;");
-        escapedValue.replaceAll("<", "&lt;");
-        escapedValue.replaceAll(">", "&gt;");
-        escapedValue.replaceAll("'", "&apos;");
-        escapedValue.replaceAll("\"", "&quot;");
+        escapedValue = escapedValue.replaceAll("&", "&amp;");
+        escapedValue = escapedValue.replaceAll("<", "&lt;");
+        escapedValue = escapedValue.replaceAll(">", "&gt;");
+        escapedValue = escapedValue.replaceAll("'", "&apos;");
+        escapedValue = escapedValue.replaceAll("\"", "&quot;");
         attributes_.put(attribute, escapedValue);
     }
 
