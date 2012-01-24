@@ -91,7 +91,7 @@ public class DiscoItems extends Payload {
     public void addItem(Item item) {
         items_.add(item);
     }
-    private String node_;
+    private String node_ = "";
     private final List<Item> items_ = new ArrayList<Item>();
 }
 

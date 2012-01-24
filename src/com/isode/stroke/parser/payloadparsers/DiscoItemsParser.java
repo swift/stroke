@@ -14,7 +14,7 @@ import com.isode.stroke.jid.JID;
 import com.isode.stroke.parser.AttributeMap;
 import com.isode.stroke.parser.GenericPayloadParser;
 
-class DiscoItemsParser extends GenericPayloadParser<DiscoItems> {
+public class DiscoItemsParser extends GenericPayloadParser<DiscoItems> {
     public DiscoItemsParser() {
         super(new DiscoItems());
     }
