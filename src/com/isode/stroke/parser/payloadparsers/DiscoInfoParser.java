@@ -13,7 +13,7 @@ import com.isode.stroke.parser.AttributeMap;
 import com.isode.stroke.parser.GenericPayloadParser;
 
 
-class DiscoInfoParser extends GenericPayloadParser<DiscoInfo> {
+public class DiscoInfoParser extends GenericPayloadParser<DiscoInfo> {
     public DiscoInfoParser() {
         super(new DiscoInfo());
     }
