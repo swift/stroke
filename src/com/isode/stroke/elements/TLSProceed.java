@@ -12,7 +12,6 @@ package com.isode.stroke.elements;
 
 public class TLSProceed implements Element {
 
-    public TLSProceed() {
-        //
+    public TLSProceed() {        
     }
 }

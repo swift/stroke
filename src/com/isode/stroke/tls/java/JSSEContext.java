@@ -43,22 +43,22 @@ import com.isode.stroke.tls.TLSContext;
 public class JSSEContext extends TLSContext {
 
     private static class JSSEContextError {
-        public Throwable throwable;
-        public String message;
+        public final Exception exception;
+        public final String message;
         /**
          * Create a new object
-         * @param t throwable; may be null
+         * @param e exception; may be null
          * @param m message; may be null
          */
-        public JSSEContextError(Throwable t, String m) {
-            throwable = t;
+        public JSSEContextError(Exception e, String m) {
+            exception = e;
             message = m;
         }
         @Override
         public String toString() {
             return "JSSEContextError: " +
                     (message == null ? "No message" : message) + "; " +
-                    (throwable == null ? "No exception" : throwable.getMessage());
+                    (exception == null ? "No exception" : exception.getMessage());
         }
     }
     /**
@@ -83,11 +83,11 @@ public class JSSEContext extends TLSContext {
     }
     /**
      * Emit an error, and keep track of which errors have been emitted
-     * @param t the Throwable which caused this error (may be null)
+     * @param e the Exception which caused this error (may be null)
      * @param m a String describing what caused this error (may be null)
      */
-    private void emitError(Throwable t, String m) {
-        JSSEContextError jsseContextError = new JSSEContextError(t,m);
+    private void emitError(Exception e, String m) {
+        JSSEContextError jsseContextError = new JSSEContextError(e, m);
         errorsEmitted.add(jsseContextError);
         onError.emit();        
     }
@@ -103,11 +103,8 @@ public class JSSEContext extends TLSContext {
     }
 
     private void doSetup() throws SSLException {
-       
-        // May throw NoSuchAlgorithmException
-        SSLContext sslContext = null;
 
-        sslContext = getSSLContext();
+        SSLContext sslContext = getSSLContext();
         
         if (sslContext == null) {
             throw new SSLException("Could not create SSLContext");
@@ -236,8 +233,7 @@ public class JSSEContext extends TLSContext {
 
             if (bytesProduced > 0) {
                 unwrappedReceived.flip();
-                byte[] result = new byte[0];
-                result = new byte[unwrappedReceived.remaining()];
+                byte[] result = new byte[unwrappedReceived.remaining()];
                 unwrappedReceived.get(result);
                 unwrappedReceived.compact();
                 byteArray = new ByteArray(result);
@@ -599,7 +595,7 @@ public class JSSEContext extends TLSContext {
         String errors = null;
         if (hasError()) {
             errors = "; errors emitted:";
-            for (JSSEContextError e:errorsEmitted) {
+            for (JSSEContextError e : errorsEmitted) {
                 errors += "\n  " + e;
             }
         }

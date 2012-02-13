@@ -103,7 +103,7 @@ public class JavaConnection extends Connection implements EventOwner {
         private void handleConnected(final boolean error) {
             eventLoop_.postEvent(new Callback() {
                 public void run() {
-                    onConnectFinished.emit(Boolean.valueOf(error));
+                    onConnectFinished.emit(error);
                 }
             });
         }
