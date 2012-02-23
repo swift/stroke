@@ -19,8 +19,8 @@ import java.util.Collection;
 
 public class Connector {
 
-    public static Connector create(String hostname, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory) {
-        return new Connector(hostname, resolver, connectionFactory, timerFactory);
+    public static Connector create(String hostname, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory, int defaultPort) {
+        return new Connector(hostname, resolver, connectionFactory, timerFactory, defaultPort);
     }
 
     public void setTimeoutMilliseconds(int milliseconds) {
@@ -56,11 +56,12 @@ public class Connector {
 
     public final Signal1<Connection> onConnectFinished = new Signal1<Connection>();
 
-    private Connector(String hostname, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory) {
+    private Connector(String hostname, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory, int defaultPort) {
         this.hostname = hostname;
         this.resolver = resolver;
         this.connectionFactory = connectionFactory;
         this.timerFactory = timerFactory;
+        this.defaultPort = defaultPort;
     }
 
     private void handleServiceQueryResult(Collection<Result> result) {
@@ -128,7 +129,7 @@ public class Connector {
 		HostAddress address = addressQueryResults.get(0);
 		addressQueryResults.remove(0);
 
-		int port = 5222;
+		int port = defaultPort;
 		if (!serviceQueryResults.isEmpty()) {
 			port = serviceQueryResults.get(0).port;
 		}
@@ -215,4 +216,5 @@ public class Connector {
     private boolean queriedAllServices = true;
     private Connection currentConnection;
     private SignalConnection currentConnectionConnectFinishedConnection;
+    private final int defaultPort;
 }

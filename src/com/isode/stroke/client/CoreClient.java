@@ -128,20 +128,23 @@ public class CoreClient {
      */
     public void connect(ClientOptions o) {
         options = o;
-        connect(jid_.getDomain());
+        connect(jid_.getDomain(), 5222);
     }
 
     /**
-     * Connect to the specified host, overriding the standard lookup rules.
+     * Connect to the specified host, overriding the standard lookup rules for the JID.
+     *
+     * Internal method, do not use.
      * 
      * @param host Host to connect to, non-null.
+     * @param port Default port to use if SRV fails.
      */
-    public void connect(String host) {
+    public void connect(String host, int port) {
         options = new ClientOptions();
         disconnectRequested_ = false;
         assert (connector_ == null);
         /* FIXME: Port Proxies */
-        connector_ = Connector.create(host, networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory());
+        connector_ = Connector.create(host, networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory(), port);
         connectorConnectFinishedConnection_ = connector_.onConnectFinished.connect(new Slot1<Connection>() {
             public void call(Connection p1) {
                 handleConnectorFinished(p1);
