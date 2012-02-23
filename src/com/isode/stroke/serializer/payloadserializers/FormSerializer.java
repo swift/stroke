@@ -191,12 +191,12 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
     private static void serializeValueAsString(GenericFormField<String> field,
             XMLElement parent) {
         String value = field.getValue();
-        if (!value.isEmpty()) {
+        // FIXME with the proper fix after Swiften is fixed: if (!value.isEmpty()) {
             XMLElement valueElement = new XMLElement(
                     FormField.FORM_FIELD_ELEMENT_VALUE);
             valueElement.addNode(XMLTextNode.create(value));
             parent.addNode(valueElement);
-        }
+        // }
     }
 
     @Override
