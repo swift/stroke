@@ -12,6 +12,7 @@ package com.isode.stroke.tls.java;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -19,6 +20,8 @@ import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
@@ -88,6 +91,10 @@ public class JSSEContext extends TLSContext {
      */
     private void emitError(Exception e, String m) {
         JSSEContextError jsseContextError = new JSSEContextError(e, m);
+        /* onError.emit() won't provide any info about what the error was,
+         * so log a warning here as well
+         */
+        logger_.log(Level.WARNING, jsseContextError.toString(), e);
         errorsEmitted.add(jsseContextError);
         onError.emit();        
     }
@@ -115,38 +122,67 @@ public class JSSEContext extends TLSContext {
             sslEngine = sslContext.createSSLEngine();
         }
         catch (UnsupportedOperationException e) {
-            // "the underlying provider does not implement the operation"
+            /* "the underlying provider does not implement the operation" */
             throw new SSLException(e);
         }
         catch (IllegalStateException e) {
-            // "the SSLContextImpl requires initialization and init() has not been called"
+            /* "the SSLContextImpl requires initialization and init() has not been called" */
             throw new SSLException(e);
         }
-        
-        sslEngine.setUseClientMode(true); // I am a client
-        sslEngine.setEnableSessionCreation(true); // can create new sessions
+                
+        sslEngine.setUseClientMode(true); /* I am a client */
+        sslEngine.setEnableSessionCreation(true); /* can create new sessions */
         
 
-        int appBufferMax = sslEngine.getSession().getApplicationBufferSize();
-        int netBufferMax = sslEngine.getSession().getPacketBufferSize();
+        /* Will get "the current size of the largest application data that is
+         * expected when using this session". 
+         * 
+         * If we get packets larger than this, we'll grow the buffers by this
+         * amount.
+         */
+        appBufferSize = sslEngine.getSession().getApplicationBufferSize();
         
-        // All buffers are normally in "write" mode. Access to all of them
-        // must be synchronized
-        plainToSend = ByteBuffer.allocate(appBufferMax + 50);
-        wrappedToSend = ByteBuffer.allocate(netBufferMax);
-        encryptedReceived = ByteBuffer.allocate(netBufferMax);
-        unwrappedReceived = ByteBuffer.allocate(appBufferMax + 50); 
+        /*
+         * Don't grow application buffers bigger than this
+         */
+        appBufferMax = (appBufferSize * 10);
         
-        // Note that calling beginHandshake might not actually do anything; 
-        // the SSLEngine may not actually send the handshake until it's had 
-        // some data from the application.  And the higher level won't send 
-        // any data until it thinks the handshake is completed.  
-        //
-        // So this is a hack to force the handshake to occur: on the assumption
-        // that the first thing to be sent once TLS is running is 
-        // the "<" from the start of a tag, we send a less-than sign now, 
-        // which we'll remember must be removed that from the first message
-        // we get told to send.
+        /* "A SSLEngine using this session may generate SSL/TLS packets of
+         * any size up to and including the value returned by this method"
+         * 
+         * Note though, that this doesn't mean we might not be asked to 
+         * process data chunks that are larger than this: we cannot rely on this 
+         * value being big enough to hold anything that comes in through
+         * "handleDataFromNetwork()".
+         */        
+        netBufferSize = sslEngine.getSession().getPacketBufferSize();
+        /*
+         * Don't grow network buffers bigger than this
+         */
+        netBufferMax = (netBufferSize * 10);
+        
+        /* All buffers are normally in "write" mode. Access to all of them
+         * must be synchronized
+         */
+        plainToSend = ByteBuffer.allocate(appBufferSize + 50);
+        wrappedToSend = ByteBuffer.allocate(netBufferSize);
+        
+        encryptedReceived = ByteBuffer.allocate(netBufferSize);
+
+        unwrappedReceived = ByteBuffer.allocate(appBufferSize + 50); 
+
+       
+        /* Note that calling beginHandshake might not actually do anything; 
+         * the SSLEngine may not actually send the handshake until it's had 
+         * some data from the application.  And the higher level won't send 
+         * any data until it thinks the handshake is completed.  
+         *
+         * So this is a hack to force the handshake to occur: on the assumption
+         * that the first thing to be sent once TLS is running is 
+         * the "<" from the start of a tag, we send a less-than sign now, 
+         * which we'll remember must be removed that from the first message
+         * we get told to send.
+         */
         
         sslEngine.beginHandshake();
 
@@ -172,63 +208,88 @@ public class JSSEContext extends TLSContext {
         Status status;   
         int bytesProduced = 0;
         int bytesConsumed = 0;
+        int bytesToUnwrap = 0;
         HandshakeStatus handshakeStatus = null;
         ByteArray byteArray = null;
 
         synchronized(recvMutex) {
             try {
                 encryptedReceived.flip();
-                sslEngineResult = sslEngine.unwrap(encryptedReceived, unwrappedReceived);
+                
+                boolean unwrapDone = false;
+                do {
+                    bytesToUnwrap = encryptedReceived.remaining();
+                    sslEngineResult = sslEngine.unwrap(encryptedReceived, unwrappedReceived);
+                    status = sslEngineResult.getStatus();
+                    handshakeStatus = sslEngineResult.getHandshakeStatus();
+                    /* A call to unwrap can generate a status of FINISHED, which
+                     * you won't get from SSLEngine.getHandshakeStatus.  Such
+                     * a status is an indication that we need to re-check whether
+                     * anything's pending to be written
+                     */
+                    if (handshakeStatus == HandshakeStatus.FINISHED) {
+                        /* Special case will happen when the handshake completes following
+                         * an unwrap.  The first time we tried wrapping some plain stuff,
+                         * it triggers the handshake but won't itself have been dealt with.
+                         * So now the handshake has finished, we have to try sending it
+                         * again
+                         */
+                        handshakeCompleted = true;
+                        wrapAndSendData();
+                        onConnected.emit();
+                        status = sslEngineResult.getStatus();
+                    }
+
+                    
+                    switch (status) {
+                    case BUFFER_OVERFLOW :
+                        unwrappedReceived = enlargeBuffer("unwrappedReceived",unwrappedReceived,appBufferSize, appBufferMax);
+                        unwrapDone = false;
+                        break;
+                        
+                    case BUFFER_UNDERFLOW:
+                        /* There's not enough data yet for engine to be able to decode
+                         * a full message. Not a problem; assume that more will come
+                         * in to the socket eventually
+                         */
+                        unwrapDone = true;
+                        break;
+                    case CLOSED:
+                        /* Engine closed - don't expect this here */
+                        emitError(null, "SSLEngine.unwrap returned " + status);
+                        return bytesConsumed;
+                        
+                    case OK:
+                        /* Some stuff was unwrapped. */
+                        bytesConsumed += sslEngineResult.bytesConsumed();
+                        bytesProduced = sslEngineResult.bytesProduced();
+                        
+                        /* It may be that the unwrap consumed some, but not all of
+                         * the data. In which case, the loop continues to give it
+                         * another chance to process whatever's remaining
+                         */
+                        if (sslEngineResult.bytesConsumed() == 0) {
+                            /* No point looping around again */
+                            unwrapDone = true;
+                        }
+                        else {
+                            /* It consumed some bytes, but perhaps not everything */
+                            unwrapDone = (sslEngineResult.bytesConsumed() == bytesToUnwrap);
+                        }
+                        break;
+                    }
+                } while (!unwrapDone);
+                
                 encryptedReceived.compact();
 
-                // A call to unwrap can generate a status of FINISHED, which
-                // you won't get from SSLEngine.getHandshakeStatus.  Such
-                // a status is an indication that we need to re-check whether
-                // anything's pending to be written
-                handshakeStatus = sslEngineResult.getHandshakeStatus();
 
 
                 bytesConsumed += sslEngineResult.bytesConsumed();
                 bytesProduced = sslEngineResult.bytesProduced();
             }
             catch (SSLException e) {
-                throw new RuntimeException("unwrap produced: " + e);
-            }
-
-
-            status = sslEngineResult.getStatus();
-            boolean finished = false;
-            while (!finished) {
-                switch (status) {
-                case BUFFER_UNDERFLOW:
-                    // There's not enough data yet for engine to be able to decode
-                    // a full message. Not a problem; assume that more will come
-                    // in to the socket eventually
-                    finished = true;
-                    break;
-                case OK:
-                    // Unwrap was OK
-                    finished = true;
-                    break;
-                case BUFFER_OVERFLOW:
-                    // Not enough room in "unwrappedReceived" to write the data
-                    // TODO: need to fix this
-                case CLOSED:
-                    // Engine closed - don't expect this here
-                    emitError(null, "SSLEngine.unwrap returned " + status);
-                    return bytesConsumed;
-                }
-            }
-
-            if (handshakeStatus == HandshakeStatus.FINISHED) {
-                // Special case will happen when the handshake completes following
-                // an unwrap.  The first time we tried wrapping some plain stuff,
-                // it triggers the handshake but won't itself have been dealt with.
-                // So now the handshake has finished, we have to try sending it
-                // again
-                handshakeCompleted = true;
-                wrapAndSendData();
-                onConnected.emit();
+                emitError(e, "unwrap failed");
+                return bytesConsumed;
             }
 
             if (bytesProduced > 0) {
@@ -241,7 +302,7 @@ public class JSSEContext extends TLSContext {
 
         }
         
-        // Now out of synchronized block
+        /* Now out of synchronized block */
         if (byteArray != null) {
             onDataForApplication.emit(byteArray);
         }
@@ -261,14 +322,16 @@ public class JSSEContext extends TLSContext {
         ByteArray byteArray = null;
         SSLEngineResult sslEngineResult = null;
         Status status = null;
+        HandshakeStatus handshakeStatus = null;
         boolean handshakeFinished = false;
        
         synchronized(sendMutex) {
-            // Check if there's anything outstanding to be sent at the
-            // top of the loop, so that we clear the "wrappedToSend"
-            // buffer before asking the engine to encrypt anything
-            // TODO: is this required? I don't think anything gets put in
-            // wrappedToSend apart from in here?
+            /* Check if there's anything outstanding to be sent at the
+             * top of the loop, so that we clear the "wrappedToSend"
+             * buffer before asking the engine to encrypt anything
+             * TODO: is this required? I don't think anything gets put in
+             * wrappedToSend apart from in here?
+             */
             wrappedToSend.flip();
             if (wrappedToSend.hasRemaining()) {
                 byte[] b = new byte[(wrappedToSend.remaining())];
@@ -276,49 +339,64 @@ public class JSSEContext extends TLSContext {
                 byteArray = new ByteArray(b);
             }
             wrappedToSend.compact();
-        } // end synchronized
+        } /* end synchronized */
 
         if (byteArray != null) {
             int s = byteArray.getSize();
-            
             onDataForNetwork.emit(byteArray);
             bytesSentToSocket += s;
             byteArray = null;
         }
 
-        // There's nothing waiting to be sent. Now see what new data needs 
-        // encrypting
+        /* There's nothing waiting to be sent. Now see what new data needs 
+         * encrypting
+         */
         synchronized(sendMutex) {
             plainToSend.flip();
             if (!plainToSend.hasRemaining()) {
-                // Nothing more to be encrypted
+                /* Nothing more to be encrypted */
                 plainToSend.compact();
                 return;
             }
             try {
-                sslEngineResult = sslEngine.wrap(plainToSend, wrappedToSend);
+                boolean wrapDone = false;
+                do {
+                    sslEngineResult = sslEngine.wrap(plainToSend, wrappedToSend);
+                    handshakeStatus = sslEngineResult.getHandshakeStatus();
+                    status = sslEngineResult.getStatus();
+                    
+                    
+                    if (status == Status.BUFFER_OVERFLOW) {
+                        wrappedToSend = enlargeBuffer(
+                                "wrappedToSend", wrappedToSend, netBufferSize, netBufferMax);
+                    }
+                    else {
+                        wrapDone = true;
+                    }
+                }
+                while (!wrapDone);
             }
+            
             catch (SSLException e) {
-                // TODO: Is there anything more that can be done here?
-                // TODO: this is called inside the mutex, does this matter?
+                /* This could result from the "enlargeBuffer" running out of space */
                 emitError(e,"SSLEngine.wrap failed");
                 return;
             }
             plainToSend.compact();
 
-            status = sslEngineResult.getStatus();
-
-            // FINISHED can only come back for wrap() or unwrap(); so check to
-            // see if we just had it
-            if (sslEngineResult.getHandshakeStatus() == HandshakeStatus.FINISHED) {
+            /* FINISHED can only come back for wrap() or unwrap(); so check to 
+             * see if we just had it
+             */
+            if (handshakeStatus == HandshakeStatus.FINISHED) {
                 handshakeFinished = true;
             }
 
             switch (status) {
             case OK:
-                // This is the only status we expect here. It means the
-                // data was successfully wrapped and that there's something
-                // to be sent.  
+                /* This is the only status we expect here. It means the
+                 * data was successfully wrapped and that there's something
+                 * to be sent.
+                 */  
                 wrappedToSend.flip();
                 if (wrappedToSend.hasRemaining()) {
                     byte[] b = new byte[(wrappedToSend.remaining())];
@@ -329,19 +407,17 @@ public class JSSEContext extends TLSContext {
                 break;
 
             case BUFFER_UNDERFLOW:
-                // Can't happen for a wrap
+                /* Can't happen for a wrap */
             case CLOSED :
-                // ???
+                /* Engine closed - don't expect this here */
             case BUFFER_OVERFLOW:
-                // The "wrappedToSend" buffer, which we had previously made
-                // sure was empty, isn't big enough. 
-                // TODO: I don't think this can happen though
-                // TODO: Note that we're in sychronized block here
+                /* We already dealt with this, so don't expect to come here
+                 */
                 emitError(null, "SSLEngine.wrap returned " + status);
                 return;
 
             }
-        } // end synchronized
+        } /* end synchronized */
         
         if (handshakeFinished) {
             handshakeCompleted = true;
@@ -355,8 +431,9 @@ public class JSSEContext extends TLSContext {
             byteArray = null;
         }
 
-        // Note that there may still be stuff in "plainToSend" that hasn't
-        // yet been consumed
+        /* Note that there may still be stuff in "plainToSend" that hasn't
+         * yet been consumed
+         */
         return;
 
     }
@@ -369,42 +446,74 @@ public class JSSEContext extends TLSContext {
      */
     private boolean processHandshakeStatus() {
         HandshakeStatus handshakeStatus;
-        
+
         handshakeStatus = sslEngine.getHandshakeStatus();
         switch (handshakeStatus) {
         case NOT_HANDSHAKING:
-            // No handshaking going on - session is available, no more
-            // handshake status to process
+            /* No handshaking going on - session is available, no more
+             * handshake status to process
+             */
             return false;
         case NEED_TASK:
-            runDelegatedTasks(false); // false==don't create separate threads 
+            runDelegatedTasks(false); /* false==don't create separate threads */ 
             
-            // after tasks have run, need to come back here and check
-            // handshake status again
+            /* after tasks have run, need to come back here and check
+             * handshake status again
+             */
             return true;
             
         case NEED_WRAP:
-            // SSLEngine wants some data that it can wrap for sending to the
-            // other side
+            /* SSLEngine wants some data that it can wrap for sending to the
+             * other side
+             */
             wrapAndSendData();
-            // after sending data, need to check handshake status again
+            /* after sending data, need to check handshake status again */
             return true;
         case NEED_UNWRAP:
             
-            // SSLEngine wants data from other side that it can unwrap and
-            // process
+            /* SSLEngine wants data from other side that it can unwrap and
+             * process
+             */
             int consumed = unwrapPendingData();
             return (consumed > 0);
              
         case FINISHED:
-            // "This value is only generated by a call to wrap/unwrap when
-            // that call finishes a handshake. It is never generated by
-            // SSLEngine.getHandshakeStatus()"
+            /* "This value is only generated by a call to wrap/unwrap when
+             * that call finishes a handshake. It is never generated by
+             * SSLEngine.getHandshakeStatus()"
+             */
             
         default:
-            // There are no other values, but compiler requires this
+            /* There are no other values, but compiler requires this */
             throw new RuntimeException("unexpected handshake status " + handshakeStatus);
         }        
+    }
+    
+    /**
+     * Create a ByteBuffer that is a copy of an existing buffer, but with a
+     * larger capacity.
+     * @param bufferName the name of the buffer, for logging purposes
+     * @param bb the original ByteBuffer
+     * @param growBy how many bytes to grow the buffer by
+     * @param maxSize the maximum size that the output buffer is allowed to be
+     * @return a ByteBuffer that will have been enlarged by <em>growBy</em>
+     * @throws BufferOverflowException if adding <em>growBy</em> would take
+     * the buffer's size to greater than <em>maxSize</em>
+     */
+    private ByteBuffer enlargeBuffer(
+            String bufferName, ByteBuffer bb, int growBy, int maxSize) 
+    throws SSLException {
+        int newSize = bb.capacity() + growBy;
+        if (newSize <= maxSize) {
+            logger_.fine("Buffer " + bufferName + 
+                    " growing from " + bb.capacity() + " to " + newSize);
+            ByteBuffer temp = ByteBuffer.allocate(newSize);
+            bb.flip();
+            temp.put(bb);
+            return temp;
+        }
+        throw new SSLException("Buffer for " + bufferName + 
+                " exceeded maximum size of " + maxSize);
     }
     
     /**
@@ -459,11 +568,12 @@ public class JSSEContext extends TLSContext {
                 
         peerCertificate = new JavaCertificate(certs[0]);
         
-        // Swiften uses SSL_get_verify_result() for this, and the documentation
-        // for that says it "while the verification of a certificate can fail
-        // because of many reasons at the same time. Only the last verification
-        // error that occurred..is available". 
-        // So once one problem is found, don't bother looking for others.
+        /* Swiften uses SSL_get_verify_result() for this, and the documentation
+         * for that says it "while the verification of a certificate can fail
+         * because of many reasons at the same time. Only the last verification
+         * error that occurred..is available". 
+         * So once one problem is found, don't bother looking for others.
+         */
 
         if (certificateException != null) {
             if (certificateException instanceof CertificateNotYetValidException) {
@@ -483,94 +593,185 @@ public class JSSEContext extends TLSContext {
     
     @Override
     public boolean setClientCertificate(PKCS12Certificate cert) {
-        // TODO: NYI.
-        // It's possible this is going to change as a result of Alexey's work
-        // so will leave for now
+        /* TODO: NYI.
+         * It's possible this is going to change as a result of Alexey's work
+         * so will leave for now
+         */
         return false;
     }
 
     @Override
     public void handleDataFromNetwork(ByteArray data) {
         if (hasError()) {
-            // We have previously seen, and reported, an error.  Emit again
+            /* We have previously seen, and reported, an error.  Emit again */
             onError.emit();        
             return;
         }
+
+        /* Note that we need to deal with arbitrarily large ByteArrays here;
+         * specifically it may be that the number of bytes from the network is
+         * larger than the value of "netBufferMax" that was used to size the
+         * encryptedReceived buffer 
+         */
         byte[] b = data.getData();
         
-        synchronized(recvMutex) {
-            try {
-                // TODO: could "encryptedReceived" already have stuff in it?
-                encryptedReceived.put(b);
+        /* We need to deal with arbitrarily large ByteArrays here; specifically
+         * it may be that the number of bytes from the network is
+         * larger than the value of "netBufferMax" that was used to size the
+         * encryptedReceived buffer 
+         */
+        int remaining = b.length;
+        int chunkPos = 0;
+        while (remaining > 0) {                
+            synchronized(recvMutex) {
+                int chunkSize = encryptedReceived.remaining();
+                if (chunkSize == 0) {
+                    try {
+                        encryptedReceived = enlargeBuffer(
+                                "encryptedReceived", encryptedReceived, netBufferSize, netBufferMax);
+                        /* We know that this will now give us a non-zero value */
+                        chunkSize = encryptedReceived.remaining();
+                    }
+                    catch (SSLException e) {
+                        /* Enlarging buffer failed */
+                        emitError(e, "encryptedReceived buffer reached maximum size");
+                        return;                        
+                    }
+                    
+                }
+                if (remaining <= chunkSize) {
+                    /* There's room in the buffer for all remaining bytes */
+                    chunkSize = remaining;
+                }
+                try {
+                    encryptedReceived.put(b, chunkPos, chunkSize);
+                    remaining = (remaining - chunkSize);
+                    chunkPos = (chunkPos + chunkSize);
+                }
+                catch (BufferOverflowException e) {
+                    /* We never expect buffer overflow, because we are being
+                     * careful not to write too much.  If this happens, 
+                     * then include info in the error that may help
+                     * diagnosis
+                     */
+                    emitError(e, "Unexpected when writing encryptedReceived; remaining=" + 
+                            remaining + 
+                            "; chunkPos=" + chunkPos +
+                            "; chunkSize= " + chunkSize + 
+                            "; encryptedReceived=" + encryptedReceived);
+                    return;
+                }
             }
-            catch (BufferOverflowException e) {
-                emitError(e, "Unable to add data to encryptedReceived");
-                return;
-            }
+
+            unwrapPendingData();
+
+            /* Now keep checking SSLEngine until no more handshakes are required */
+            do {
+                /* */
+            } while (processHandshakeStatus());
+            
+            
+            /* Loop round so long as there are still bytes from the network
+             * to be processed
+             */
         }
-        
-        unwrapPendingData();
-        
-        // Now keep checking SSLEngine until no more handshakes are required
-        do {
-            //
-        } while (processHandshakeStatus());
-               
     }
 
     @Override
     public void handleDataFromApplication(ByteArray data) {
         if (hasError()) {
-            // We have previously seen, and reported, an error.  Emit again
+            /* We have previously seen, and reported, an error.  Emit again */
             onError.emit();        
             return;
         }
         byte[] b = data.getData();
-               
-        synchronized(sendMutex) {
-            try {
-                // Note that "plainToSend" may not be empty, because it's possible
-                // that calls to SSLEngine.wrap haven't yet consumed everything
-                // in there
-                switch (hack) {
-                case SENDING_FAKE_LT :
-                    plainToSend.put(b);
-                    hack = HackStatus.DISCARD_FIRST_LT;
-                    break;
-                    
-                case DISCARD_FIRST_LT:
-                    if (b.length > 0) {
-                        if (b[0] == (byte)'<') {
-                            plainToSend.put(b,1,b.length - 1);
-                            hack = HackStatus.HACK_DONE;
-                        }
-                        else {
-                            emitError(null,
-                                    "First character sent after TLS started was " + 
-                                    b[0] + " and not '<'");                            
-                        }
+
+        /* Need to cope in the case that the application sends a ByteArray
+         * with more data than will fit in the "plainToSend" buffer
+         */
+        int remaining = b.length;
+        int chunkPos = 0;
+        while (remaining > 0) {
+            synchronized(sendMutex) {
+                int chunkSize = plainToSend.remaining();
+                if (chunkSize == 0) {
+                    try {
+                        plainToSend = enlargeBuffer("plainToSend", plainToSend, appBufferSize, appBufferMax);
+                        /* We know that this will now give us a non-zero value */
+                        chunkSize = plainToSend.remaining();
                     }
-                    break;
-                case HACK_DONE:
-                    plainToSend.put(b);
-                    break;
+                    catch (SSLException e) {
+                        /* Enlarging buffer failed */
+                        emitError(e, "plainToSend buffer reached maximum size");
+                        return;
+                    }
+                }
+                if (remaining <= chunkSize) {
+                    /* There's room in the buffer for all remaining bytes */
+                    chunkSize = remaining;
+                }
+                try {
+
+                    /* Note that "plainToSend" may not be empty, because it's possible
+                     * that calls to SSLEngine.wrap haven't yet consumed everything
+                     * in there
+                     */
+                    switch (hack) {
+                    case SENDING_FAKE_LT :
+                        plainToSend.put(b, chunkPos, chunkSize);
+                        hack = HackStatus.DISCARD_FIRST_LT;
+                        break;
+
+                    case DISCARD_FIRST_LT:
+                        if (b.length > 0) {
+                            if (b[0] == (byte)'<') {
+                                plainToSend.put(b,1,chunkSize - 1);
+                                hack = HackStatus.HACK_DONE;
+                            }
+                            else {
+                                emitError(null,
+                                        "First character sent after TLS started was " + 
+                                        b[0] + " and not '<'"); 
+                                return;
+                            }
+                        }
+                        break;
+                    case HACK_DONE:
+                        plainToSend.put(b, chunkPos, chunkSize);
+                        break;
+                    }
+                    
+                    remaining = (remaining - chunkSize);
+                    chunkPos = (chunkPos + chunkSize);
+                }
+                catch (BufferOverflowException e) {
+                    /* We never expect buffer overflow, because we are being
+                     * careful not to write too much. If this happens, then
+                     * include info in the error that may help diagnosis
+                     */
+                    emitError(e, "Unexpected when writing to plainToSend; remaining=" +
+                            remaining +
+                            "; chunkPos=" + chunkPos +
+                            "; chunkSize=" + chunkSize +
+                            "; plainToSend=" + plainToSend);
+                    return;
                 }
             }
-            catch (BufferOverflowException e) {
-                // TODO: anything else here?
-                emitError(e, "plainToSend.put failed");
-                return;
-            }
+
+            wrapAndSendData();
+
+            /* Now keep checking SSLEngine until no more handshakes are required */
+            do {
+                /* */
+            } while (processHandshakeStatus());
+
+            /* Loop round so long as there are still bytes from the application
+             * to be processed
+             */
         }
-
-        wrapAndSendData();
-        
-        // Now keep checking SSLEngine until no more handshakes are required
-        do {
-            //
-        } while (processHandshakeStatus());
-
     }
+
+
 
     @Override
     public Certificate getPeerCertificate() {
@@ -584,8 +785,9 @@ public class JSSEContext extends TLSContext {
 
     @Override
     public ByteArray getFinishMessage() {
-        // TODO: Doesn't appear to be an obvious way to get this
-        // information from SSLEngine et al.  For now, return null.
+        /* TODO: Doesn't appear to be an obvious way to get this
+         * information from SSLEngine et al.  For now, return null.
+         */
         
         return null;
     }
@@ -601,7 +803,7 @@ public class JSSEContext extends TLSContext {
         }
         
         String result = 
-            "JSSEContext with SSLEngine = " + 
+            "JSSEContext(" + hashCode() + ") with SSLEngine = " + 
             sslEngine + 
             "; handshakeCompleted=" + handshakeCompleted;
         
@@ -610,12 +812,12 @@ public class JSSEContext extends TLSContext {
         }
         return result + errors;
     }
-    
+
     /**
      * Construct a new JSSEContext object. 
      */
     public JSSEContext() {
-        //
+        /* */
     }
 
     /**
@@ -627,6 +829,29 @@ public class JSSEContext extends TLSContext {
      * waiting to be encrypted and sent out over the socket. 
      */
     private ByteBuffer plainToSend;
+    
+    /**
+     * The initial size of the buffer used for application data.  This is
+     * likely to be enough for plaintext buffers, but in cases where the size
+     * is exceeded (for example, the result of decrypting a particularly huge 
+     * message), the buffer will be increased by this amount.
+     */
+    private int appBufferSize;
+    
+    /**
+     * The maximum amount to grow any buffer for application data
+     */
+    private int appBufferMax;
+    
+    /** 
+     * Initial size of buffer used for encrypted data to/from SSL.
+     */
+    private int netBufferSize;
+    
+    /**
+     * The maximum amount to grow any buffer for network data
+     */
+    private int netBufferMax;
     
     /**
      * Contains encrypted information produced by the SSLEngine which is
@@ -671,9 +896,10 @@ public class JSSEContext extends TLSContext {
      * to send
      */
     private static enum HackStatus { SENDING_FAKE_LT, DISCARD_FIRST_LT, HACK_DONE }
-    private static HackStatus hack = HackStatus.SENDING_FAKE_LT;
+    private HackStatus hack = HackStatus.SENDING_FAKE_LT;
 
           
+    private final Logger logger_ = Logger.getLogger(this.getClass().getName());
     /**
      * Set up the SSLContext and JavaTrustManager that will be used for this
      * JSSEContext.
@@ -686,25 +912,74 @@ public class JSSEContext extends TLSContext {
      */
     private SSLContext getSSLContext()
     {
+        JavaTrustManager[] tm = null;
+        
         try {
-            JavaTrustManager [] tm = new JavaTrustManager[] { new JavaTrustManager(this)};
-            SSLContext sslContext = SSLContext.getInstance("TLS");
-            sslContext.init(
-                    null,   // KeyManager[]
-                    tm,     // TrustManager[]
-                    null);  // SecureRandom
-            return sslContext;
+            tm = new JavaTrustManager[] { new JavaTrustManager(this)};
         }
         catch (SSLException e) {
             emitError(e, "Couldn't create JavaTrustManager");
         }
-        catch (NoSuchAlgorithmException e) {
-            emitError(e, "Couldn't create SSLContext");
-        }
-        catch (KeyManagementException e) {
-            emitError(e, "Couldn't initialise SSLContext");
-        }
-        return null;
         
+        /*
+         * This is the list of protocols, in preference order, that will be
+         * used to obtain an SSLContext.
+         * 
+         * Note that "TLSv1.2" and "TLSv1.1" appear to be available for
+         * JRE7 but not JRE6
+         * 
+         * Note that the actual protocol negotiated will depend on what 
+         * the server can support: the one offered by the client is "best",
+         * and server may not support that so will use a lesser value
+         * 
+         * The loop will pick the first protocol that returns an SSLContext.
+         * 
+         */
+        final String protocols[] = { 
+                /* These work for JRE 7 but may not be available for JRE 6*/
+                "TLSv1.2", "TLSv1.1", 
+                
+                /* These work for JRE 6 */
+                "TLSv1", "TLS", "SSLv3" };
+        
+        /* Accumulate a list of problems which will be discarded if things
+         * go well, but including in the error if things fail
+         */
+        String problems = "";
+        GeneralSecurityException lastException = null;
+        
+        SSLContext sslContext = null;
+        
+        for (String protocol:protocols) {
+            try {
+                sslContext = SSLContext.getInstance(protocol);
+                
+                /* That worked */
+                try {
+                    sslContext.init(
+                            null,    /* KeyManager[] */
+                            tm,      /* TrustManager[] */
+                            null);   /* SecureRandom */
+                    
+                    return sslContext;
+                }
+                catch (KeyManagementException e) {
+                    lastException = e;
+                    problems += "Could not get SSLContext for " + protocol + " (" + e + ")\n";
+                }
+            }
+            catch (NoSuchAlgorithmException e) {
+                lastException = e;
+                problems += "Could not get SSLContext for " + protocol + " (" + e + ")\n";
+                /* Try the next one */
+            }
+        }
+        
+        /* Fell through without being able to initialise using any
+         * of the protocols
+         */
+        emitError(lastException, problems);
+        return null;
+       
     }
 }
