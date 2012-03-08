@@ -31,6 +31,7 @@ import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
+import com.isode.stroke.tls.CertificateWithKey;
 import com.isode.stroke.tls.PKCS12Certificate;
 import com.isode.stroke.tls.PlatformTLSFactories;
 
@@ -169,8 +170,8 @@ public class CoreClient {
 
             assert (sessionStream_ == null);
             sessionStream_ = new BasicSessionStream(StreamType.ClientStreamType, connection_, payloadParserFactories_, payloadSerializers_, tlsFactories.getTLSContextFactory(), networkFactories.getTimerFactory(), eventLoop_);
-            if (certificate_ != null && !certificate_.isEmpty()) {
-                sessionStream_.setTLSCertificate(new PKCS12Certificate(certificate_, password_));
+            if (certificate_ != null && !certificate_.isNull()) {
+                sessionStream_.setTLSCertificate(certificate_);
             }
             sessionStreamDataReadConnection_ = sessionStream_.onDataRead.connect(new Slot1<String>() {
 
@@ -228,7 +229,7 @@ public class CoreClient {
         }
     }
 
-    public void setCertificate(String certificate) {
+    public void setCertificate(CertificateWithKey certificate) {
         certificate_ = certificate;
     }
 
@@ -454,7 +455,7 @@ public class CoreClient {
     private Connection connection_;
     private BasicSessionStream sessionStream_;
     private ClientSession session_;
-    private String certificate_;
+    private CertificateWithKey certificate_;
     private boolean disconnectRequested_;
     private ClientOptions options;
     private CertificateTrustChecker certificateTrustChecker;

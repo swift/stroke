@@ -10,11 +10,17 @@
  
 package com.isode.stroke.tls.java;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
@@ -23,6 +29,8 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
@@ -34,6 +42,7 @@ import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.CertificateVerificationError.Type;
+import com.isode.stroke.tls.CertificateWithKey;
 import com.isode.stroke.tls.PKCS12Certificate;
 import com.isode.stroke.tls.TLSContext;
 
@@ -110,7 +119,6 @@ public class JSSEContext extends TLSContext {
     }
 
     private void doSetup() throws SSLException {
-
         SSLContext sslContext = getSSLContext();
         
         if (sslContext == null) {
@@ -592,11 +600,81 @@ public class JSSEContext extends TLSContext {
     
     
     @Override
-    public boolean setClientCertificate(PKCS12Certificate cert) {
-        /* TODO: NYI.
-         * It's possible this is going to change as a result of Alexey's work
-         * so will leave for now
+    public boolean setClientCertificate(CertificateWithKey cert) {
+        if (cert == null || cert.isNull()) {
+            emitError(null,cert + " has no useful contents");
+            return false;
+        }
+        if (!(cert instanceof PKCS12Certificate)) {
+            emitError(null,"setClientCertificate can only work with PKCS12 objects");
+            return false;
+        }
+        PKCS12Certificate p12 = (PKCS12Certificate)cert;
+        if (!p12.isPrivateKeyExportable()) {
+            emitError(null,cert + " does not have exportable private key");
+            return false;
+        }
+        
+        /* Get a reference that can be used in any error messages */
+        File p12File = new File(p12.getCertStoreName());
+        
+        /* Attempt to build a usable identity from the P12 file. This set of
+         * operations can result in a variety of exceptions, all of which
+         * mean that the operation is regarded as having failed.
+         * If it works, then "myKeyManager_" will be initialised for use
+         * by any subsequent call to getSSLContext() 
          */
+        KeyStore keyStore = null;
+        KeyManagerFactory kmf = null;
+        
+        try {
+            keyStore = KeyStore.getInstance("PKCS12");
+            kmf = KeyManagerFactory.getInstance("SunX509");
+            
+            /* The PKCS12Certificate object has read the file contents already */
+            ByteArray ba = p12.getData();
+            byte[] p12Bytes = ba.getData();
+                        
+            ByteArrayInputStream bis = new ByteArrayInputStream(p12Bytes);
+            
+            /* Both of the next two calls require that we supply the password */
+            keyStore.load(bis, p12.getPassword());
+            kmf.init(keyStore, p12.getPassword());
+            
+            KeyManager[] keyManagers = kmf.getKeyManagers();
+            if (keyManagers == null || keyManagers.length == 0) {
+                emitError(null, "Unable to get KeyManager for SunX509");
+                return false;
+            }
+            
+            /* Just take the first one (there probably will only be one) */
+            myKeyManager_ = keyManagers[0];
+                        
+            return true;
+            
+        }
+        catch (KeyStoreException e) {
+            emitError(e, "Cannot get PKCS12 KeyStore");
+        }
+        catch (NoSuchAlgorithmException e) {
+            emitError(e, "Unable to initialise KeyStore from " + p12File);
+        }
+        catch (CertificateException e) {
+            emitError(e, "Unable to load certificates from " + p12File);
+        }
+        catch (IOException e) {
+            if (e.getCause() != null && e.getCause() instanceof UnrecoverableKeyException) {
+                emitError(e, "Password incorrect for " +p12File);
+            }
+            else {
+                emitError(e, "Unable to read " + p12File);
+            }
+        }
+        catch (UnrecoverableKeyException e) {
+            emitError(e, "Unable to initialise KeyStore from " + p12File);            
+        }
+        
+        /* Fall through here after any exception */
         return false;
     }
 
@@ -900,6 +978,9 @@ public class JSSEContext extends TLSContext {
 
           
     private final Logger logger_ = Logger.getLogger(this.getClass().getName());
+    
+    private KeyManager myKeyManager_ = null;
+    
     /**
      * Set up the SSLContext and JavaTrustManager that will be used for this
      * JSSEContext.
@@ -949,15 +1030,22 @@ public class JSSEContext extends TLSContext {
         GeneralSecurityException lastException = null;
         
         SSLContext sslContext = null;
-        
         for (String protocol:protocols) {
             try {
                 sslContext = SSLContext.getInstance(protocol);
                 
-                /* That worked */
+                /* If a KeyManager has been set up in setClientCertificate()
+                 * then use it; otherwise the "default" implementation will be 
+                 * used, which will be sufficient for starting TLS with no
+                 * client certificate
+                 */
+                KeyManager[] keyManagers = null;
+                if (myKeyManager_ != null) {
+                    keyManagers = new KeyManager[] { myKeyManager_ };
+                }
                 try {
                     sslContext.init(
-                            null,    /* KeyManager[] */
+                            keyManagers,    /* KeyManager[] */
                             tm,      /* TrustManager[] */
                             null);   /* SecureRandom */
                     

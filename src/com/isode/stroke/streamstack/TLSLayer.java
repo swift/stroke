@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -14,7 +14,7 @@ import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateVerificationError;
-import com.isode.stroke.tls.PKCS12Certificate;
+import com.isode.stroke.tls.CertificateWithKey;
 import com.isode.stroke.tls.TLSContext;
 import com.isode.stroke.tls.TLSContextFactory;
 
@@ -50,7 +50,7 @@ public class TLSLayer extends StreamLayer {
         context.handleDataFromNetwork(data);
     }
 
-    public boolean setClientCertificate(PKCS12Certificate certificate) {
+    public boolean setClientCertificate(CertificateWithKey certificate) {
         return context.setClientCertificate(certificate);
     }
 

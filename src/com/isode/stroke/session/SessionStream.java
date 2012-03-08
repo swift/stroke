@@ -15,6 +15,7 @@ import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateVerificationError;
+import com.isode.stroke.tls.CertificateWithKey;
 import com.isode.stroke.tls.PKCS12Certificate;
 
 public abstract class SessionStream {
@@ -60,7 +61,7 @@ public abstract class SessionStream {
 
     public abstract void resetXMPPParser();
     
-    public void setTLSCertificate(PKCS12Certificate cert) {
+    public void setTLSCertificate(CertificateWithKey cert) {
         certificate = cert;
     }
 
@@ -80,7 +81,7 @@ public abstract class SessionStream {
     public final Signal onTLSEncrypted = new Signal();
     public final Signal1<String> onDataRead = new Signal1<String>();
     public final Signal1<String> onDataWritten = new Signal1<String>();
-    protected PKCS12Certificate getTLSCertificate() {
+    protected CertificateWithKey getTLSCertificate() {
         return certificate;
     }
     
@@ -94,5 +95,5 @@ public abstract class SessionStream {
         "; " + (hasTLSCertificate() ? "has" : "no") +
         " certificate";            
     }
-    private PKCS12Certificate certificate;
+    private CertificateWithKey certificate;
 }

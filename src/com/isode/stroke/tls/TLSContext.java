@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Isode Limited, London, England.
+ * Copyright (c) 2011-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -14,10 +14,10 @@ import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Signal1;
 
 public abstract class TLSContext {
-    //See SSLEngine for real implementation when the time comes
+
     public abstract void connect();
 
-    public abstract boolean setClientCertificate(PKCS12Certificate cert);
+    public abstract boolean setClientCertificate(CertificateWithKey cert);
 
     public abstract void handleDataFromNetwork(ByteArray data);
     public abstract void handleDataFromApplication(ByteArray data);
