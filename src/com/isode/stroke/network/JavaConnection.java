@@ -10,6 +10,7 @@ package com.isode.stroke.network;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
@@ -34,8 +35,8 @@ public class JavaConnection extends Connection implements EventOwner {
 
         public void run() {
             try {
-                InetSocketAddress isa = new InetSocketAddress(address_.getAddress().getInetAddress(),address_.getPort());
-                socketChannel_ = SocketChannel.open(isa);
+                socketChannel_ = SocketChannel.open(
+                        new InetSocketAddress(address_.getAddress().getInetAddress(),address_.getPort()));
                 
                 /* By default, SocketChannels start off in blocking mode, which
                  * isn't what we want
@@ -49,7 +50,7 @@ public class JavaConnection extends Connection implements EventOwner {
             while (!disconnecting_) {
                 while (!writeBuffer_.isEmpty()) {
                     ByteArray data = writeBuffer_.get(0);
-                    ByteBuffer bb = ByteBuffer.wrap(data.getData());
+                    ByteBuffer byteBuffer = ByteBuffer.wrap(data.getData());
                     try {
                         /* Because the SocketChannel is non-blocking, we have to
                          * be prepared to cope with the write operation not
@@ -57,8 +58,8 @@ public class JavaConnection extends Connection implements EventOwner {
                          */
                         boolean finishedWriting = false;
                         while (!finishedWriting && !disconnecting_) {                     
-                            socketChannel_.write(bb);
-                            finishedWriting = (bb.remaining() == 0);
+                            socketChannel_.write(byteBuffer);
+                            finishedWriting = (byteBuffer.remaining() == 0);
                             if (!finishedWriting) {
                                 try {
                                     /* Give the output buffer a chance to empty */
@@ -78,18 +79,18 @@ public class JavaConnection extends Connection implements EventOwner {
 
                 ByteArray data = new ByteArray();
                 try {
-                    ByteBuffer bb = ByteBuffer.allocate(1024);
+                    ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
                    
-                    int count = socketChannel_.read(bb);
+                    int count = socketChannel_.read(byteBuffer);
                     while (count > 0) {
-                        bb.flip();
-                        byte[] result = new byte[bb.remaining()];
-                        bb.get(result);
-                        bb.compact();
+                        byteBuffer.flip();
+                        byte[] result = new byte[byteBuffer.remaining()];
+                        byteBuffer.get(result);
+                        byteBuffer.compact();
                         for (int i=0; i<result.length; i++) {
                             data.append(result[i]);
                         }
-                        count = socketChannel_.read(bb);
+                        count = socketChannel_.read(byteBuffer);
                    }
                    if (count == -1) {
                        /* socketChannel input has reached "end-of-stream", which
@@ -164,7 +165,6 @@ public class JavaConnection extends Connection implements EventOwner {
 
     @Override
     public void connect(HostAddressPort address) {
-        hostAddressPort_ = address;
         worker_ = new Worker(address);
         Thread workerThread = new Thread(worker_);
         workerThread.setDaemon(true);
@@ -183,7 +183,14 @@ public class JavaConnection extends Connection implements EventOwner {
 
     @Override
     public HostAddressPort getLocalAddress() {
-        return hostAddressPort_;
+        if (socketChannel_ == null) {
+            return null;
+        }
+        Socket socket = socketChannel_.socket();
+        if (socket == null) {
+            return null;
+        }
+        return new HostAddressPort(new HostAddress(socket.getLocalAddress()), socket.getLocalPort());        
     }
     
     @Override
@@ -198,6 +205,5 @@ public class JavaConnection extends Connection implements EventOwner {
     private boolean disconnecting_ = false;
     private SocketChannel socketChannel_;
     private Worker worker_;
-    private HostAddressPort hostAddressPort_;
 
 }
