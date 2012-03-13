@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 
@@ -173,7 +173,7 @@ public class StrokeGUI extends javax.swing.JFrame {
                 thisObject.handleMessageReceived(p1);
             }
         });
-        client_.onError.connect(new Slot1<ClientError>() {
+        client_.onDisconnected.connect(new Slot1<ClientError>() {
 
             public void call(ClientError p1) {
                 thisObject.handleClientError(p1);

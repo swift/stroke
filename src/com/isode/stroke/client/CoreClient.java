@@ -8,6 +8,7 @@
  */
 package com.isode.stroke.client;
 
+import com.isode.stroke.base.NotNull;
 import com.isode.stroke.elements.Message;
 import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.Stanza;
@@ -32,7 +33,6 @@ import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.CertificateWithKey;
-import com.isode.stroke.tls.PKCS12Certificate;
 import com.isode.stroke.tls.PlatformTLSFactories;
 
 /**
@@ -159,11 +159,10 @@ public class CoreClient {
         if (connectorConnectFinishedConnection_ != null) {
             connectorConnectFinishedConnection_.disconnect();
         }
+
         connector_ = null;
         if (connection == null) {
-            if (!disconnectRequested_) {
-                onError.emit(new ClientError(ClientError.Type.ConnectionError));
-            }
+            onDisconnected.emit(disconnectRequested_ ? null : new ClientError(ClientError.Type.ConnectionError));
         } else {
             assert (connection_ == null);
             connection_ = connection;
@@ -193,6 +192,7 @@ public class CoreClient {
             switch (options.useTLS) {
                 case UseTLSWhenAvailable:
                     session_.setUseTLS(ClientSession.UseTLS.UseTLSWhenAvailable);
+                    session_.setCertificateTrustChecker(certificateTrustChecker);
                     break;
                 case NeverUseTLS:
                     session_.setUseTLS(ClientSession.UseTLS.NeverUseTLS);
@@ -232,6 +232,20 @@ public class CoreClient {
     public void setCertificate(CertificateWithKey certificate) {
         certificate_ = certificate;
     }
+    
+    /**
+     * Sets the certificate trust checker. If a server presents a certificate
+     * which does not conform to the requirements of RFC 6120, then the
+     * trust checker, if configured, will be called. If the trust checker 
+     * says the certificate is trusted, then connecting will proceed; if 
+     * not, the connection will end with an error.
+     *
+     * @param checker a CertificateTrustChecker that will be called when 
+     * the server sends a TLS certificate that does not validate. 
+     */
+    public void setCertificateTrustChecker(CertificateTrustChecker checker) {
+        certificateTrustChecker = checker;
+    }
 
     private void handleSessionFinished(com.isode.stroke.base.Error error) {
         sessionFinishedConnection_.disconnect();
@@ -245,8 +259,8 @@ public class CoreClient {
         connection_.disconnect();
         connection_ = null;
 
+        ClientError clientError = null;
         if (error != null) {
-            ClientError clientError = null;
             if (error instanceof ClientSession.Error) {
                 ClientSession.Error actualError = (ClientSession.Error) error;
                 switch (actualError.type) {
@@ -277,6 +291,7 @@ public class CoreClient {
                     case TLSClientCertificateError:
                         clientError = new ClientError(ClientError.Type.ClientCertificateError);
                         break;
+                    /* Note: no case clause for "StreamError" */
                 }
             } else if (error instanceof SessionStream.Error) {
                 SessionStream.Error actualError = (SessionStream.Error) error;
@@ -335,9 +350,12 @@ public class CoreClient {
                         break;
                 }
             }
-            assert clientError != null;
-            onError.emit(clientError);
+            /* If "error" was non-null, we expect to be able to derive 
+             * a non-null "clientError".
+             */  
+            NotNull.exceptIfNull(clientError,"clientError");
         }
+        onDisconnected.emit(clientError);
     }
 
     private void handleNeedCredentials() {
@@ -409,9 +427,12 @@ public class CoreClient {
 
     /**
      * The user should add a listener to this signal, which will be called when
-     * a stream or connection error (not stanza error) occurs.
+     * the client was disconnected from tne network.
+     * 
+     * <p>If the disconnection was due to a non-recoverable error, the type
+     * of error will be passed as a parameter.
      */
-    public final Signal1<ClientError> onError = new Signal1<ClientError>();
+    public final Signal1<ClientError> onDisconnected = new Signal1<ClientError>();
 
     /**
      * The user should add a listener to this signal, which will be called when
