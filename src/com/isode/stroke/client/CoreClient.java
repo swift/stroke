@@ -30,6 +30,7 @@ import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.CertificateWithKey;
@@ -403,6 +404,25 @@ public class CoreClient {
     public boolean isAvailable() {
         return stanzaChannel_.isAvailable();
     }
+    
+    /**
+     * Determine whether the underlying session is encrypted with TLS
+     * @return true if the session is initialized and encrypted with TLS,
+     * false otherwise.
+     */
+    public boolean isSessionTLSEncrypted() {
+        return (sessionStream_ != null && sessionStream_.isTLSEncrypted());
+    }
+    
+    /**
+     * If the session is initialized and encrypted with TLS, then the
+     * certificate presented by the peer is returned
+     * @return the peer certificate, if one is available, otherwise null.
+     */
+    public Certificate getSessionCertificate() {
+        return (sessionStream_ == null ? null : sessionStream_.getPeerCertificate());
+    }
+
 
     /**
      * @return JID of the client, will never be null. After the session was
