@@ -32,7 +32,9 @@
 
   <target name="compile" depends="init"
         description="compile the source " >
-    <javac srcdir="${src}" destdir="${build}" classpathref="classpath" debug="${compile.debug}"/>
+    <javac srcdir="${src}" destdir="${build}" classpathref="classpath" debug="${compile.debug}">
+        <compilerarg line="-encoding utf-8"/>
+    </javac>
   </target>
 
   <target name="dist" depends="compile"
@@ -48,6 +50,7 @@
 <target name="compile-tests" depends="dist"
         description="compile the test sources " >
     <javac srcdir="${src.tests}" destdir="${src.tests}" debug="${compile.debug}">
+        <compilerarg line="-encoding utf-8"/>
         <classpath>
             <pathelement location="${jar}"/>
             <pathelement location="${JUNIT_JAR}"/>
