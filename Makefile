@@ -11,7 +11,7 @@ distclean: clean
 
 .PHONY : dist/lib/stroke.jar
 dist/lib/stroke.jar: third-party/xpp/xpp.jar third-party/jzlib/jzlib.jar third-party/icu4j.jar
-	ant -Dxpp-dir=third-party/xpp -Djzlib-dir=third-party/jzlib
+	ant -Dxpp-dir=third-party/xpp -Djzlib-dir=third-party/jzlib -Dicu4j-dir=third-party/
 
 third-party/xpp/xpp.jar:
 	mkdir -p third-party/xpp
