@@ -420,7 +420,7 @@ public class CoreClient {
      * @return the peer certificate, if one is available, otherwise null.
      */
     public Certificate getSessionCertificate() {
-        return (sessionStream_ == null ? null : sessionStream_.getPeerCertificate());
+        return (isSessionTLSEncrypted() ? sessionStream_.getPeerCertificate() : null);
     }
 
 
