@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -16,6 +16,7 @@ public class ErrorPayload extends Payload {
     private Condition condition_;
     private Type type_;
     private String text_;
+    private Payload payload_;
     
     public enum Type { Cancel, Continue, Modify, Auth, Wait };
 
@@ -84,5 +85,13 @@ public class ErrorPayload extends Payload {
 
     public String getText() {
         return text_;
+    }
+    
+    public void setPayload(Payload payload) {
+        this.payload_ = payload;
+    }
+    
+    public Payload getPayload() {
+        return payload_;
     }
 }

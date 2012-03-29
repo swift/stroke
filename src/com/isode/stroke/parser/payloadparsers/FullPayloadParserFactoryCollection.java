@@ -23,7 +23,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	addFactory(new GenericPayloadParserFactory<BodyParser>("body", BodyParser.class));
 	//addFactory(new GenericPayloadParserFactory<SubjectParser>("subject", SubjectParser.class));
 	//addFactory(new GenericPayloadParserFactory<PriorityParser>("priority", PriorityParser.class));
-	//addFactory(new ErrorParserFactory(this)));
+	addFactory(new ErrorParserFactory(this));
 	addFactory(new SoftwareVersionParserFactory());
 	//addFactory(new StorageParserFactory());
 	addFactory(new RosterParserFactory());
