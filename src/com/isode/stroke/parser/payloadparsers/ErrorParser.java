@@ -10,7 +10,6 @@
 package com.isode.stroke.parser.payloadparsers;
 
 import com.isode.stroke.elements.ErrorPayload;
-import com.isode.stroke.elements.Payload;
 import com.isode.stroke.parser.AttributeMap;
 import com.isode.stroke.parser.GenericPayloadParser;
 import com.isode.stroke.parser.PayloadParser;
