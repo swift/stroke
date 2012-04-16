@@ -10,8 +10,6 @@ package com.isode.stroke.jid;
 
 import com.ibm.icu.text.StringPrep;
 import com.ibm.icu.text.StringPrepParseException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * JID helper.
@@ -32,7 +30,7 @@ import java.util.logging.Logger;
  * <p>
  * This is an immutable class.
  */
-public class JID {
+public class JID implements Comparable<JID> {
     public enum CompareType {
         WithResource, WithoutResource
     };
@@ -50,7 +48,8 @@ public class JID {
 
     /**
      * Create a JID using the JID(String) constructor.
-     * @param jid String formatted JID.
+     * @param jid String formatted JID, not null
+     * @return Jabber ID, not null
      */
     public static JID fromString(final String jid) {
         return new JID(jid);
@@ -191,6 +190,7 @@ public class JID {
 
     /**
      * Is a bare JID, i.e. has no resource part.
+     * @return true if the resource part of JID is null, false if not
      */
     public boolean isBare() {
         return resource_ == null;
@@ -237,6 +237,36 @@ public class JID {
         boolean resourceMatch = (resource1 == null && resource2 == null) || (resource1 != null && resource1.equals(resource2));
         return nodeMatch && domainMatch && resourceMatch;
     }
+    
+    /**
+     * Compare two Jabber IDs by either including the resource part or
+     * excluding it
+     * @param o other JID to which this JID should be compared, can be null
+     * @param compareType comparison type
+     * @return 0 if equal, 1 if other JID is greater or -1 if this JID is greater
+     */
+    public int compare(final JID o, CompareType compareType) {
+        if(this == o) return 0;
+        if(o == null) return 1;
+        if (!node_ .equals(o.node_)) { 
+            return node_.compareTo(o.node_); 
+        }        
+        if (!domain_ .equals(o.domain_)) { 
+            return domain_.compareTo(o.domain_); 
+        }
+        if (compareType == CompareType.WithResource) {
+            String res1 = getResource();
+            String res2 = o.getResource();
+            if(res1 != null && res2 != null) {
+                return res1.compareTo(res2);
+            }
+            if (res1 == null) { return -1; }
+            if (res2 == null) { return 1; }
+        }
+        return 0;
+
+    }
+
 
     @Override
     public int hashCode() {
@@ -245,5 +275,10 @@ public class JID {
         hash = 73 * hash + (this.domain_ != null ? this.domain_.hashCode() : 0);
         hash = 73 * hash + (this.resource_ != null ? this.resource_.hashCode() : 0);
         return hash;
+    }
+
+    @Override
+    public int compareTo(JID o) {
+        return compare(o, CompareType.WithResource);
     }
 }
