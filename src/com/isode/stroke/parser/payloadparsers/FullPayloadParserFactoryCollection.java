@@ -46,9 +46,18 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	//addFactory(new PrivateStorageParserFactory(this));
 	//addFactory(new ChatStateParserFactory());
 	//addFactory(new DelayParserFactory());
-	//addFactory(new MUCUserPayloadParserFactory());
-	//addFactory(new NicknameParserFactory());
-        
+	addFactory(new MUCUserPayloadParserFactory(this));
+	addFactory(new MUCOwnerPayloadParserFactory(this));
+	addFactory(new GenericPayloadParserFactory<MUCInvitationPayloadParser>("x", 
+	        "jabber:x:conference",MUCInvitationPayloadParser.class));
+	addFactory(new GenericPayloadParserFactory<MUCAdminPayloadParser>("query", 
+	        "http://jabber.org/protocol/muc#admin",MUCAdminPayloadParser.class));
+	addFactory(new GenericPayloadParserFactory<MUCDestroyPayloadParser>("destroy", 
+	        "http://jabber.org/protocol/muc#user",MUCDestroyPayloadParser.class));
+	addFactory(new GenericPayloadParserFactory<MUCDestroyPayloadParser>("destroy", 
+	        "http://jabber.org/protocol/muc#owner",MUCDestroyPayloadParser.class));
+	
+	//addFactory(new NicknameParserFactory());        
 
         PayloadParserFactory defaultFactory = new RawXMLPayloadParserFactory();
         setDefaultFactory(defaultFactory);
