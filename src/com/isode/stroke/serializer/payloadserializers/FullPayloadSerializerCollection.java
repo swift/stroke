@@ -8,6 +8,12 @@
  */
 package com.isode.stroke.serializer.payloadserializers;
 
+import com.isode.stroke.serializer.payloadserializers.MUCAdminPayloadSerializer;
+import com.isode.stroke.serializer.payloadserializers.MUCDestroyPayloadSerializer;
+import com.isode.stroke.serializer.payloadserializers.MUCInvitationPayloadSerializer;
+import com.isode.stroke.serializer.payloadserializers.MUCOwnerPayloadSerializer;
+import com.isode.stroke.serializer.payloadserializers.MUCPayloadSerializer;
+import com.isode.stroke.serializer.payloadserializers.MUCUserPayloadSerializer;
 import com.isode.stroke.serializer.PayloadSerializerCollection;
 
 public class FullPayloadSerializerCollection extends PayloadSerializerCollection {
@@ -21,9 +27,12 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	//addSerializer(new PrioritySerializer());
 	addSerializer(new ErrorSerializer());
 	addSerializer(new RosterSerializer());
-	//addSerializer(new MUCPayloadSerializer());
-	//addSerializer(new MUCUserPayloadSerializer());
-	//addSerializer(new MUCOwnerPayloadSerializer(this));
+	addSerializer(new MUCPayloadSerializer());
+	addSerializer(new MUCDestroyPayloadSerializer());
+	addSerializer(new MUCAdminPayloadSerializer());
+	addSerializer(new MUCInvitationPayloadSerializer());
+	addSerializer(new MUCOwnerPayloadSerializer(this));
+	addSerializer(new MUCUserPayloadSerializer(this));
 	addSerializer(new SoftwareVersionSerializer());
 	//addSerializer(new StatusSerializer());
 	//addSerializer(new StatusShowSerializer());
