@@ -25,7 +25,7 @@ public class GenericPayloadParserFactory<T extends PayloadParser> implements Pay
     }
 
     public boolean canParse(final String element, final String ns, final AttributeMap attributes) {
-        return element.equals(tag_) && xmlns_.equals(ns);
+        return (tag_.isEmpty() ? true : tag_.equals(element)) && (xmlns_.isEmpty() ? true : xmlns_.equals(ns));
     }
 
     public final PayloadParser createPayloadParser() {
