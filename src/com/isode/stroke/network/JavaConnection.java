@@ -118,6 +118,7 @@ public class JavaConnection extends Connection implements EventOwner {
             } catch (IOException ex) {
                 /* Do we need to return an error if we're already trying to close? */
             }
+            handleDisconnected(null);
         }
 
         private void handleConnected(final boolean error) {
@@ -129,11 +130,14 @@ public class JavaConnection extends Connection implements EventOwner {
         }
 
         private void handleDisconnected(final Error error) {
-            eventLoop_.postEvent(new Callback() {
-                public void run() {
-                    onDisconnected.emit(error);
-                }
-            });
+            if (!disconnected_) {
+                disconnected_ = true;
+                eventLoop_.postEvent(new Callback() {
+                    public void run() {
+                        onDisconnected.emit(error);
+                    }
+                });
+            }
         }
 
         private void handleDataRead(final ByteArray data) {
@@ -203,6 +207,7 @@ public class JavaConnection extends Connection implements EventOwner {
     
     private final EventLoop eventLoop_;
     private boolean disconnecting_ = false;
+    private boolean disconnected_ = false;
     private SocketChannel socketChannel_;
     private Worker worker_;
 
