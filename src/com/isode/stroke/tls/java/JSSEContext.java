@@ -149,12 +149,7 @@ public class JSSEContext extends TLSContext {
          * amount.
          */
         appBufferSize = sslEngine.getSession().getApplicationBufferSize();
-        
-        /*
-         * Don't grow application buffers bigger than this
-         */
-        appBufferMax = (appBufferSize * 10);
-        
+                
         /* "A SSLEngine using this session may generate SSL/TLS packets of
          * any size up to and including the value returned by this method"
          * 
@@ -164,10 +159,6 @@ public class JSSEContext extends TLSContext {
          * "handleDataFromNetwork()".
          */        
         netBufferSize = sslEngine.getSession().getPacketBufferSize();
-        /*
-         * Don't grow network buffers bigger than this
-         */
-        netBufferMax = (netBufferSize * 10);
         
         /* All buffers are normally in "write" mode. Access to all of them
          * must be synchronized
@@ -251,7 +242,7 @@ public class JSSEContext extends TLSContext {
                     
                     switch (status) {
                     case BUFFER_OVERFLOW :
-                        unwrappedReceived = enlargeBuffer("unwrappedReceived",unwrappedReceived,appBufferSize, appBufferMax);
+                        unwrappedReceived = getLargerBuffer("unwrappedReceived",unwrappedReceived,appBufferSize);
                         unwrapDone = false;
                         break;
                         
@@ -375,8 +366,8 @@ public class JSSEContext extends TLSContext {
                     
                     
                     if (status == Status.BUFFER_OVERFLOW) {
-                        wrappedToSend = enlargeBuffer(
-                                "wrappedToSend", wrappedToSend, netBufferSize, netBufferMax);
+                        wrappedToSend = getLargerBuffer(
+                                "wrappedToSend", wrappedToSend, netBufferSize);
                     }
                     else {
                         wrapDone = true;
@@ -499,29 +490,23 @@ public class JSSEContext extends TLSContext {
     
     /**
      * Create a ByteBuffer that is a copy of an existing buffer, but with a
-     * larger capacity.
+     * larger capacity. Note that no limits are imposed on the size of the
+     * new buffer, and so repeated calls to this method will eventually
+     * exhaust memory.
      * @param bufferName the name of the buffer, for logging purposes
      * @param bb the original ByteBuffer
      * @param growBy how many bytes to grow the buffer by
-     * @param maxSize the maximum size that the output buffer is allowed to be
      * @return a ByteBuffer that will have been enlarged by <em>growBy</em>
-     * @throws BufferOverflowException if adding <em>growBy</em> would take
-     * the buffer's size to greater than <em>maxSize</em>
      */
-    private ByteBuffer enlargeBuffer(
-            String bufferName, ByteBuffer bb, int growBy, int maxSize) 
-    throws SSLException {
+    private ByteBuffer getLargerBuffer(
+            String bufferName, ByteBuffer bb, int growBy) {
         int newSize = bb.capacity() + growBy;
-        if (newSize <= maxSize) {
-            logger_.fine("Buffer " + bufferName + 
-                    " growing from " + bb.capacity() + " to " + newSize);
-            ByteBuffer temp = ByteBuffer.allocate(newSize);
-            bb.flip();
-            temp.put(bb);
-            return temp;
-        }
-        throw new SSLException("Buffer for " + bufferName + 
-                " exceeded maximum size of " + maxSize);
+        logger_.fine("Buffer " + bufferName + 
+                " growing from " + bb.capacity() + " to " + newSize);
+        ByteBuffer temp = ByteBuffer.allocate(newSize);
+        bb.flip();
+        temp.put(bb);
+        return temp;
     }
     
     /**
@@ -704,18 +689,10 @@ public class JSSEContext extends TLSContext {
             synchronized(recvMutex) {
                 int chunkSize = encryptedReceived.remaining();
                 if (chunkSize == 0) {
-                    try {
-                        encryptedReceived = enlargeBuffer(
-                                "encryptedReceived", encryptedReceived, netBufferSize, netBufferMax);
-                        /* We know that this will now give us a non-zero value */
-                        chunkSize = encryptedReceived.remaining();
-                    }
-                    catch (SSLException e) {
-                        /* Enlarging buffer failed */
-                        emitError(e, "encryptedReceived buffer reached maximum size");
-                        return;                        
-                    }
-                    
+                    encryptedReceived = getLargerBuffer(
+                            "encryptedReceived", encryptedReceived, netBufferSize);
+                    /* We know that this will now give us a non-zero value */
+                    chunkSize = encryptedReceived.remaining();                    
                 }
                 if (remaining <= chunkSize) {
                     /* There's room in the buffer for all remaining bytes */
@@ -772,17 +749,10 @@ public class JSSEContext extends TLSContext {
         while (remaining > 0) {
             synchronized(sendMutex) {
                 int chunkSize = plainToSend.remaining();
-                if (chunkSize == 0) {
-                    try {
-                        plainToSend = enlargeBuffer("plainToSend", plainToSend, appBufferSize, appBufferMax);
-                        /* We know that this will now give us a non-zero value */
-                        chunkSize = plainToSend.remaining();
-                    }
-                    catch (SSLException e) {
-                        /* Enlarging buffer failed */
-                        emitError(e, "plainToSend buffer reached maximum size");
-                        return;
-                    }
+                if (chunkSize == 0) {              
+                    plainToSend = getLargerBuffer("plainToSend", plainToSend, appBufferSize);
+                    /* We know that this will now give us a non-zero value */
+                    chunkSize = plainToSend.remaining();
                 }
                 if (remaining <= chunkSize) {
                     /* There's room in the buffer for all remaining bytes */
@@ -915,21 +885,11 @@ public class JSSEContext extends TLSContext {
      * message), the buffer will be increased by this amount.
      */
     private int appBufferSize;
-    
-    /**
-     * The maximum amount to grow any buffer for application data
-     */
-    private int appBufferMax;
-    
+        
     /** 
      * Initial size of buffer used for encrypted data to/from SSL.
      */
     private int netBufferSize;
-    
-    /**
-     * The maximum amount to grow any buffer for network data
-     */
-    private int netBufferMax;
     
     /**
      * Contains encrypted information produced by the SSLEngine which is
