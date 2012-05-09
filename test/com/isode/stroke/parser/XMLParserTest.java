@@ -31,11 +31,7 @@ public class XMLParserTest {
     }
 
     private void join(XMLParser parser) {
-        try {
-            ((PullXMLParser) parser).getParserThread().join(300);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(XMLParserTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
+       
     }
 
     @Test

@@ -16,12 +16,14 @@
   <property name="main-class" value="com.isode.stroke.examples.gui.StrokeGUI"/>
   <property name="compile.debug" value="true"/>
   <property name="testsuiteclass" value="com.isode.stroke.unittest.StrokeTestSuite" />
-  <property name="xpp-dir" value="../third-party/xpp"/>
+  <property name="aalto-dir" value="../third-party/aalto"/>
+  <property name="stax2-dir" value="../third-party/stax2"/>
   <property name="jzlib-dir" value="../third-party/jzlib"/>
   <property name="icu4j-dir" value="../third-party/icu4j"/>
 
   <path id="classpath">
-    <fileset dir="${xpp-dir}" includes="xpp.jar"/>
+    <fileset dir="${aalto-dir}" includes="aalto-xml.jar"/>
+    <fileset dir="${stax2-dir}" includes="stax2-api.jar"/>
     <fileset dir="${jzlib-dir}" includes="jzlib.jar"/>
     <fileset dir="${icu4j-dir}" includes="icu4j.jar"/>
   </path>
@@ -93,9 +95,9 @@
      sourcepath="${src}"
      destdir="${doc}"
      windowtitle="Stroke">
-     <classpath> 
+     <!--<classpath>
        <fileset dir="${xpp-dir}" includes="xpp.jar"/>
-     </classpath>
+     </classpath>-->
       <link href="http://docs.oracle.com/javase/6/docs/api/"/>
    </javadoc>
   </target>
