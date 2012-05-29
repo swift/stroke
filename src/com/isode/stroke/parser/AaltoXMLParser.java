@@ -47,6 +47,7 @@ class AaltoXMLParser extends XMLParser {
             inputFeeder.feedInput(xmlBytes, 0, xmlBytes.length);
         } catch (XMLStreamException ex) {
             error = true;
+            /* This is an unexpected error */
             throw new IllegalStateException(ex);
         }
 
@@ -75,7 +76,7 @@ class AaltoXMLParser extends XMLParser {
             }
         } catch (XMLStreamException e) {
             error = true;
-            throw new IllegalStateException(e);
+            /* This type of error (illegal XML) is ~expected */
         }
         if (type == XMLStreamConstants.END_DOCUMENT) {
             try {
