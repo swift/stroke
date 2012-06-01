@@ -22,7 +22,7 @@ class StanzaAckSerializer extends GenericElementSerializer<StanzaAck> {
         StanzaAck stanzaAck = (StanzaAck) element;
         assert stanzaAck.isValid();
         XMLElement result = new XMLElement("a", "urn:xmpp:sm:2");
-        result.setAttribute("h", Double.toString(stanzaAck.getHandledStanzasCount()));
+        result.setAttribute("h", Long.toString(stanzaAck.getHandledStanzasCount()));
         return result.serialize();
     }
 }
