@@ -32,8 +32,9 @@ public class PlatformDomainNameServiceQuery extends DomainNameServiceQuery imple
             Hashtable env = new Hashtable();
             env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
             env.put("java.naming.provider.url", "dns:");
+            DirContext ctx = null;
             try {
-                DirContext ctx = new InitialDirContext(env);
+                ctx = new InitialDirContext(env);
                 Attributes attrs = ctx.getAttributes(service, new String[]{"SRV"});
                 Attribute attribute = attrs.get("SRV");
                 for (int i = 0; attribute != null && i < attribute.size(); i++) {
@@ -58,7 +59,15 @@ public class PlatformDomainNameServiceQuery extends DomainNameServiceQuery imple
                     onResult.emit(results);
                 }
             });
-
+            //close the context as otherwise this will lead to open sockets in
+            //CLOSE_WAIT condition
+            if(ctx != null) {
+                try {
+                    ctx.close();
+                } catch (NamingException e) {
+                    //at least we try to close the context
+                }
+            }
         }
     }
 
