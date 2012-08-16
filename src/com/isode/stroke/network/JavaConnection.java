@@ -35,90 +35,94 @@ public class JavaConnection extends Connection implements EventOwner {
 
         public void run() {
             try {
-                socketChannel_ = SocketChannel.open(
-                        new InetSocketAddress(address_.getAddress().getInetAddress(),address_.getPort()));
-                
-                /* By default, SocketChannels start off in blocking mode, which
-                 * isn't what we want
-                 */
-                socketChannel_.configureBlocking(false);
-            } catch (IOException ex) {
-                handleConnected(true);
-                return;
-            }
-            handleConnected(false);
-            while (!disconnecting_) {
-                while (!writeBuffer_.isEmpty()) {
-                    ByteArray data = writeBuffer_.get(0);
-                    ByteBuffer byteBuffer = ByteBuffer.wrap(data.getData());
-                    try {
-                        /* Because the SocketChannel is non-blocking, we have to
-                         * be prepared to cope with the write operation not
-                         * consuming all of the data
-                         */
-                        boolean finishedWriting = false;
-                        while (!finishedWriting && !disconnecting_) {                     
-                            socketChannel_.write(byteBuffer);
-                            finishedWriting = (byteBuffer.remaining() == 0);
-                            if (!finishedWriting) {
-                                try {
-                                    /* Give the output buffer a chance to empty */
-                                    Thread.sleep(100);
-                                }
-                                catch (InterruptedException e) {
-                                    /* Perhaps someone has set disconnecting_ */
-                                }
-                            }
-                        }
-                    } catch (IOException ex) {
-                        disconnecting_ = true;
-                        handleDisconnected(Error.WriteError);                    
-                    }
-                    writeBuffer_.remove(0);
-                }
-
-                ByteArray data = new ByteArray();
                 try {
-                    ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-                   
-                    int count = socketChannel_.read(byteBuffer);
-                    while (count > 0) {
-                        byteBuffer.flip();
-                        byte[] result = new byte[byteBuffer.remaining()];
-                        byteBuffer.get(result);
-                        byteBuffer.compact();
-                        for (int i=0; i<result.length; i++) {
-                            data.append(result[i]);
-                        }
-                        count = socketChannel_.read(byteBuffer);
-                   }
-                   if (count == -1) {
-                       /* socketChannel input has reached "end-of-stream", which
-                        * we regard as meaning that the socket has been closed 
-                        */
-                       throw new IOException("socketChannel_.read returned -1");
-                   }
+                    socketChannel_ = SocketChannel.open(
+                            new InetSocketAddress(address_.getAddress().getInetAddress(),address_.getPort()));                
+                    /* By default, SocketChannels start off in blocking mode, which
+                     * isn't what we want
+                     */
+                    socketChannel_.configureBlocking(false);
                 } catch (IOException ex) {
-                    handleDisconnected(Error.ReadError);
+                    handleConnected(true);
                     return;
                 }
-                
-                if (!data.isEmpty()) {
-                    handleDataRead(data);
-                }
+                handleConnected(false);
+                while (!disconnecting_) {
+                    while (!writeBuffer_.isEmpty()) {
+                        ByteArray data = writeBuffer_.get(0);
+                        ByteBuffer byteBuffer = ByteBuffer.wrap(data.getData());
+                        try {
+                            /* Because the SocketChannel is non-blocking, we have to
+                             * be prepared to cope with the write operation not
+                             * consuming all of the data
+                             */
+                            boolean finishedWriting = false;
+                            while (!finishedWriting && !disconnecting_) {                     
+                                socketChannel_.write(byteBuffer);
+                                finishedWriting = (byteBuffer.remaining() == 0);
+                                if (!finishedWriting) {
+                                    try {
+                                        /* Give the output buffer a chance to empty */
+                                        Thread.sleep(100);
+                                    }
+                                    catch (InterruptedException e) {
+                                        /* Perhaps someone has set disconnecting_ */
+                                    }
+                                }
+                            }
+                        } catch (IOException ex) {
+                            disconnecting_ = true;
+                            handleDisconnected(Error.WriteError);                    
+                        }
+                        writeBuffer_.remove(0);
+                    }
 
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    /* We've been woken up, probably to force us to do something.*/
+                    ByteArray data = new ByteArray();
+                    try {
+                        ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+
+                        int count = socketChannel_.read(byteBuffer);
+                        while (count > 0) {
+                            byteBuffer.flip();
+                            byte[] result = new byte[byteBuffer.remaining()];
+                            byteBuffer.get(result);
+                            byteBuffer.compact();
+                            for (int i=0; i<result.length; i++) {
+                                data.append(result[i]);
+                            }
+                            count = socketChannel_.read(byteBuffer);
+                        }
+                        if (count == -1) {
+                            /* socketChannel input has reached "end-of-stream", which
+                             * we regard as meaning that the socket has been closed 
+                             */
+                            throw new IOException("socketChannel_.read returned -1");
+                        }
+                    } catch (IOException ex) {
+                        handleDisconnected(Error.ReadError);
+                        return;
+                    }
+
+                    if (!data.isEmpty()) {
+                        handleDataRead(data);
+                    }
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException ex) {
+                        /* We've been woken up, probably to force us to do something.*/
+                    }
+                }            
+                handleDisconnected(null);
+            }finally {
+                if(socketChannel_ != null) {
+                    try {
+                        socketChannel_.close();
+                    } catch (IOException ex) {
+                        /* Do we need to return an error if we're already trying to close? */
+                    }
                 }
             }
-            try {
-                socketChannel_.close();
-            } catch (IOException ex) {
-                /* Do we need to return an error if we're already trying to close? */
-            }
-            handleDisconnected(null);
         }
 
         private void handleConnected(final boolean error) {
