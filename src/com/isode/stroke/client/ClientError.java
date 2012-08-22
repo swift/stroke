@@ -15,7 +15,7 @@ public class ClientError {
 
     private final Type type_;
 
-    enum Type {
+    public enum Type {
 
         UnknownError,
         DomainNameResolveError,
