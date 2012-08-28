@@ -29,6 +29,7 @@ import com.isode.stroke.elements.FormField.TextSingleFormField;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.parser.AttributeMap;
 import com.isode.stroke.parser.GenericPayloadParser;
+import java.util.ArrayList;
 
 /**
  * Parser for {@link Form} element.
@@ -211,7 +212,8 @@ public class FormParser extends GenericPayloadParser<Form> {
     private static final int FieldLevel = 2;
 
     private int level_;
-    private String currentText_ = "";
+    //private String currentText_ = "";
+    private ArrayList<String> texts_ = new ArrayList<String>();
     private String currentOptionLabel_ = "";
     private FieldParseHelper<?> currentFieldParseHelper_ = null;
 
@@ -243,9 +245,9 @@ public class FormParser extends GenericPayloadParser<Form> {
             form.setType(Type.getType(type));
         } else if (level_ == PayloadLevel) {
             if (element.equals(Form.FORM_ELEMENT_TITLE)) {
-                currentText_ = "";
+                texts_ = new ArrayList();
             } else if (element.equals(Form.FORM_ELEMENT_INSTRUCTIONS)) {
-                currentText_ = "";
+                texts_ = new ArrayList();
             } else if (element.equals(Form.FORM_ELEMENT_FIELD)) {
                 String type = attributes
                         .getAttribute(FormField.FORM_FIELD_ATTRIBUTE_TYPE);
@@ -299,7 +301,7 @@ public class FormParser extends GenericPayloadParser<Form> {
                 }
             }
         } else if ((level_ == FieldLevel) && (currentFieldParseHelper_ != null)) {
-            currentText_ = "";
+            texts_ = new ArrayList();
             if (element.equals(FormField.FORM_FIELD_ELEMENT_OPTION)) {
                 currentOptionLabel_ = attributes
                         .getAttribute(FormField.FORM_FIELD_ATTRIBUTE_OPTION_LABEL);
@@ -324,17 +326,17 @@ public class FormParser extends GenericPayloadParser<Form> {
             if (element.equals(Form.FORM_ELEMENT_TITLE)) {
                 String currentTitle = form.getTitle();
                 if (currentTitle.isEmpty()) {
-                    form.setTitle(currentText_);
+                    form.setTitle(getCurrentText());
                 } else {
-                    form.setTitle(currentTitle + "\n" + currentText_);
+                    form.setTitle(currentTitle + "\n" + getCurrentText());
                 }
             } else if (element.equals(Form.FORM_ELEMENT_INSTRUCTIONS)) {
                 String currentInstructions = form.getInstructions();
                 if (currentInstructions.isEmpty()) {
-                    form.setInstructions(currentText_);
+                    form.setInstructions(getCurrentText());
                 } else {
                     form.setInstructions(currentInstructions + "\n"
-                            + currentText_);
+                            + getCurrentText());
                 }
             } else if (element.equals(Form.FORM_ELEMENT_FIELD)) {
                 if (currentFieldParseHelper_ != null) {
@@ -347,14 +349,26 @@ public class FormParser extends GenericPayloadParser<Form> {
                 currentFieldParseHelper_.getField().setRequired(true);
             } else if (element.equals(FormField.FORM_FIELD_ELEMENT_DESC)) {
                 currentFieldParseHelper_.getField()
-                        .setDescription(currentText_);
+                        .setDescription(getCurrentText());
             } else if (element.equals(FormField.FORM_FIELD_ELEMENT_OPTION)) {
                 currentFieldParseHelper_.getField().addOption(
-                        new Option(currentOptionLabel_, currentText_));
+                        new Option(currentOptionLabel_, getCurrentText()));
             } else if (element.equals(FormField.FORM_FIELD_ELEMENT_VALUE)) {
-                currentFieldParseHelper_.addValue(currentText_);
+                currentFieldParseHelper_.addValue(getCurrentText());
             }
         }
+    }
+
+    private String getCurrentText() {
+        int size = 0;
+        for (String text : texts_) {
+            size += text.length();
+        }
+        StringBuilder builder = new StringBuilder(size);
+        for (String text : texts_) {
+            builder.append(text);
+        }
+        return builder.toString();
     }
 
     public void handleCharacterData(String text) {
@@ -362,13 +376,13 @@ public class FormParser extends GenericPayloadParser<Form> {
             throw new NullPointerException("'text' must not be null");
         }
 
-        currentText_ += text;
+        texts_.add(text);
     }
 
     @Override
     public String toString() {
         return FormParser.class.getSimpleName() + "\nlevel: " + level_
-                + "\ncurrent text: " + currentText_
+                + "\ncurrent text: " + getCurrentText()
                 + "\ncurrent option label: " + currentOptionLabel_;
     }
 }
