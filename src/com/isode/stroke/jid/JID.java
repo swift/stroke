@@ -218,12 +218,12 @@ public class JID implements Comparable<JID> {
     }
 
     @Override
-    public boolean equals(final Object otherObject) {
-        if (otherObject == null || getClass() != otherObject.getClass()) {
-            return false;
-        }
+    public boolean equals(final Object otherObject) {        
         if (otherObject == this) {
             return true;
+        }
+        if (!(otherObject instanceof JID)) {
+            return false;
         }
         JID other = (JID)otherObject;
         String node1 = getNode();
