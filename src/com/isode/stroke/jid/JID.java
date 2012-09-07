@@ -207,18 +207,18 @@ public class JID implements Comparable<JID> {
     @Override
     public String toString() {
         String string = new String();
-	if (node_.length()!=0) {
-		string += node_ + "@";
-	}
-	string += domain_;
-	if (!isBare()) {
-		string += "/" + resource_;
-	}
-	return string;
+        if (node_.length()!=0) {
+            string += node_ + "@";
+        }
+        string += domain_;
+        if (!isBare()) {
+            string += "/" + resource_;
+        }
+        return string;
     }
 
     @Override
-    public boolean equals(final Object otherObject) {        
+    public boolean equals(final Object otherObject) {
         if (otherObject == this) {
             return true;
         }
@@ -237,7 +237,7 @@ public class JID implements Comparable<JID> {
         boolean resourceMatch = (resource1 == null && resource2 == null) || (resource1 != null && resource1.equals(resource2));
         return nodeMatch && domainMatch && resourceMatch;
     }
-    
+
     /**
      * Compare two Jabber IDs by either including the resource part or
      * excluding it
@@ -248,11 +248,11 @@ public class JID implements Comparable<JID> {
     public int compare(final JID o, CompareType compareType) {
         if(this == o) return 0;
         if(o == null) return 1;
-        if (!node_ .equals(o.node_)) { 
-            return node_.compareTo(o.node_); 
-        }        
-        if (!domain_ .equals(o.domain_)) { 
-            return domain_.compareTo(o.domain_); 
+        if (!node_ .equals(o.node_)) {
+            return node_.compareTo(o.node_);
+        }
+        if (!domain_ .equals(o.domain_)) {
+            return domain_.compareTo(o.domain_);
         }
         if (compareType == CompareType.WithResource) {
             String res1 = getResource();
