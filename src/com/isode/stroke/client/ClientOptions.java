@@ -13,7 +13,7 @@ package com.isode.stroke.client;
  */
 public class ClientOptions {
 
-    enum UseTLS {
+    public enum UseTLS {
 
         NeverUseTLS,
         UseTLSWhenAvailable
