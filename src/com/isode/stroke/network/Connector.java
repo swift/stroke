@@ -10,6 +10,7 @@ package com.isode.stroke.network;
 
 import com.isode.stroke.network.DomainNameServiceQuery.Result;
 import com.isode.stroke.signals.Signal1;
+import com.isode.stroke.signals.Signal2;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
@@ -19,8 +20,8 @@ import java.util.Collection;
 
 public class Connector {
 
-    public static Connector create(String hostname, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory, int defaultPort) {
-        return new Connector(hostname, resolver, connectionFactory, timerFactory, defaultPort);
+    public static Connector create(String hostname, int port, boolean doServiceLookups, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory) {
+        return new Connector(hostname, port, doServiceLookups, resolver, connectionFactory, timerFactory);
     }
 
     public void setTimeoutMilliseconds(int milliseconds) {
@@ -32,42 +33,51 @@ public class Connector {
         assert serviceQuery == null;
         assert timer == null;
         queriedAllServices = false;
-        serviceQuery = resolver.createServiceQuery("_xmpp-client._tcp." + hostname);
-        serviceQuery.onResult.connect(new Slot1<Collection<DomainNameServiceQuery.Result>>() {
-            public void call(Collection<Result> p1) {
-                handleServiceQueryResult(p1);
-            }
-        });
-        if (timeoutMilliseconds > 0) {
-            timer = timerFactory.createTimer(timeoutMilliseconds);
-            timer.onTick.connect(new Slot() {
-                public void call() {
-                    handleTimeout();
+        if (doServiceLookups) {
+            serviceQuery = resolver.createServiceQuery("_xmpp-client._tcp." + hostname);
+            serviceQuery.onResult.connect(new Slot1<Collection<DomainNameServiceQuery.Result>>() {
+                public void call(Collection<Result> p1) {
+                    handleServiceQueryResult(p1);
                 }
             });
-            timer.start();
+            if (timeoutMilliseconds > 0) {
+                timer = timerFactory.createTimer(timeoutMilliseconds);
+                timer.onTick.connect(new Slot() {
+                    public void call() {
+                        handleTimeout();
+                    }
+                });
+                timer.start();
+            }
+            serviceQuery.run();
         }
-        serviceQuery.run();
+        else {
+            queryAddress(hostname);
+        }
     }
 
     public void stop() {
         finish(null);
     }
 
-    public final Signal1<Connection> onConnectFinished = new Signal1<Connection>();
+    public final Signal2<Connection, com.isode.stroke.base.Error> onConnectFinished = new Signal2<Connection, com.isode.stroke.base.Error>();
 
-    private Connector(String hostname, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory, int defaultPort) {
+    private Connector(String hostname,int port, boolean doServiceLookups, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory) {
         this.hostname = hostname;
         this.resolver = resolver;
         this.connectionFactory = connectionFactory;
         this.timerFactory = timerFactory;
-        this.defaultPort = defaultPort;
+        this.port = port;
+        this.doServiceLookups = doServiceLookups;
     }
 
     private void handleServiceQueryResult(Collection<Result> result) {
         serviceQueryResults = new ArrayList<Result>();
         serviceQueryResults.addAll(result);
         serviceQuery = null;
+        if (!serviceQueryResults.isEmpty()) {
+            foundSomeDNS = true;
+        }
         tryNextServiceOrFallback();
     }
 
@@ -75,15 +85,16 @@ public class Connector {
       	//std::cout << "Connector::handleAddressQueryResult(): Start" << std::endl;
 	addressQuery = null;
 	if (error != null || addresses.isEmpty()) {
-		if (!serviceQueryResults.isEmpty()) {
-			serviceQueryResults.remove(0);
-		}
-		tryNextServiceOrFallback();
+            if (!serviceQueryResults.isEmpty()) {
+                serviceQueryResults.remove(0);
+            }
+            tryNextServiceOrFallback();
 	}
 	else {
-		addressQueryResults = new ArrayList<HostAddress>();
-                addressQueryResults.addAll(addresses);
-		tryNextAddress();
+            foundSomeDNS = true;
+            addressQueryResults = new ArrayList<HostAddress>();
+            addressQueryResults.addAll(addresses);
+            tryNextAddress();
 	}
     }
 
@@ -129,12 +140,12 @@ public class Connector {
 		HostAddress address = addressQueryResults.get(0);
 		addressQueryResults.remove(0);
 
-		int port = defaultPort;
+		int connectPort = (port == -1) ? 5222 : port;
 		if (!serviceQueryResults.isEmpty()) {
-			port = serviceQueryResults.get(0).port;
+			connectPort = serviceQueryResults.get(0).port;
 		}
 
-		tryConnect(new HostAddressPort(address, port));
+		tryConnect(new HostAddressPort(address, connectPort));
 	}
     }
 
@@ -189,7 +200,8 @@ public class Connector {
 		currentConnectionConnectFinishedConnection.disconnect();
 		currentConnection = null;
 	}
-	onConnectFinished.emit(connection);
+
+	onConnectFinished.emit(connection, (connection != null || foundSomeDNS) ? null : new DomainNameResolveError());
     }
 
     private void handleTimeout() {
@@ -216,5 +228,7 @@ public class Connector {
     private boolean queriedAllServices = true;
     private Connection currentConnection;
     private SignalConnection currentConnectionConnectFinishedConnection;
-    private final int defaultPort;
+    private final int port;
+    private final boolean doServiceLookups;
+    private boolean foundSomeDNS = false;
 }

@@ -26,7 +26,7 @@ public class PayloadsParserTester implements XMLParserClient {
 
     public PayloadsParserTester(EventLoop eventLoop) {
         level = 0;
-        xmlParser = PlatformXMLParserFactory.createXMLParser(this, eventLoop);
+        xmlParser = PlatformXMLParserFactory.createXMLParser(this);
     }
 
     public boolean parse(String data) {

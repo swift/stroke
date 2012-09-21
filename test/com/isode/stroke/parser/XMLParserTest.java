@@ -27,7 +27,7 @@ public class XMLParserTest {
     }
 
     private XMLParser parser() {
-        return PlatformXMLParserFactory.createXMLParser(client_, new SimpleEventLoop());
+        return PlatformXMLParserFactory.createXMLParser(client_);
     }
 
     private void join(XMLParser parser) {

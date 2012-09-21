@@ -70,7 +70,7 @@ public class ConnectDisconnect {
         DummyEventLoop eventLoop = new DummyEventLoop();
         JavaNetworkFactories factories = new JavaNetworkFactories(eventLoop);
 
-        client = new CoreClient(eventLoop, jid, password, factories);
+        client = new CoreClient(jid, password, factories);
         client.onConnected.connect(new Slot() {
 
             public void call() {

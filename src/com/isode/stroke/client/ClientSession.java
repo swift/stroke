@@ -104,14 +104,18 @@ public class ClientSession {
 
     public enum UseTLS {
         NeverUseTLS,
-        UseTLSWhenAvailable
+        UseTLSWhenAvailable,
+        RequireTLS
     }
 
     private ClientSession(JID jid, SessionStream stream) {
         localJID = jid;
         state = State.Initial;
         this.stream = stream;
-        allowPLAINOverNonTLS = true; /* FIXME: false */
+        allowPLAINOverNonTLS = false;
+        useStreamCompression = true;
+        useTLS = UseTLS.UseTLSWhenAvailable;
+        useAcks = true;
         needSessionStart = false;
         needResourceBind = false;
         needAcking = false;
@@ -136,6 +140,10 @@ public class ClientSession {
 
     public void setUseTLS(UseTLS use) {
         useTLS = use;
+    }
+
+    public void setUseAcks(boolean use) {
+        useAcks = use;
     }
 
     public boolean getStreamManagementEnabled() {
@@ -291,11 +299,14 @@ public class ClientSession {
                 return;
             }
 
-            if (streamFeatures.hasStartTLS() && stream.supportsTLSEncryption()) {
+            if (streamFeatures.hasStartTLS() && stream.supportsTLSEncryption() && !UseTLS.NeverUseTLS.equals(useTLS)) {
                 state = State.WaitingForEncrypt;
                 stream.writeElement(new StartTLSRequest());
             }
-            else if (false && streamFeatures.hasCompressionMethod("zlib")) { /*FIXME: test and enable!*/
+            else if (UseTLS.RequireTLS.equals(useTLS) && !stream.isTLSEncrypted()) {
+                finishSession(Error.Type.NoSupportedAuthMechanismsError);
+            }
+            else if (false && useStreamCompression && streamFeatures.hasCompressionMethod("zlib")) { /*FIXME: test and enable!*/
                 state = State.Compressing;
                 stream.writeElement(new CompressRequest("zlib"));
             }
@@ -344,7 +355,7 @@ public class ClientSession {
                 stream.setWhitespacePingEnabled(true);
                 needSessionStart = streamFeatures.hasSession();
                 needResourceBind = streamFeatures.hasResourceBind();
-                needAcking = streamFeatures.hasStreamManagement();
+                needAcking = streamFeatures.hasStreamManagement() && useAcks;
                 if (!needResourceBind) {
                     // Resource binding is a MUST
                     finishSession(Error.Type.ResourceBindError);
@@ -605,6 +616,7 @@ public class ClientSession {
     private boolean allowPLAINOverNonTLS;
     private boolean useStreamCompression;
     private UseTLS useTLS;
+    private boolean useAcks;
     private boolean needSessionStart;
     private boolean needResourceBind;
     private boolean needAcking;

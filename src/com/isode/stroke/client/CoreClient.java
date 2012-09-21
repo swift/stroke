@@ -9,6 +9,7 @@
 package com.isode.stroke.client;
 
 import com.isode.stroke.base.NotNull;
+import com.isode.stroke.client.ClientSession.UseTLS;
 import com.isode.stroke.elements.Message;
 import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.Stanza;
@@ -18,6 +19,7 @@ import com.isode.stroke.jid.JID;
 import com.isode.stroke.network.Connection;
 import com.isode.stroke.network.ConnectionFactory;
 import com.isode.stroke.network.Connector;
+import com.isode.stroke.network.DomainNameResolveError;
 import com.isode.stroke.network.NetworkFactories;
 import com.isode.stroke.parser.payloadparsers.FullPayloadParserFactoryCollection;
 import com.isode.stroke.queries.IQRouter;
@@ -29,6 +31,7 @@ import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.signals.Slot2;
 import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
@@ -119,47 +122,76 @@ public class CoreClient {
     delete stanzaChannel_;
     }*/
 
+
     /**
      * Connect using the standard XMPP connection rules (i.e. SRV then A/AAAA).
      * 
      * @param o Client options to use in the connection, must not be null
      */
     public void connect(ClientOptions o) {
-        options = o;
-        connect(jid_.getDomain(), 5222);
-    }
-
-    /**
-     * Connect to the specified host, overriding the standard lookup rules for the JID.
-     *
-     * Internal method, do not use.
-     * 
-     * @param host Host to connect to, non-null.
-     * @param port Default port to use if SRV fails.
-     */
-    public void connect(String host, int port) {
-        options = new ClientOptions();
+        forceReset();
         disconnectRequested_ = false;
         assert (connector_ == null);
         /* FIXME: Port Proxies */
-        connector_ = Connector.create(host, networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory(), port);
-        connectorConnectFinishedConnection_ = connector_.onConnectFinished.connect(new Slot1<Connection>() {
-            public void call(Connection p1) {
-                handleConnectorFinished(p1);
+        String host = o.manualHostname.isEmpty() ? jid_.getDomain() : o.manualHostname;
+        int port = o.manualPort;
+        connector_ = Connector.create(host, port, o.manualHostname.isEmpty(), networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory());
+        connectorConnectFinishedConnection_ = connector_.onConnectFinished.connect(new Slot2<Connection, com.isode.stroke.base.Error>() {
+            public void call(Connection p1, com.isode.stroke.base.Error p2) {
+                handleConnectorFinished(p1, p2);
             }
         });
         connector_.setTimeoutMilliseconds(60 * 1000);
         connector_.start();
     }
 
-    void handleConnectorFinished(Connection connection) {
-        if (connectorConnectFinishedConnection_ != null) {
-            connectorConnectFinishedConnection_.disconnect();
+    private void bindSessionToStream() {
+        session_ = ClientSession.create(jid_, sessionStream_);
+        session_.setCertificateTrustChecker(certificateTrustChecker);
+        session_.setUseStreamCompression(options.useStreamCompression);
+        session_.setAllowPLAINOverNonTLS(options.allowPLAINWithoutTLS);
+        switch (options.useTLS) {
+            case UseTLSWhenAvailable:
+                session_.setUseTLS(ClientSession.UseTLS.UseTLSWhenAvailable);
+                session_.setCertificateTrustChecker(certificateTrustChecker);
+                break;
+            case NeverUseTLS:
+                session_.setUseTLS(ClientSession.UseTLS.NeverUseTLS);
+                break;
+            case RequireTLS:
+                session_.setUseTLS(ClientSession.UseTLS.RequireTLS);
+                break;
         }
+        session_.setUseAcks(options.useAcks);
+        stanzaChannel_.setSession(session_);
+        sessionFinishedConnection_ = session_.onFinished.connect(new Slot1<com.isode.stroke.base.Error>() {
 
-        connector_ = null;
+            public void call(com.isode.stroke.base.Error p1) {
+                handleSessionFinished(p1);
+            }
+        });
+        sessionNeedCredentialsConnection_ = session_.onNeedCredentials.connect(new Slot() {
+
+            public void call() {
+                handleNeedCredentials();
+            }
+        });
+        session_.start();
+    }
+
+    void handleConnectorFinished(Connection connection, com.isode.stroke.base.Error error) {
+        resetConnector();
+        
         if (connection == null) {
-            onDisconnected.emit(disconnectRequested_ ? null : new ClientError(ClientError.Type.ConnectionError));
+            ClientError clientError = null;
+            if (!disconnectRequested_) {
+                if (error instanceof DomainNameResolveError) {
+                    clientError = new ClientError(ClientError.Type.DomainNameResolveError);
+                } else {
+                    clientError = new ClientError(ClientError.Type.ConnectionError);
+                }
+            }
+            onDisconnected.emit(clientError);
         } else {
             assert (connection_ == null);
             connection_ = connection;
@@ -183,34 +215,11 @@ public class CoreClient {
                 }
             });
 
-            session_ = ClientSession.create(jid_, sessionStream_);
-            session_.setCertificateTrustChecker(certificateTrustChecker);
-            session_.setUseStreamCompression(options.useStreamCompression);
-            switch (options.useTLS) {
-                case UseTLSWhenAvailable:
-                    session_.setUseTLS(ClientSession.UseTLS.UseTLSWhenAvailable);
-                    session_.setCertificateTrustChecker(certificateTrustChecker);
-                    break;
-                case NeverUseTLS:
-                    session_.setUseTLS(ClientSession.UseTLS.NeverUseTLS);
-                   	break;
-            }
-            stanzaChannel_.setSession(session_);
-            sessionFinishedConnection_ = session_.onFinished.connect(new Slot1<com.isode.stroke.base.Error>() {
-
-                public void call(com.isode.stroke.base.Error p1) {
-                    handleSessionFinished(p1);
-                }
-            });
-            sessionNeedCredentialsConnection_ = session_.onNeedCredentials.connect(new Slot() {
-
-                public void call() {
-                    handleNeedCredentials();
-                }
-            });
-            session_.start();
+            bindSessionToStream();
         }
     }
+
+
 
     /**
      * Close the stream and disconnect from the server.
@@ -419,6 +428,26 @@ public class CoreClient {
         return (isSessionTLSEncrypted() ? sessionStream_.getPeerCertificate() : null);
     }
 
+    private void resetConnector() {
+        if (connectorConnectFinishedConnection_ != null) {
+            connectorConnectFinishedConnection_.disconnect();
+        }
+        connector_ = null;
+    }
+
+    private void resetSession() {
+        session_.onFinished.disconnectAll();
+        session_.onNeedCredentials.disconnectAll();
+
+        sessionStream_.onDataRead.disconnectAll();
+        sessionStream_.onDataWritten.disconnectAll();
+
+        if (connection_ != null) {
+            connection_.disconnect();
+        }
+        sessionStream_ = null;
+        connection_ = null;
+    }
 
     /**
      * @return JID of the client, will never be null. After the session was
@@ -432,6 +461,16 @@ public class CoreClient {
         } else {
             return jid_;
         }
+    }
+
+    private void forceReset() {
+        if (connector_ != null) {
+            resetConnector();
+        }
+        if (sessionStream_ != null || connection_ != null) {
+            resetSession();
+        }
+
     }
     
     @Override

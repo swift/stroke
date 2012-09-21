@@ -111,7 +111,7 @@ public abstract class Session {
     protected abstract void handleStreamStart(ProtocolHeader header);
 
     protected void initializeStreamStack() {
-        xmppLayer = new XMPPLayer(payloadParserFactories, payloadSerializers, StreamType.ClientStreamType, eventLoop);
+        xmppLayer = new XMPPLayer(payloadParserFactories, payloadSerializers, StreamType.ClientStreamType);
         xmppLayer.onStreamStart.connect(new Slot1<ProtocolHeader>() {
 
             public void call(ProtocolHeader header) {

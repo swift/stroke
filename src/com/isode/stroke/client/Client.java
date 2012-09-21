@@ -46,8 +46,8 @@ public class Client extends CoreClient {
      * @param networkFactories An implementation of network interaction, must
      *            not be null.
      */
-    public  Client(EventLoop eventLoop, JID jid, String password, NetworkFactories networkFactories) {
-        super(eventLoop,jid, password, networkFactories);
+    public  Client(JID jid, String password, NetworkFactories networkFactories) {
+        super(jid, password, networkFactories);
         stanzaChannelPresenceSender = new StanzaChannelPresenceSender(getStanzaChannel());
         directedPresenceSender = new DirectedPresenceSender(stanzaChannelPresenceSender);
 
