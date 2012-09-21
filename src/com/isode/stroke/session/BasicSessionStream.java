@@ -36,8 +36,7 @@ public class BasicSessionStream extends SessionStream {
             PayloadParserFactoryCollection payloadParserFactories,
             PayloadSerializerCollection payloadSerializers,
             TLSContextFactory tlsContextFactory,
-            TimerFactory timerFactory,
-            EventLoop eventLoop) {
+            TimerFactory timerFactory) {
         available = false;
         this.connection = connection;
         this.payloadParserFactories = payloadParserFactories;
@@ -52,7 +51,7 @@ public class BasicSessionStream extends SessionStream {
         this.tlsLayer = null;
         this.whitespacePingLayer = null;
 
-        xmppLayer = new XMPPLayer(payloadParserFactories, payloadSerializers, streamType, eventLoop);
+        xmppLayer = new XMPPLayer(payloadParserFactories, payloadSerializers, streamType);
         xmppLayer.onStreamStart.connect(new Slot1<ProtocolHeader>() {
 
             public void call(ProtocolHeader p1) {

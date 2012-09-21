@@ -9,13 +9,10 @@
 
 package com.isode.stroke.parser;
 
-import com.isode.stroke.eventloop.EventLoop;
 
 public class PlatformXMLParserFactory {
-    /**
-     * Unlike Swiften, this may be threaded, and therefore needs an eventloop.
-     */
-    public static XMLParser createXMLParser(XMLParserClient client, EventLoop eventLoop) {
-        return new AaltoXMLParser(client, eventLoop);
+
+    public static XMLParser createXMLParser(XMLParserClient client) {
+        return new AaltoXMLParser(client);
     }
 }

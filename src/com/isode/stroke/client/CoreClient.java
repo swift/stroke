@@ -19,7 +19,6 @@ import com.isode.stroke.network.Connection;
 import com.isode.stroke.network.ConnectionFactory;
 import com.isode.stroke.network.Connector;
 import com.isode.stroke.network.NetworkFactories;
-import com.isode.stroke.network.PlatformDomainNameResolver;
 import com.isode.stroke.parser.payloadparsers.FullPayloadParserFactoryCollection;
 import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.serializer.payloadserializers.FullPayloadSerializerCollection;
@@ -51,7 +50,6 @@ public class CoreClient {
     private SignalConnection sessionFinishedConnection_;
     private SignalConnection sessionNeedCredentialsConnection_;
     private SignalConnection connectorConnectFinishedConnection_;
-    private final EventLoop eventLoop_;
 
     /**
      * Constructor.
@@ -69,14 +67,12 @@ public class CoreClient {
      * @param networkFactories An implementation of network interaction, must
      *            not be null.
      */
-    public CoreClient(EventLoop eventLoop, JID jid, String password, NetworkFactories networkFactories) {
+    public CoreClient(JID jid, String password, NetworkFactories networkFactories) {
         jid_ = jid;
         password_ = password;
         disconnectRequested_ = false;
-        eventLoop_ = eventLoop;
         this.networkFactories = networkFactories;
         this.certificateTrustChecker = null;
-        resolver_ = new PlatformDomainNameResolver(eventLoop);
         stanzaChannel_ = new ClientSessionStanzaChannel();
         stanzaChannel_.onMessageReceived.connect(new Slot1<Message>() {
 
@@ -169,7 +165,7 @@ public class CoreClient {
             connection_ = connection;
 
             assert (sessionStream_ == null);
-            sessionStream_ = new BasicSessionStream(StreamType.ClientStreamType, connection_, payloadParserFactories_, payloadSerializers_, tlsFactories.getTLSContextFactory(), networkFactories.getTimerFactory(), eventLoop_);
+            sessionStream_ = new BasicSessionStream(StreamType.ClientStreamType, connection_, payloadParserFactories_, payloadSerializers_, tlsFactories.getTLSContextFactory(), networkFactories.getTimerFactory());
             if (certificate_ != null && !certificate_.isNull()) {
                 sessionStream_.setTLSCertificate(certificate_);
             }
@@ -484,7 +480,6 @@ public class CoreClient {
      * Called when a stanza has been received and acked by a server supporting XEP-0198.
      */
     public final Signal1<Stanza> onStanzaAcked = new Signal1<Stanza>();
-    private PlatformDomainNameResolver resolver_;
     private JID jid_;
     private String password_;
     private ClientSessionStanzaChannel stanzaChannel_;

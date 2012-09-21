@@ -21,12 +21,10 @@ class AaltoXMLParser extends XMLParser {
 
     private final Logger logger_ = Logger.getLogger(this.getClass().getName());
     private boolean error_ = false;
-    private final EventLoop eventLoop_;
     private final AsyncXMLStreamReader xmlReader_ = new InputFactoryImpl().createAsyncXMLStreamReader();
 
-    public AaltoXMLParser(XMLParserClient client, EventLoop eventLoop) {
+    public AaltoXMLParser(XMLParserClient client) {
         super(client);
-        eventLoop_ = eventLoop;
     }
 
 

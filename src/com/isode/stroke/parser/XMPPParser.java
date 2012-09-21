@@ -23,10 +23,10 @@ public class XMPPParser implements XMLParserClient {
     private boolean parseErrorOccurred_ = false;
     private Logger logger_ = Logger.getLogger(this.getClass().getName());
 
-    public XMPPParser(XMPPParserClient parserClient, PayloadParserFactoryCollection payloadParserFactories, EventLoop eventLoop) {
+    public XMPPParser(XMPPParserClient parserClient, PayloadParserFactoryCollection payloadParserFactories) {
         client_ = parserClient;
         payloadParserFactories_ = payloadParserFactories;
-        xmlParser_ = PlatformXMLParserFactory.createXMLParser(this, eventLoop);
+        xmlParser_ = PlatformXMLParserFactory.createXMLParser(this);
     }
 
     public boolean parse(String data) {

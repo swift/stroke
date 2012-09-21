@@ -33,14 +33,12 @@ public class XMPPLayer implements HighLayer, XMPPParserClient {
     public XMPPLayer(
             PayloadParserFactoryCollection payloadParserFactories,
             PayloadSerializerCollection payloadSerializers,
-            StreamType streamType,
-            EventLoop eventLoop) {
+            StreamType streamType) {
         payloadParserFactories_ = payloadParserFactories;
         payloadSerializers_ = payloadSerializers;
         resetParserAfterParse_ = false;
-        eventLoop_ = eventLoop;
         inParser_ = false;
-        xmppParser_ = new XMPPParser(this, payloadParserFactories_, eventLoop_);
+        xmppParser_ = new XMPPParser(this, payloadParserFactories_);
         xmppSerializer_ = new XMPPSerializer(payloadSerializers_, streamType);
     }
 
@@ -100,7 +98,7 @@ public class XMPPLayer implements HighLayer, XMPPParserClient {
     }
 
     private void doResetParser() {
-        xmppParser_ = new XMPPParser(this, payloadParserFactories_, eventLoop_);
+        xmppParser_ = new XMPPParser(this, payloadParserFactories_);
         resetParserAfterParse_ = false;
     }
     
