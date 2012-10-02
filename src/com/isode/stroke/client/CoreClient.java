@@ -132,6 +132,7 @@ public class CoreClient {
         forceReset();
         disconnectRequested_ = false;
         assert (connector_ == null);
+        options = o;
         /* FIXME: Port Proxies */
         String host = (o.manualHostname == null || o.manualHostname.isEmpty()) ? jid_.getDomain() : o.manualHostname;
         int port = o.manualPort;
