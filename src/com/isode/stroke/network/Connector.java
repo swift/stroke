@@ -33,6 +33,8 @@ public class Connector {
         assert serviceQuery == null;
         assert timer == null;
         queriedAllServices = false;
+        serviceQueryResults = new ArrayList<Result>();
+        
         if (doServiceLookups) {
             serviceQuery = resolver.createServiceQuery("_xmpp-client._tcp." + hostname);
             serviceQuery.onResult.connect(new Slot1<Collection<DomainNameServiceQuery.Result>>() {
