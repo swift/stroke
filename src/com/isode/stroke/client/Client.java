@@ -8,13 +8,13 @@
  */
 package com.isode.stroke.client;
 
-import com.isode.stroke.eventloop.EventLoop;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.muc.MUCManager;
 import com.isode.stroke.muc.MUCRegistry;
 import com.isode.stroke.network.NetworkFactories;
 import com.isode.stroke.presence.DirectedPresenceSender;
 import com.isode.stroke.presence.StanzaChannelPresenceSender;
+import com.isode.stroke.queries.responders.SoftwareVersionResponder;
 
 /**
  * Provides the core functionality for writing XMPP client software.
@@ -29,6 +29,7 @@ public class Client extends CoreClient {
     private MUCRegistry mucRegistry;
     private DirectedPresenceSender directedPresenceSender;
     private StanzaChannelPresenceSender stanzaChannelPresenceSender;
+    private SoftwareVersionResponder softwareVersionResponder;
 
     /**
      * Constructor.
@@ -53,6 +54,9 @@ public class Client extends CoreClient {
 
         mucRegistry = new MUCRegistry();
         mucManager = new MUCManager(getStanzaChannel(), getIQRouter(), directedPresenceSender, mucRegistry);
+
+        softwareVersionResponder = new SoftwareVersionResponder(getIQRouter());
+        softwareVersionResponder.start();
     }
 
     /**
@@ -69,5 +73,14 @@ public class Client extends CoreClient {
      */
     public MUCRegistry getMUCRegistry() {
         return mucRegistry;
+    }
+    
+    /**
+     * Sets the software version of the client.                  
+     *
+     * This will be used to respond to version queries from other entities.
+     */
+    public void setSoftwareVersion(final String name, final String version, final String os) {
+        softwareVersionResponder.setVersion(name, version, os);
     }
 }

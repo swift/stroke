@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2012, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -15,5 +15,5 @@ import com.isode.stroke.elements.IQ;
  * Thing reacting to IQs.
  */
 public interface IQHandler {
-    boolean handleIQ(IQ iq);
+    public boolean handleIQ(IQ iq);
 }

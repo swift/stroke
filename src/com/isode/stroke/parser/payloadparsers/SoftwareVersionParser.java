@@ -9,14 +9,14 @@
 
 package com.isode.stroke.parser.payloadparsers;
 
-import com.isode.stroke.elements.Version;
+import com.isode.stroke.elements.SoftwareVersion;
 import com.isode.stroke.parser.AttributeMap;
 import com.isode.stroke.parser.GenericPayloadParser;
 
-public class SoftwareVersionParser extends GenericPayloadParser<Version> {
+public class SoftwareVersionParser extends GenericPayloadParser<SoftwareVersion> {
 
     public SoftwareVersionParser() {
-        super(new Version());
+        super(new SoftwareVersion());
     }
 
     public void handleStartElement(String element, String ns, AttributeMap attributes) {

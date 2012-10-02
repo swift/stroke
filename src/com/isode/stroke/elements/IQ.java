@@ -46,6 +46,15 @@ public class IQ extends Stanza {
         iq.addPayload(payload);
         return iq;
     }
+    
+    public static IQ createResult(JID to, JID from, String id, Payload payload) {
+        IQ iq = new IQ(Type.Result);
+        iq.setTo(to);
+        iq.setFrom(from);
+        iq.setID(id);
+        iq.addPayload(payload);
+        return iq;
+    }
 
     public static IQ createError(JID to, String id, ErrorPayload.Condition condition, ErrorPayload.Type type) {
         IQ iq = new IQ(Type.Error);
@@ -54,7 +63,28 @@ public class IQ extends Stanza {
         iq.addPayload(new ErrorPayload(condition, type));
         return iq;
     }
+    
+    public static IQ createError(JID to, String id, ErrorPayload.Condition condition, ErrorPayload.Type type, Payload payload) {
+        IQ iq = new IQ(Type.Error);
+        iq.setTo(to);
+        iq.setID(id);
+        ErrorPayload errorPayload = new ErrorPayload(condition, type);
+        errorPayload.setPayload(payload);
+        iq.addPayload(errorPayload);
+        return iq;
+    }
 
+    public static IQ createError(JID to, JID from, String id, ErrorPayload.Condition condition, ErrorPayload.Type type, Payload payload) {
+        IQ iq = new IQ(Type.Error);
+        iq.setTo(to);
+        iq.setFrom(from);
+        iq.setID(id);
+        ErrorPayload errorPayload = new ErrorPayload(condition, type);
+        errorPayload.setPayload(payload);
+        iq.addPayload(errorPayload);
+        return iq;
+    }
+    
     @Override
     public String toString() {
         return super.toString() + " Type=" + type_; 

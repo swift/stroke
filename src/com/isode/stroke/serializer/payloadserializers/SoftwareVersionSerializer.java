@@ -9,17 +9,17 @@
 
 package com.isode.stroke.serializer.payloadserializers;
 
-import com.isode.stroke.elements.Version;
+import com.isode.stroke.elements.SoftwareVersion;
 import com.isode.stroke.serializer.GenericPayloadSerializer;
 
-public class SoftwareVersionSerializer extends GenericPayloadSerializer<Version>{
+public class SoftwareVersionSerializer extends GenericPayloadSerializer<SoftwareVersion>{
 
     public SoftwareVersionSerializer() {
-        super(Version.class);
+        super(SoftwareVersion.class);
     }
 
     @Override
-    protected String serializePayload(Version version) {
+    protected String serializePayload(SoftwareVersion version) {
         StringBuilder result = new StringBuilder();
         result.append("<query xmlns=\"jabber:iq:version\">");
         if (version.getName() != null && version.getName().length() > 0) {

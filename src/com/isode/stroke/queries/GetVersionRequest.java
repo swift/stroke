@@ -10,15 +10,15 @@
 package com.isode.stroke.queries;
 
 import com.isode.stroke.elements.IQ.Type;
-import com.isode.stroke.elements.Version;
+import com.isode.stroke.elements.SoftwareVersion;
 import com.isode.stroke.jid.JID;
 
-public class GetVersionRequest extends GenericRequest<Version> {
+public class GetVersionRequest extends GenericRequest<SoftwareVersion> {
     public GetVersionRequest(JID target, IQRouter iqRouter) {
-        super(Type.Get, target, new Version(), iqRouter);
+        super(Type.Get, target, new SoftwareVersion(), iqRouter);
     }
 
     public GetVersionRequest(IQRouter iqRouter) {
-        super(Type.Get, new JID(), new Version(), iqRouter);
+        super(Type.Get, new JID(), new SoftwareVersion(), iqRouter);
     }
 }

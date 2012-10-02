@@ -10,18 +10,18 @@
 package com.isode.stroke.elements;
 
 
-public class Version extends Payload {
+public class SoftwareVersion extends Payload {
     private String name_;
     private String version_;
     private String os_;
 
-    public Version(final String name, final String version, final String os) {
+    public SoftwareVersion(final String name, final String version, final String os) {
         name_ = name;
         version_ = version;
         os_ = os;
     }
 
-    public Version() {
+    public SoftwareVersion() {
         
     }
 
