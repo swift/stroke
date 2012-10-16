@@ -3,13 +3,20 @@ Stroke
 Stroke is a port of the C++ Swift library ( http://swift.im/swiften/ )
 The source is available from the Git repository at http://swift.im/git/stroke/
 
-It depends on the XmlPullParser from http://www.extreme.indiana.edu/xgws/xsoap/xpp/mxp1/index.html. This is passed to Ant in the xpp-dir parameter. The passed folder should contain the XPP jar called xpp.jar (i.e. with no version numbering in the filename).
+For XML parsing, Stroke depends on the Aalto XML Parser and the STAX2 API, from http://wiki.fasterxml.com/AaltoHome
 
 It also depends upon http://www.jcraft.com/jzlib/, which is passed to ant in the jzlib-dir parameter. The passed folder should contain a jar called jzlib.jar.
 
-To build, run:
-ant  -Dxpp-dir=path/to/directory/containing/xpp -Djzlib-dir=path/to/directory/containing/jzlib
+It also depends upon icu4j from http://site.icu-project.org/
 
+
+To build, run:
+ant -Dxpp-dir=third-party/xpp -Djzlib-dir=third-party/jzlib -Dicu4j-dir=third-party/ -Dstax2-dir=third-party/stax2/ -Daalto-dir=third-party/aalto/ 
+Changing the paths to the relevant paths for the dependencies on your system
 
 Easy version:
 The included Makefile should, on Unixes with make/curl installed, grab the dependencies (once only) and build.
+
+
+For development:
+If you want to commit changes to Stroke, first run `make .git/hooks/commit-msg` to download a script that will generate change-ids needed by our review system.

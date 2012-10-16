@@ -41,3 +41,6 @@ third-party/icu4j.jar:
 	mkdir -p third-party
 	curl http://download.icu-project.org/files/icu4j/4.8.1/icu4j-4_8_1.jar -o third-party/icu4j.jar
 
+.git/hooks/commit-msg:
+	curl -k https://git.swift.im/review/tools/hooks/commit-msg -o .git/hooks/commit-msg
+	chmod u+x .git/hooks/commit-msg
