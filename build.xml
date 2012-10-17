@@ -64,12 +64,12 @@
       <delete dir="${test.results}"/>
       <mkdir dir="${test.results}"/>
     <junit fork="false">
-        <formatter type="plain"/>
+        <formatter type="xml"/>
         <classpath>
             <pathelement location="${JUNIT_JAR}"/>
             <pathelement location="${jar}"/>
             <pathelement location="${src.tests}"/>
-	    <path refid="classpath"/>
+        <path refid="classpath"/>
         </classpath>
         <batchtest fork="yes" todir="${test.results}">
             <fileset dir="${src.tests}">
