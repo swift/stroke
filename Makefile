@@ -1,6 +1,6 @@
 all: dist/lib/stroke.jar
 
-DEFINES = -Dxpp-dir=third-party/xpp -Djzlib-dir=third-party/jzlib -Dicu4j-dir=third-party/ -Dstax2-dir=third-party/stax2/ -Daalto-dir=third-party/aalto/
+DEFINES = -Dxpp-dir=third-party/xpp -Djzlib-dir=third-party/jzlib -Dicu4j-dir=third-party/ -Dstax2-dir=third-party/stax2/ -Daalto-dir=third-party/aalto/ -Dcobertura-jar=third-party/cobertura/cobertura.jar -Djakarta-oro-jar=third-party/cobertura/lib/jakarta-oro-2.0.8.jar -Dlog4j-jar=third-party/cobertura/lib/log4j-1.2.9.jar -Dasm-jar=third-party/cobertura/lib/asm-3.0.jar -Dasm-tree-jar=third-party/cobertura/lib/asm-tree-3.0.jar
 
 JUNIT ?= /usr/share/junit/junit.jar
 
@@ -18,7 +18,7 @@ dist/lib/stroke.jar: third-party/jzlib/jzlib.jar third-party/icu4j.jar third-par
 	ant ${DEFINES}
 
 .PHONY : test
-test: dist/lib/stroke.jar
+test: dist/lib/stroke.jar third-party/cobertura/cobertura.jar
 	ant ${DEFINES} -DJUNIT_JAR=${JUNIT} test
 
 third-party/aalto/aalto-xml.jar:
@@ -40,6 +40,12 @@ third-party/jzlib/jzlib.jar:
 third-party/icu4j.jar:
 	mkdir -p third-party
 	curl http://download.icu-project.org/files/icu4j/4.8.1/icu4j-4_8_1.jar -o third-party/icu4j.jar
+
+third-party/cobertura/cobertura.jar:
+	mkdir -p third-party
+	curl -L 'http://sourceforge.net/projects/cobertura/files/cobertura/1.9.4.1/cobertura-1.9.4.1-bin.tar.bz2/download' -o third-party/cobertura-1.9.4.1-bin.tar.bz2
+	tar -xvjf third-party/cobertura-1.9.4.1-bin.tar.bz2 -C third-party/
+	mv third-party/cobertura-1.9.4.1 third-party/cobertura
 
 .git/hooks/commit-msg:
 	curl -k https://git.swift.im/review/tools/hooks/commit-msg -o .git/hooks/commit-msg

@@ -20,6 +20,18 @@
   <property name="stax2-dir" value="../third-party/stax2"/>
   <property name="jzlib-dir" value="../third-party/jzlib"/>
   <property name="icu4j-dir" value="../third-party/icu4j"/>
+  <property name="cobertura.dir" value="instrumented"/>
+  <property name="coveragereport.dir" value="coverage"/>
+
+
+  <path id="cobertura.classpath">
+      <pathelement path="${cobertura-jar}"/>
+      <pathelement path="${jakarta-oro-jar}"/>
+      <pathelement path="${log4j-jar}"/>
+      <pathelement path="${asm-jar}"/>
+      <pathelement path="${asm-tree-jar}"/>
+  </path>
+  <taskdef classpathref="cobertura.classpath" resource="tasks.properties"/>
 
   <path id="classpath">
     <fileset dir="${aalto-dir}" includes="aalto-xml.jar"/>
@@ -60,24 +72,55 @@
     </javac>
   </target>
 
-  <target name="test" depends="compile-tests">
-      <delete dir="${test.results}"/>
-      <mkdir dir="${test.results}"/>
-    <junit fork="false">
+  <target name="instrument" if="cobertura-jar" depends="compile-tests">
+    <delete dir="${cobertura.dir}"/>
+    <mkdir dir="${cobertura.dir}"/>
+    <cobertura-instrument todir="${cobertura.dir}">
+      <fileset dir="test">
+        <include name="**/*.class"/>
+      </fileset>
+    </cobertura-instrument>
+  </target>
+
+  <target name="run-tests" depends="compile-tests">
+    <delete dir="${test.results}"/>
+    <mkdir dir="${test.results}"/>
+    <junit fork="yes">
         <formatter type="xml"/>
+        <classpath>
+            <pathelement location="${cobertura.dir}"/>
+            <path refid="cobertura.classpath"/>
+        </classpath>
         <classpath>
             <pathelement location="${JUNIT_JAR}"/>
             <pathelement location="${jar}"/>
             <pathelement location="${src.tests}"/>
-        <path refid="classpath"/>
+            <path refid="classpath"/>
         </classpath>
-        <batchtest fork="yes" todir="${test.results}">
+        <batchtest todir="${test.results}">
             <fileset dir="${src.tests}">
                 <include name="**/*Test.java"/>
                 <!--<exclude name="**/AllTests.java"/>-->
             </fileset>
         </batchtest>
     </junit>
+
+  </target>
+
+  <target name="coverage" if="cobertura-jar" depends="instrument, run-tests">
+    <delete dir="${coveragereport.dir}"/>
+    <mkdir dir="${coveragereport.dir}"/>
+    <cobertura-report format="html" destdir="${coveragereport.dir}">
+        <fileset dir="${src}">
+            <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${src.tests}">
+            <include name="**/*.java"/>
+        </fileset>
+    </cobertura-report>
+  </target>
+
+  <target name="test" depends="compile-tests, instrument, run-tests, coverage">
   </target>
 
   <target name="clean"
@@ -86,6 +129,9 @@
     <delete dir="${test.results}"/>
     <delete dir="${dist}"/>
     <delete dir="${doc}"/>
+    <delete dir="${coveragereport.dir}"/>
+    <delete dir="${cobertura.dir}"/>
+
   </target>
 
   <target name="javadoc" depends="init">
