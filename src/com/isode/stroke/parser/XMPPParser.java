@@ -31,7 +31,13 @@ public class XMPPParser implements XMLParserClient {
 
     public boolean parse(String data) {
         parseErrorOccurred_ = false;
-        boolean xmlParseResult = xmlParser_.parse(data);
+        boolean xmlParseResult = false;
+        try {
+            xmlParseResult = xmlParser_.parse(data);
+        } catch (Exception e) {
+            parseErrorOccurred_ = true;
+            logger_.warning("Data " + data + " caused:\n" + e.getMessage());
+        }
         if (parseErrorOccurred_ || !xmlParseResult) {
             logger_.warning(String.format("When parsing, %b and %b", parseErrorOccurred_, xmlParseResult));
         }
