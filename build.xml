@@ -110,7 +110,7 @@
   <target name="coverage" if="cobertura-jar" depends="instrument, run-tests">
     <delete dir="${coveragereport.dir}"/>
     <mkdir dir="${coveragereport.dir}"/>
-    <cobertura-report format="html" destdir="${coveragereport.dir}">
+    <cobertura-report format="xml" destdir="${coveragereport.dir}">
         <fileset dir="${src}">
             <include name="**/*.java"/>
         </fileset>
@@ -120,7 +120,23 @@
     </cobertura-report>
   </target>
 
-  <target name="test" depends="compile-tests, instrument, run-tests, coverage">
+  <target name="findbugs" if="findbugs.home" depends="dist">
+    <path id="findbugs-jar"> 
+      <pathelement path="${findbugs.home}/lib/findbugs-ant.jar" /> 
+    </path> 
+    <taskdef name="findbugs" classname="edu.umd.cs.findbugs.anttask.FindBugsTask" classpathref="findbugs-jar" /> 
+    <findbugs home="${findbugs.home}"
+              output="xml"
+              outputFile="findbugs.xml" >
+      <auxClasspath>
+        <path refid="classpath" />
+      </auxClasspath>
+      <sourcePath path="${src}" />
+      <class location="${jar}" />
+    </findbugs>
+  </target>
+
+  <target name="test" depends="compile-tests, instrument, run-tests, coverage, findbugs">
   </target>
 
   <target name="clean"
@@ -137,7 +153,7 @@
   <target name="javadoc" depends="init">
     <!-- Note that this may stall if no network connection is available
          to the Oracle website -->
-    <javadoc packagenames="com.isode.**.**"
+     <javadoc packagenames="com.isode.**.**"
      sourcepath="${src}"
      destdir="${doc}"
      windowtitle="Stroke">
