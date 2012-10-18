@@ -62,7 +62,7 @@ public class MUCPayload extends Payload {
      * @param since date-time, should not be null
      */
     public void setSince(Date since) {
-        since_ = since;
+        since_ = (Date)since.clone();
     }
 
     /**
@@ -110,6 +110,6 @@ public class MUCPayload extends Payload {
      * @return date, ca be null if not set
      */
     public Date getSince() {
-        return since_;
+        return (Date)since_.clone();
     }
 }

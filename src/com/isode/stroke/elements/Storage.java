@@ -40,7 +40,7 @@ public class Storage extends Payload {
      * Class for bookmarking web pages, i.e., HTTP or HTTPS URLs. 
      *
      */
-    public class URL {
+    public static class URL {
         public URL() {
 
         }

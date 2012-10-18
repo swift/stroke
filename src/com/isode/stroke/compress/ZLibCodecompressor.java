@@ -14,7 +14,7 @@ import com.jcraft.jzlib.JZlib;
 import com.jcraft.jzlib.ZStream;
 
 public abstract class ZLibCodecompressor {
-    protected final int CHUNK_SIZE = 1024;
+    protected static final int CHUNK_SIZE = 1024;
     protected final ZStream stream_ = new ZStream();
 
     public ByteArray process(ByteArray input) throws ZLibException {

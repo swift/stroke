@@ -31,25 +31,29 @@ public class DiscoInfo extends Payload {
     public static final String MessageDeliveryReceiptsFeature = "urn:xmpp:receipts";
 
     public static class Identity implements Comparable<Identity> {
+        private final String name_;
+        private final String category_;
+        private final String type_;
+        private final String lang_;
 
         /**
          * Identity(name, "client", "pc", "");
          */
-        public Identity(String name) {
+        public Identity(final String name) {
             this(name, "client");
         }
 
         /**
          * Identity(name, category, "pc, "");
          */
-        public Identity(String name, String category) {
+        public Identity(final String name, final String category) {
             this(name, category, "pc");
         }
 
         /**
          * Identity(name, category, type, "");
          */
-        public Identity(String name, String category, String type) {
+        public Identity(final String name, final String category, final String type) {
             this(name, category, type, "");
         }
 
@@ -60,7 +64,7 @@ public class DiscoInfo extends Payload {
          * @param type Identity type, notnull.
          * @param lang Identity language, notnull.
          */
-        public Identity(String name, String category, String type, String lang) {
+        public Identity(final String name, final String category, final String type, final String lang) {
             NotNull.exceptIfNull(name, "name");
             NotNull.exceptIfNull(category, "category");
             NotNull.exceptIfNull(type, "type");
@@ -104,7 +108,7 @@ public class DiscoInfo extends Payload {
         }
 
         // Sorted according to XEP-115 rules
-        public int compareTo(Identity other) {
+        public int compareTo(final Identity other) {
             if (other == null) {
                 return -1;
             }
@@ -122,12 +126,25 @@ public class DiscoInfo extends Payload {
                 return category_.compareTo(other.category_);
             }
         }
-            
-        private final String name_;
-        private final String category_;
-        private final String type_;
-        private final String lang_;
 
+        @Override
+        public boolean equals(final Object other) {
+            if (!(other instanceof Identity)) {
+                return false;
+            }
+            final Identity o = (Identity)other;
+            return o.category_.equals(category_) && o.lang_.equals(lang_) && o.name_.equals(name_) && o.type_.equals(type_);
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 7;
+            hash = 37 * hash + (this.name_ != null ? this.name_.hashCode() : 0);
+            hash = 37 * hash + (this.category_ != null ? this.category_.hashCode() : 0);
+            hash = 37 * hash + (this.type_ != null ? this.type_.hashCode() : 0);
+            hash = 37 * hash + (this.lang_ != null ? this.lang_.hashCode() : 0);
+            return hash;
+        }
 
     }
 
@@ -146,7 +163,7 @@ public class DiscoInfo extends Payload {
      *
      * @param node Notnull.
      */
-    public void setNode(String node) {
+    public void setNode(final String node) {
         NotNull.exceptIfNull(node, "node");
         node_ = node;
     }
@@ -163,7 +180,7 @@ public class DiscoInfo extends Payload {
      *
      * @param identity Non-null.
      */
-    public void addIdentity(Identity identity) {
+    public void addIdentity(final Identity identity) {
         NotNull.exceptIfNull(identity, "identity");
         identities_.add(identity);
     }
@@ -180,12 +197,12 @@ public class DiscoInfo extends Payload {
      *
      * @param feature Non-null.
      */
-    public void addFeature(String feature) {
+    public void addFeature(final String feature) {
         NotNull.exceptIfNull(feature, "feature");
         features_.add(feature);
     }
 
-    public boolean hasFeature(String feature) {
+    public boolean hasFeature(final String feature) {
         return features_.contains(feature);
     }
 
@@ -193,7 +210,7 @@ public class DiscoInfo extends Payload {
      *
      * @param form Non-null.
      */
-    public void addExtension(Form form) {
+    public void addExtension(final Form form) {
         NotNull.exceptIfNull(form, "form");
         extensions_.add(form);
     }

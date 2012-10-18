@@ -189,17 +189,17 @@ public class ClientSession {
 
     public void start() {
         streamStreamStartReceivedConnection = stream.onStreamStartReceived.connect(new Slot1<ProtocolHeader>(){
-            public void call(ProtocolHeader p1) {
+            public void call(final ProtocolHeader p1) {
                 handleStreamStart(p1);
             }
         });
 	streamElementReceivedConnection = stream.onElementReceived.connect(new Slot1<Element>(){
-            public void call(Element p1) {
+            public void call(final Element p1) {
                 handleElement(p1);
             }
         });
 	streamClosedConnection = stream.onClosed.connect(new Slot1<SessionStream.Error>(){
-            public void call(SessionStream.Error p1) {
+            public void call(final SessionStream.Error p1) {
                 handleStreamClosed(p1);
             }
         });
@@ -227,7 +227,7 @@ public class ClientSession {
 	}
     }
 
-    private void handleStreamStart(final ProtocolHeader header) {
+    private void handleStreamStart(final ProtocolHeader header) { //NOPMD, I'm not removing header from the API
         if (!checkState(State.WaitingForStreamStart)) {
             return;
         }
@@ -405,14 +405,14 @@ public class ClientSession {
             });
             stanzaAckOnAckedConnection_ = stanzaAckRequester_.onStanzaAcked.connect(new Slot1<Stanza>() {
 
-                public void call(Stanza p1) {
+                public void call(final Stanza p1) {
                     handleStanzaAcked(p1);
                 }
             });
             stanzaAckResponder_ = new StanzaAckResponder();
             stanzaResponderAckConnection_ = stanzaAckResponder_.onAck.connect(new Slot1<Long>() {
 
-                public void call(Long p1) {
+                public void call(final Long p1) {
                     ack(p1);
                 }
             });
@@ -471,7 +471,7 @@ public class ClientSession {
     private void continueSessionInitialization() {
         if (needResourceBind) {
             state = State.BindingResource;
-            ResourceBind resourceBind = new ResourceBind();
+            final ResourceBind resourceBind = new ResourceBind();
             if (localJID.getResource().length() != 0) {
                 resourceBind.setResource(localJID.getResource());
             }
@@ -519,7 +519,7 @@ public class ClientSession {
             checkTrustOrFinish(certificate, verificationError);
         }
         else {
-            ServerIdentityVerifier identityVerifier = new ServerIdentityVerifier(localJID);
+            final ServerIdentityVerifier identityVerifier = new ServerIdentityVerifier(localJID);
             if (identityVerifier.certificateVerifies(certificate)) {
                 continueAfterTLSEncrypted();
             }
