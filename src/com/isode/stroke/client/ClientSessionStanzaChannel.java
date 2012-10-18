@@ -22,12 +22,15 @@ import java.util.logging.Logger;
  * StanzaChannel implementation around a ClientSession.
  */
 public class ClientSessionStanzaChannel extends StanzaChannel {
+    private final IDGenerator idGenerator = new IDGenerator();
+    private ClientSession session;
+    private static final Logger logger_ = Logger.getLogger(ClientSessionStanzaChannel.class.getName());
     private SignalConnection sessionInitializedConnection;
     private SignalConnection sessionFinishedConnection;
     private SignalConnection sessionStanzaReceivedConnection;
     private SignalConnection sessionStanzaAckedConnection;
 
-    public void setSession(ClientSession session) {
+    public void setSession(final ClientSession session) {
         assert this.session == null;
         this.session = session;
         sessionInitializedConnection = session.onInitialized.connect(new Slot() {
@@ -36,9 +39,9 @@ public class ClientSessionStanzaChannel extends StanzaChannel {
                 handleSessionInitialized();
             }
         });
-        sessionFinishedConnection = session.onFinished.connect(new Slot1<com.isode.stroke.base.Error>() {
+        sessionFinishedConnection = session.onFinished.connect(new Slot1<Error>() {
 
-            public void call(com.isode.stroke.base.Error p1) {
+            public void call(Error p1) {
                 handleSessionFinished(p1);
             }
         });
@@ -56,15 +59,15 @@ public class ClientSessionStanzaChannel extends StanzaChannel {
         });
     }
 
-    public void sendIQ(IQ iq) {
+    public void sendIQ(final IQ iq) {
         send(iq);
     }
 
-    public void sendMessage(Message message) {
+    public void sendMessage(final Message message) {
         send(message);
     }
 
-    public void sendPresence(Presence presence) {
+    public void sendPresence(final Presence presence) {
         send(presence);
     }
 
@@ -83,7 +86,7 @@ public class ClientSessionStanzaChannel extends StanzaChannel {
         return idGenerator.generateID();
     }
 
-    private void send(Stanza stanza) {
+    private void send(final Stanza stanza) {
         if (!isAvailable()) {
             logger_.warning("Warning: Client: Trying to send a stanza while disconnected.");
             return;
@@ -91,7 +94,8 @@ public class ClientSessionStanzaChannel extends StanzaChannel {
         session.sendStanza(stanza);
     }
 
-    private void handleSessionFinished(Error error) {
+    // NOPMD, ignore that Error isn't used.
+    private void handleSessionFinished(final Error error) {
         sessionFinishedConnection.disconnect();
         sessionStanzaReceivedConnection.disconnect();
         sessionStanzaAckedConnection.disconnect();
@@ -100,7 +104,7 @@ public class ClientSessionStanzaChannel extends StanzaChannel {
         onAvailableChanged.emit(false);
     }
 
-    private void handleStanza(Stanza stanza) {
+    private void handleStanza(final Stanza stanza) {
         if (stanza instanceof Message) {
             onMessageReceived.emit((Message)stanza);
         }
@@ -112,14 +116,12 @@ public class ClientSessionStanzaChannel extends StanzaChannel {
         }
     }
 
-    private void handleStanzaAcked(Stanza stanza) {
+    private void handleStanzaAcked(final Stanza stanza) {
         onStanzaAcked.emit(stanza);
     }
 
     private void handleSessionInitialized() {
         onAvailableChanged.emit(true);
     }
-    private IDGenerator idGenerator = new IDGenerator();
-    private ClientSession session;
-    private static final Logger logger_ = Logger.getLogger(ClientSessionStanzaChannel.class.getName());
+
 }

@@ -47,7 +47,7 @@ public class ClientError {
         InvalidServerIdentityError,
     };
 
-    ClientError(Type type) {
+    ClientError(final Type type) {
         type_ = type;
     }
 

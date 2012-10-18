@@ -25,8 +25,9 @@
     <exclude name="UseConcurrentHashMap"/> <!-- Disabling this, because we don't have concurrency -->
   </rule>
   <rule ref="rulesets/java/coupling.xml">
-      <!--<exclude name="ExcessiveImports"/>-->
+    <exclude name="ExcessiveImports"/>
     <exclude name="CouplingBetweenObjects"/>
+    <exclude name="LawOfDemeter"/>
   </rule>
   <rule ref="rulesets/java/design.xml">
     <exclude name="SwitchStmtsShouldHaveDefault"/>
@@ -36,6 +37,7 @@
     <exclude name="AvoidDeeplyNestedIfStmts"/>
     <exclude name="ConfusingTernary"/>
     <exclude name="PreserveStackTrace"/>
+    <exclude name="GodClass"/>
   </rule>
   <rule ref="rulesets/java/finalizers.xml"/>
   <rule ref="rulesets/java/imports.xml"/>
@@ -46,8 +48,9 @@
     <exclude name="LongVariable"/>
     <exclude name="AvoidFieldNameMatchingTypeName"/>
     <exclude name="AbstractNaming"/>
-    <!-- Excluded for the Tcl stuff -->
     <exclude name="MethodNamingConventions"/>
+    <exclude name="BooleanGetMethodName"/>
+    <exclude name="VariableNamingConventions"/>
   </rule>
   <rule ref="rulesets/java/optimizations.xml">
       <!--<exclude name="LocalVariableCouldBeFinal"/>-->

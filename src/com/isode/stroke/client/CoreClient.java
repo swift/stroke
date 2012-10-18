@@ -9,12 +9,10 @@
 package com.isode.stroke.client;
 
 import com.isode.stroke.base.NotNull;
-import com.isode.stroke.client.ClientSession.UseTLS;
 import com.isode.stroke.elements.Message;
 import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.Stanza;
 import com.isode.stroke.elements.StreamType;
-import com.isode.stroke.eventloop.EventLoop;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.network.Connection;
 import com.isode.stroke.network.ConnectionFactory;
@@ -48,6 +46,62 @@ import com.isode.stroke.tls.PlatformTLSFactories;
  * functionality and interfaces, and is better suited for most needs.
  */
 public class CoreClient {
+    /**
+     * The user should add a listener to this signal, which will be called when
+     * the client was disconnected from tne network.
+     *
+     * <p>If the disconnection was due to a non-recoverable error, the type
+     * of error will be passed as a parameter.
+     */
+    public final Signal1<ClientError> onDisconnected = new Signal1<ClientError>();
+
+    /**
+     * The user should add a listener to this signal, which will be called when
+     * the connection is established with the server.
+     */
+    public final Signal onConnected = new Signal();
+
+    /**
+     * The user may add a listener to this signal, which will be called when
+     * data are received from the server. Useful for observing protocol exchange.
+     */
+    public final Signal1<String> onDataRead = new Signal1<String>();
+
+    /**
+     * The user may add a listener to this signal, which will be called when
+     * data are sent to the server. Useful for observing protocol exchange.
+     */
+    public final Signal1<String> onDataWritten = new Signal1<String>();
+
+    /**
+     * Called when a message stanza is received.
+     */
+    public final Signal1<Message> onMessageReceived = new Signal1<Message>();
+    /**
+     * Called when a presence stanza is received.
+     */
+    public final Signal1<Presence> onPresenceReceived = new Signal1<Presence>();
+    /**
+     * Called when a stanza has been received and acked by a server supporting XEP-0198.
+     */
+    public final Signal1<Stanza> onStanzaAcked = new Signal1<Stanza>();
+    private JID jid_;
+    private String password_;
+    private ClientSessionStanzaChannel stanzaChannel_;
+    private IQRouter iqRouter_;
+    private Connector connector_;
+    //private ConnectionFactory connectionFactory_;
+    private FullPayloadParserFactoryCollection payloadParserFactories_ = new FullPayloadParserFactoryCollection();
+    private FullPayloadSerializerCollection payloadSerializers_ = new FullPayloadSerializerCollection();
+    private Connection connection_;
+    private BasicSessionStream sessionStream_;
+    private ClientSession session_;
+    private CertificateWithKey certificate_;
+    private boolean disconnectRequested_;
+    private ClientOptions options;
+    private CertificateTrustChecker certificateTrustChecker;
+    private NetworkFactories networkFactories;
+    private PlatformTLSFactories tlsFactories;
     private SignalConnection sessionStreamDataReadConnection_;
     private SignalConnection sessionStreamDataWrittenConnection_;
     private SignalConnection sessionFinishedConnection_;
@@ -70,7 +124,7 @@ public class CoreClient {
      * @param networkFactories An implementation of network interaction, must
      *            not be null.
      */
-    public CoreClient(JID jid, String password, NetworkFactories networkFactories) {
+    public CoreClient(final JID jid, final String password, final NetworkFactories networkFactories) {
         jid_ = jid;
         password_ = password;
         disconnectRequested_ = false;
@@ -128,7 +182,7 @@ public class CoreClient {
      * 
      * @param o Client options to use in the connection, must not be null
      */
-    public void connect(ClientOptions o) {
+    public void connect(final ClientOptions o) {
         forceReset();
         disconnectRequested_ = false;
         assert (connector_ == null);
@@ -180,7 +234,7 @@ public class CoreClient {
         session_.start();
     }
 
-    void handleConnectorFinished(Connection connection, com.isode.stroke.base.Error error) {
+    void handleConnectorFinished(final Connection connection, final com.isode.stroke.base.Error error) {
         resetConnector();
         
         if (connection == null) {
@@ -236,7 +290,7 @@ public class CoreClient {
         }
     }
 
-    public void setCertificate(CertificateWithKey certificate) {
+    public void setCertificate(final CertificateWithKey certificate) {
         certificate_ = certificate;
     }
     
@@ -250,11 +304,11 @@ public class CoreClient {
      * @param checker a CertificateTrustChecker that will be called when 
      * the server sends a TLS certificate that does not validate. 
      */
-    public void setCertificateTrustChecker(CertificateTrustChecker checker) {
+    public void setCertificateTrustChecker(final CertificateTrustChecker checker) {
         certificateTrustChecker = checker;
     }
 
-    private void handleSessionFinished(com.isode.stroke.base.Error error) {
+    private void handleSessionFinished(final com.isode.stroke.base.Error error) {
         sessionFinishedConnection_.disconnect();
         sessionNeedCredentialsConnection_.disconnect();
         session_ = null;
@@ -370,25 +424,25 @@ public class CoreClient {
         session_.sendCredentials(password_);
     }
 
-    private void handleDataRead(String data) {
+    private void handleDataRead(final String data) {
         onDataRead.emit(data);
     }
 
-    private void handleDataWritten(String data) {
+    private void handleDataWritten(final String data) {
         onDataWritten.emit(data);
     }
 
-    private void handleStanzaChannelAvailableChanged(boolean available) {
+    private void handleStanzaChannelAvailableChanged(final boolean available) {
         if (available) {
             onConnected.emit();
         }
     }
 
-    public void sendMessage(Message message) {
+    public void sendMessage(final Message message) {
         stanzaChannel_.sendMessage(message);
     }
 
-    public void sendPresence(Presence presence) {
+    public void sendPresence(final Presence presence) {
         stanzaChannel_.sendPresence(presence);
     }
 
@@ -481,60 +535,4 @@ public class CoreClient {
         "; session " + (isAvailable() ? "" : "un") + "available"; 
     }
 
-    /**
-     * The user should add a listener to this signal, which will be called when
-     * the client was disconnected from tne network.
-     * 
-     * <p>If the disconnection was due to a non-recoverable error, the type
-     * of error will be passed as a parameter.
-     */
-    public final Signal1<ClientError> onDisconnected = new Signal1<ClientError>();
-
-    /**
-     * The user should add a listener to this signal, which will be called when
-     * the connection is established with the server.
-     */
-    public final Signal onConnected = new Signal();
-
-    /**
-     * The user may add a listener to this signal, which will be called when
-     * data are received from the server. Useful for observing protocol exchange.
-     */
-    public final Signal1<String> onDataRead = new Signal1<String>();
-
-    /**
-     * The user may add a listener to this signal, which will be called when
-     * data are sent to the server. Useful for observing protocol exchange.
-     */
-    public final Signal1<String> onDataWritten = new Signal1<String>();
-
-    /**
-     * Called when a message stanza is received.
-     */
-    public final Signal1<Message> onMessageReceived = new Signal1<Message>();
-    /**
-     * Called when a presence stanza is received.
-     */
-    public final Signal1<Presence> onPresenceReceived = new Signal1<Presence>();
-    /**
-     * Called when a stanza has been received and acked by a server supporting XEP-0198.
-     */
-    public final Signal1<Stanza> onStanzaAcked = new Signal1<Stanza>();
-    private JID jid_;
-    private String password_;
-    private ClientSessionStanzaChannel stanzaChannel_;
-    private IQRouter iqRouter_;
-    private Connector connector_;
-    private ConnectionFactory connectionFactory_;
-    private FullPayloadParserFactoryCollection payloadParserFactories_ = new FullPayloadParserFactoryCollection();
-    private FullPayloadSerializerCollection payloadSerializers_ = new FullPayloadSerializerCollection();
-    private Connection connection_;
-    private BasicSessionStream sessionStream_;
-    private ClientSession session_;
-    private CertificateWithKey certificate_;
-    private boolean disconnectRequested_;
-    private ClientOptions options;
-    private CertificateTrustChecker certificateTrustChecker;
-    private NetworkFactories networkFactories;
-    private PlatformTLSFactories tlsFactories;
 }

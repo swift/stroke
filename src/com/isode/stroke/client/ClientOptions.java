@@ -12,32 +12,6 @@ package com.isode.stroke.client;
  * Options for a client connection
  */
 public class ClientOptions {
-
-    public enum UseTLS {
-
-        NeverUseTLS,
-        UseTLSWhenAvailable,
-        RequireTLS
-    }
-
-    public ClientOptions() {
-        useStreamCompression = true;
-        useTLS = UseTLS.UseTLSWhenAvailable;
-        useStreamResumption = false;
-        allowPLAINWithoutTLS = false;
-        useAcks = true;
-        manualHostname = "";
-        manualPort = -1;
-    }
-    
-    @Override
-    public String toString() {
-        return  
-            "useStreamCompression:" + useStreamCompression +
-            "; useStreamResumption:" + useStreamResumption +
-            "; " + useTLS;
-    }
-
     /**
      * Whether ZLib stream compression should be used when available.
      *
@@ -83,5 +57,28 @@ public class ClientOptions {
      */
     public int manualPort;
 
-    
+
+    public enum UseTLS {
+        NeverUseTLS,
+        UseTLSWhenAvailable,
+        RequireTLS
+    }
+
+    public ClientOptions() {
+        useStreamCompression = true;
+        useTLS = UseTLS.UseTLSWhenAvailable;
+        useStreamResumption = false;
+        allowPLAINWithoutTLS = false;
+        useAcks = true;
+        manualHostname = "";
+        manualPort = -1;
+    }
+
+    @Override
+    public String toString() {
+        return
+            "useStreamCompression:" + useStreamCompression +
+            "; useStreamResumption:" + useStreamResumption +
+            "; " + useTLS;
+    }
 }

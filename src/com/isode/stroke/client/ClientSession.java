@@ -51,6 +51,12 @@ import com.isode.stroke.tls.ServerIdentityVerifier;
 import java.util.UUID;
 
 public class ClientSession {
+    public final Signal onNeedCredentials = new Signal();
+    public final Signal onInitialized = new Signal();
+    public final Signal1<com.isode.stroke.base.Error> onFinished = new Signal1<com.isode.stroke.base.Error>();
+    public final Signal1<Stanza> onStanzaReceived = new Signal1<Stanza>();
+    public final Signal1<Stanza> onStanzaAcked = new Signal1<Stanza>();
+
     private SignalConnection streamElementReceivedConnection;
     private SignalConnection streamStreamStartReceivedConnection;
     private SignalConnection streamClosedConnection;
@@ -58,6 +64,22 @@ public class ClientSession {
     private SignalConnection stanzaAckOnRequestConnection_;
     private SignalConnection stanzaAckOnAckedConnection_;
     private SignalConnection stanzaResponderAckConnection_;
+    private JID localJID;
+    private State state;
+    private SessionStream stream;
+    private boolean allowPLAINOverNonTLS;
+    private boolean useStreamCompression;
+    private UseTLS useTLS;
+    private boolean useAcks;
+    private boolean needSessionStart;
+    private boolean needResourceBind;
+    private boolean needAcking;
+    private boolean rosterVersioningSupported;
+    private ClientAuthenticator authenticator;
+    private StanzaAckRequester stanzaAckRequester_;
+    private StanzaAckResponder stanzaAckResponder_;
+    private com.isode.stroke.base.Error error_;
+    private CertificateTrustChecker certificateTrustChecker;
 
     public enum State {
 
@@ -273,13 +295,13 @@ public class ClientSession {
                 if (ack.isValid()) {
                     stanzaAckRequester_.handleAckReceived(ack.getHandledStanzasCount());
                 }
-                else {
+                //else {
                     //logger_.warning("Got invalid ack from server"); /*FIXME: Do we want logging here?
-                }
+                //}
             }
-            else {
+            //else {
                 //logger_.warning("Ignoring ack"); /*FIXME: Do we want logging here?*/
-            }
+            //}
         }
         else if (element instanceof StreamError) {
             finishSession(Error.Type.StreamError);
@@ -565,7 +587,7 @@ public class ClientSession {
     private void finishSession(com.isode.stroke.base.Error error) {
         state = State.Finishing;
 	error_ = error;
-	assert(stream.isOpen());
+	assert stream.isOpen();
 	if (stanzaAckResponder_ != null) {
             stanzaAckResponder_.handleAckRequestReceived();
 	}
@@ -585,18 +607,6 @@ public class ClientSession {
         stream.writeElement(new StanzaAck(handledStanzasCount));
     }
 
-    public final Signal onNeedCredentials = new Signal();
-    public final Signal onInitialized = new Signal();
-    public final Signal1<com.isode.stroke.base.Error> onFinished = new Signal1<com.isode.stroke.base.Error>();
-    public final Signal1<Stanza> onStanzaReceived = new Signal1<Stanza>();
-    public final Signal1<Stanza> onStanzaAcked = new Signal1<Stanza>();
-
-    
-
-    
-
-
-
     private JID getRemoteJID() {
         return new JID("", localJID.getDomain());
     }
@@ -610,20 +620,5 @@ public class ClientSession {
         "; error_=" + error_;
     }
 
-    private JID localJID;
-    private State state;
-    private SessionStream stream;
-    private boolean allowPLAINOverNonTLS;
-    private boolean useStreamCompression;
-    private UseTLS useTLS;
-    private boolean useAcks;
-    private boolean needSessionStart;
-    private boolean needResourceBind;
-    private boolean needAcking;
-    private boolean rosterVersioningSupported;
-    private ClientAuthenticator authenticator;
-    private StanzaAckRequester stanzaAckRequester_;
-    private StanzaAckResponder stanzaAckResponder_;
-    private com.isode.stroke.base.Error error_;
-    private CertificateTrustChecker certificateTrustChecker;
+
 }

@@ -25,11 +25,11 @@ import com.isode.stroke.queries.responders.SoftwareVersionResponder;
 
 public class Client extends CoreClient {
 
-    private MUCManager mucManager;
-    private MUCRegistry mucRegistry;
-    private DirectedPresenceSender directedPresenceSender;
-    private StanzaChannelPresenceSender stanzaChannelPresenceSender;
-    private SoftwareVersionResponder softwareVersionResponder;
+    private final MUCManager mucManager;
+    private final MUCRegistry mucRegistry;
+    private final DirectedPresenceSender directedPresenceSender;
+    private final StanzaChannelPresenceSender stanzaChannelPresenceSender;
+    private final SoftwareVersionResponder softwareVersionResponder;
 
     /**
      * Constructor.
@@ -47,7 +47,7 @@ public class Client extends CoreClient {
      * @param networkFactories An implementation of network interaction, must
      *            not be null.
      */
-    public  Client(JID jid, String password, NetworkFactories networkFactories) {
+    public  Client(final JID jid, final String password, final NetworkFactories networkFactories) {
         super(jid, password, networkFactories);
         stanzaChannelPresenceSender = new StanzaChannelPresenceSender(getStanzaChannel());
         directedPresenceSender = new DirectedPresenceSender(stanzaChannelPresenceSender);
