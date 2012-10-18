@@ -306,7 +306,7 @@ public class ClientSession {
             else if (UseTLS.RequireTLS.equals(useTLS) && !stream.isTLSEncrypted()) {
                 finishSession(Error.Type.NoSupportedAuthMechanismsError);
             }
-            else if (false && useStreamCompression && streamFeatures.hasCompressionMethod("zlib")) { /*FIXME: test and enable!*/
+            else if (useStreamCompression && streamFeatures.hasCompressionMethod("zlib")) {
                 state = State.Compressing;
                 stream.writeElement(new CompressRequest("zlib"));
             }
