@@ -144,8 +144,7 @@
     </path> 
     <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd-jar"/>
     <pmd shortFilenames="true">
-      <ruleset>rulesets/java/basic.xml</ruleset>
-      <ruleset>java-basic</ruleset>
+      <ruleset>pmd-ruleset.xml</ruleset>
       <formatter type="xml" toFile="pmd.xml" />
       <fileset dir="${src}">
         <include name="**/*.java"/>
