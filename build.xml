@@ -136,7 +136,24 @@
     </findbugs>
   </target>
 
-  <target name="test" depends="compile-tests, instrument, run-tests, coverage, findbugs">
+  <target name="pmd">
+    <path id="pmd-jar"> 
+      <fileset dir="${pmd.home}/lib">
+        <include name="*.jar" /> 
+      </fileset>
+    </path> 
+    <taskdef name="pmd" classname="net.sourceforge.pmd.ant.PMDTask" classpathref="pmd-jar"/>
+    <pmd shortFilenames="true">
+      <ruleset>rulesets/java/basic.xml</ruleset>
+      <ruleset>java-basic</ruleset>
+      <formatter type="xml" toFile="pmd.xml" />
+      <fileset dir="${src}">
+        <include name="**/*.java"/>
+      </fileset>
+    </pmd>
+  </target>
+
+  <target name="test" depends="compile-tests, instrument, run-tests, coverage, findbugs, pmd">
   </target>
 
   <target name="clean"

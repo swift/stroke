@@ -17,8 +17,8 @@ dist/lib/stroke.jar: third-party/jzlib/jzlib.jar third-party/icu4j.jar third-par
 	ant ${DEFINES}
 
 .PHONY : test
-test: dist/lib/stroke.jar third-party/cobertura/cobertura.jar third-party/findbugs/lib/findbugs.jar
-	ant ${DEFINES} -DJUNIT_JAR=${JUNIT} -Dcobertura-jar=third-party/cobertura/cobertura.jar -Djakarta-oro-jar=third-party/cobertura/lib/jakarta-oro-2.0.8.jar -Dlog4j-jar=third-party/cobertura/lib/log4j-1.2.9.jar -Dasm-jar=third-party/cobertura/lib/asm-3.0.jar -Dasm-tree-jar=third-party/cobertura/lib/asm-tree-3.0.jar -Dfindbugs.home=third-party/findbugs test
+test: dist/lib/stroke.jar third-party/cobertura/cobertura.jar third-party/findbugs/lib/findbugs.jar third-party/pmd/lib/pmd-5.0.0.jar
+	ant ${DEFINES} -DJUNIT_JAR=${JUNIT} -Dcobertura-jar=third-party/cobertura/cobertura.jar -Djakarta-oro-jar=third-party/cobertura/lib/jakarta-oro-2.0.8.jar -Dlog4j-jar=third-party/cobertura/lib/log4j-1.2.9.jar -Dasm-jar=third-party/cobertura/lib/asm-3.0.jar -Dasm-tree-jar=third-party/cobertura/lib/asm-tree-3.0.jar -Dfindbugs.home=third-party/findbugs -Dpmd.home=third-party/pmd test
 
 third-party/aalto/aalto-xml.jar:
 	mkdir -p third-party/aalto
@@ -51,6 +51,12 @@ third-party/findbugs/lib/findbugs.jar:
 	curl -L 'http://prdownloads.sourceforge.net/findbugs/findbugs-2.0.1.tar.gz?download' -o third-party/findbugs-2.0.1.tar.gz
 	tar -xvzf third-party/findbugs-2.0.1.tar.gz -C third-party/
 	mv third-party/findbugs-2.0.1 third-party/findbugs
+
+third-party/pmd/lib/pmd-5.0.0.jar:
+	mkdir -p third-party
+	curl -L 'http://sourceforge.net/projects/pmd/files/pmd/5.0.0/pmd-bin-5.0.0.zip/download' -o third-party/pmd-bin-5.0.0.zip
+	unzip third-party/pmd-bin-5.0.0.zip -d third-party
+	mv third-party/pmd-bin-5.0.0 third-party/pmd
 
 .git/hooks/commit-msg:
 	curl -k https://git.swift.im/review/tools/hooks/commit-msg -o .git/hooks/commit-msg
