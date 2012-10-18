@@ -13,7 +13,7 @@ import com.isode.stroke.base.ByteArray;
 public class Hexify {
 
     public static String hexify(byte datum) {
-        return String.format("%02x", new Byte(datum));
+        return String.format("%02x", Byte.valueOf(datum));
     }
 
     public static String hexify(ByteArray data) {

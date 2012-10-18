@@ -16,7 +16,11 @@ import java.util.List;
  * disco#info from XEP-0030.
  */
 public class DiscoInfo extends Payload {
-
+    private String node_ = "";
+    private final List<Identity> identities_ = new ArrayList<Identity>();
+    private final List<String> features_ = new ArrayList<String>();
+    private final List<Form> extensions_ = new ArrayList<Form>();
+    
     public static final String ChatStatesFeature = "http://jabber.org/protocol/chatstates";
     public static final String SecurityLabelsFeature = "urn:xmpp:sec-label:0";
     public static final String SecurityLabelsCatalogFeature = "urn:xmpp:sec-label:catalog:2";
@@ -148,9 +152,6 @@ public class DiscoInfo extends Payload {
 
     }
 
-    public DiscoInfo() {
-    }
-
     /**
      *
      * @return Node, notnull.
@@ -222,8 +223,5 @@ public class DiscoInfo extends Payload {
     public List<Form> getExtensions() {
         return new ArrayList(extensions_);
     }
-    private String node_ = "";
-    private final List<Identity> identities_ = new ArrayList<Identity>();
-    private final List<String> features_ = new ArrayList<String>();
-    private final List<Form> extensions_ = new ArrayList<Form>();
+
 }

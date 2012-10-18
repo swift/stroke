@@ -29,7 +29,20 @@ import com.isode.stroke.signals.Signal1;
  * XML parsing being multi-threaded here.
  */
 public class XMPPLayer implements HighLayer, XMPPParserClient {
+    public final Signal1<ProtocolHeader> onStreamStart = new Signal1<ProtocolHeader>();
+    public final Signal1<Element> onElement = new Signal1<Element>();
+    public final Signal1<ByteArray> onWriteData = new Signal1<ByteArray>();
+    public final Signal1<ByteArray> onDataRead = new Signal1<ByteArray>();
+    public final Signal onError = new Signal();
 
+    private PayloadParserFactoryCollection payloadParserFactories_;
+    private XMPPParser xmppParser_;
+    private PayloadSerializerCollection payloadSerializers_;
+    private XMPPSerializer xmppSerializer_;
+    private boolean resetParserAfterParse_;
+    private boolean inParser_;
+
+    
     public XMPPLayer(
             PayloadParserFactoryCollection payloadParserFactories,
             PayloadSerializerCollection payloadSerializers,
@@ -80,12 +93,6 @@ public class XMPPLayer implements HighLayer, XMPPParserClient {
         writeDataToChildLayer(data);
     }
 
-    public final Signal1<ProtocolHeader> onStreamStart = new Signal1<ProtocolHeader>();
-    public final Signal1<Element> onElement = new Signal1<Element>();
-    public final Signal1<ByteArray> onWriteData = new Signal1<ByteArray>();
-    public final Signal1<ByteArray> onDataRead = new Signal1<ByteArray>();
-    public final Signal onError = new Signal();
-
     public void handleStreamStart(ProtocolHeader header) {
         onStreamStart.emit(header);
     }
@@ -102,14 +109,6 @@ public class XMPPLayer implements HighLayer, XMPPParserClient {
         resetParserAfterParse_ = false;
     }
     
-    private PayloadParserFactoryCollection payloadParserFactories_;
-    private XMPPParser xmppParser_;
-    private PayloadSerializerCollection payloadSerializers_;
-    private XMPPSerializer xmppSerializer_;
-    private boolean resetParserAfterParse_;
-    private boolean inParser_;
-    private EventLoop eventLoop_;
-
     /* Multiple-inheritance workarounds */
 
     private StreamLayer fakeStreamLayer_ = new StreamLayer() {

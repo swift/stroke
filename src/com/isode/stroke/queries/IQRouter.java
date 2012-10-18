@@ -29,7 +29,6 @@ public class IQRouter {
 
     public IQRouter(IQChannel channel) {
         channel_ = channel;
-        final IQRouter thisObject = this;
         channel_.onIQReceived.connect(new Slot1<IQ>() {
 
             public void call(IQ p1) {

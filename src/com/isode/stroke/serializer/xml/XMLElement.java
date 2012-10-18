@@ -37,22 +37,22 @@ public class XMLElement implements XMLNode {
     }
 
     public String serialize() {
-        String result = "";
-        result += "<" + tag_;
+        StringBuilder result = new StringBuilder();
+        result.append("<").append(tag_);
         for (String key : attributes_.keySet()) {
-            result += " " + key + "=\"" + attributes_.get(key) + "\"";
+            result.append(" ").append(key).append("=\"").append(attributes_.get(key)).append("\"");
         }
 
         if (childNodes_.size() > 0) {
-            result += ">";
+            result.append(">");
             for (XMLNode node : childNodes_) {
-                result += node.serialize();
+                result.append(node.serialize());
             }
-            result += "</" + tag_ + ">";
+            result.append("</").append(tag_).append(">");
         } else {
-            result += "/>";
+            result.append("/>");
         }
-        return result;
+        return result.toString();
     }
 
     public void setAttribute(String attribute, String value) {

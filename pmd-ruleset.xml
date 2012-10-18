@@ -45,6 +45,7 @@
   <rule ref="rulesets/java/naming.xml">
     <exclude name="ShortVariable"/>
     <exclude name="ShortMethodName"/>
+    <exclude name="ShortClassName"/>
     <exclude name="LongVariable"/>
     <exclude name="AvoidFieldNameMatchingTypeName"/>
     <exclude name="AbstractNaming"/>

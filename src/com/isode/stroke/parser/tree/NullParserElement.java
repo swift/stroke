@@ -25,5 +25,5 @@ public class NullParserElement extends ParserElement{
     /**
      * Empty/Null Parser element 
      */
-    public static NullParserElement element = new NullParserElement();
+    public static final NullParserElement element = new NullParserElement();
 }
