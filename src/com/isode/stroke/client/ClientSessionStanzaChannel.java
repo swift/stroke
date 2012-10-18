@@ -41,19 +41,19 @@ public class ClientSessionStanzaChannel extends StanzaChannel {
         });
         sessionFinishedConnection = session.onFinished.connect(new Slot1<Error>() {
 
-            public void call(Error p1) {
+            public void call(final Error p1) {
                 handleSessionFinished(p1);
             }
         });
         sessionStanzaReceivedConnection = session.onStanzaReceived.connect(new Slot1<Stanza>() {
 
-            public void call(Stanza p1) {
+            public void call(final Stanza p1) {
                 handleStanza(p1);
             }
         });
         sessionStanzaAckedConnection = session.onStanzaAcked.connect(new Slot1<Stanza>() {
 
-            public void call(Stanza p1) {
+            public void call(final Stanza p1) {
                 handleStanzaAcked(p1);
             }
         });
@@ -94,8 +94,7 @@ public class ClientSessionStanzaChannel extends StanzaChannel {
         session.sendStanza(stanza);
     }
 
-    // NOPMD, ignore that Error isn't used.
-    private void handleSessionFinished(final Error error) {
+    private void handleSessionFinished(final Error error) { // NOPMD, ignore that Error isn't used.
         sessionFinishedConnection.disconnect();
         sessionStanzaReceivedConnection.disconnect();
         sessionStanzaAckedConnection.disconnect();

@@ -27,7 +27,9 @@ public class Client extends CoreClient {
 
     private final MUCManager mucManager;
     private final MUCRegistry mucRegistry;
+    //NOPMD, this is not better as a local variable
     private final DirectedPresenceSender directedPresenceSender;
+    //NOPMD, this is not better as a local variable
     private final StanzaChannelPresenceSender stanzaChannelPresenceSender;
     private final SoftwareVersionResponder softwareVersionResponder;
 

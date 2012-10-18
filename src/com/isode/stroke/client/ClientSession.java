@@ -66,7 +66,7 @@ public class ClientSession {
     private SignalConnection stanzaResponderAckConnection_;
     private JID localJID;
     private State state;
-    private SessionStream stream;
+    private final SessionStream stream;
     private boolean allowPLAINOverNonTLS;
     private boolean useStreamCompression;
     private UseTLS useTLS;
@@ -100,7 +100,7 @@ public class ClientSession {
     };
 
     public static class Error implements com.isode.stroke.base.Error {
-
+        public final Type type;
         public enum Type {
 
             AuthenticationFailedError,
@@ -115,13 +115,12 @@ public class ClientSession {
             StreamError
         };
 
-        public Error(Type type) {
+        public Error(final Type type) {
             if (type == null) {
                 throw new IllegalStateException();
             }
             this.type = type;
         }
-        public final Type type;
     };
 
     public enum UseTLS {
@@ -130,7 +129,7 @@ public class ClientSession {
         RequireTLS
     }
 
-    private ClientSession(JID jid, SessionStream stream) {
+    private ClientSession(final JID jid, final SessionStream stream) {
         localJID = jid;
         state = State.Initial;
         this.stream = stream;
@@ -144,7 +143,7 @@ public class ClientSession {
         authenticator = null;
     }
 
-    public static ClientSession create(JID jid, SessionStream stream) {
+    public static ClientSession create(final JID jid, final SessionStream stream) {
         return new ClientSession(jid, stream);
     }
 
@@ -152,19 +151,19 @@ public class ClientSession {
         return state;
     }
 
-    public void setAllowPLAINOverNonTLS(boolean b) {
+    public void setAllowPLAINOverNonTLS(final boolean b) {
         allowPLAINOverNonTLS = b;
     }
 
-    public void setUseStreamCompression(boolean b) {
+    public void setUseStreamCompression(final boolean b) {
         useStreamCompression = b;
     }
 
-    public void setUseTLS(UseTLS use) {
+    public void setUseTLS(final UseTLS use) {
         useTLS = use;
     }
 
-    public void setUseAcks(boolean use) {
+    public void setUseAcks(final boolean use) {
         useAcks = use;
     }
 
@@ -184,7 +183,7 @@ public class ClientSession {
         return State.Finished.equals(getState());
     }
 
-    public void setCertificateTrustChecker(CertificateTrustChecker checker) {
+    public void setCertificateTrustChecker(final CertificateTrustChecker checker) {
         certificateTrustChecker = checker;
     }
 
@@ -216,28 +215,28 @@ public class ClientSession {
     }
 
     private void sendStreamHeader() {
-        ProtocolHeader header = new ProtocolHeader();
+        final ProtocolHeader header = new ProtocolHeader();
 	header.setTo(getRemoteJID().toString());
 	stream.writeHeader(header);
     }
 
-    public void sendStanza(Stanza stanza) {
+    public void sendStanza(final Stanza stanza) {
         stream.writeElement(stanza);
 	if (stanzaAckRequester_ != null) {
             stanzaAckRequester_.handleStanzaSent(stanza);
 	}
     }
 
-    private void handleStreamStart(ProtocolHeader header) {
+    private void handleStreamStart(final ProtocolHeader header) {
         if (!checkState(State.WaitingForStreamStart)) {
             return;
         }
 	state = State.Negotiating;
     }
 
-    private void handleElement(Element element) {
+    private void handleElement(final Element element) {
        	if (element instanceof Stanza) {
-            Stanza stanza = (Stanza) element;
+            final Stanza stanza = (Stanza) element;
             if (stanzaAckResponder_ != null) {
                 stanzaAckResponder_.handleStanzaReceived();
             }
@@ -245,9 +244,9 @@ public class ClientSession {
                 onStanzaReceived.emit(stanza);
             }
             else if (stanza instanceof IQ) {
-                IQ iq = (IQ)stanza;
+                final IQ iq = (IQ)stanza;
                 if (getState().equals(State.BindingResource)) {
-                    ResourceBind resourceBind = iq.getPayload(new ResourceBind());
+                    final ResourceBind resourceBind = iq.getPayload(new ResourceBind());
                     if (IQ.Type.Error.equals(iq.getType()) && iq.getID().equals("session-bind")) {
                         finishSession(Error.Type.ResourceBindError);
                     }
@@ -290,7 +289,7 @@ public class ClientSession {
             }
         }
         else if (element instanceof StanzaAck) {
-            StanzaAck ack = (StanzaAck) element;
+            final StanzaAck ack = (StanzaAck) element;
             if (stanzaAckRequester_ != null) {
                 if (ack.isValid()) {
                     stanzaAckRequester_.handleAckReceived(ack.getHandledStanzasCount());
@@ -307,7 +306,7 @@ public class ClientSession {
             finishSession(Error.Type.StreamError);
         }
 	else if (State.Initialized.equals(getState())) {
-            Stanza stanza = element instanceof Stanza ? (Stanza)element : null;
+            final Stanza stanza = element instanceof Stanza ? (Stanza)element : null;
             if (stanza != null) {
                 if (stanzaAckResponder_ != null) {
                     stanzaAckResponder_.handleStanzaReceived();
@@ -316,11 +315,11 @@ public class ClientSession {
             }
         }
         else if (element instanceof StreamFeatures) {
-            StreamFeatures streamFeatures = (StreamFeatures) element;
             if (!checkState(State.Negotiating)) {
                 return;
             }
-
+            
+            final StreamFeatures streamFeatures = (StreamFeatures) element;
             if (streamFeatures.hasStartTLS() && stream.supportsTLSEncryption() && !UseTLS.NeverUseTLS.equals(useTLS)) {
                 state = State.WaitingForEncrypt;
                 stream.writeElement(new StartTLSRequest());
@@ -347,7 +346,7 @@ public class ClientSession {
                     stream.writeElement(new AuthRequest("EXTERNAL"));
                 }
                 else if (streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1") || streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS")) {
-                    SCRAMSHA1ClientAuthenticator scramAuthenticator = new SCRAMSHA1ClientAuthenticator(UUID.randomUUID().toString(), streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS"));
+                    final SCRAMSHA1ClientAuthenticator scramAuthenticator = new SCRAMSHA1ClientAuthenticator(UUID.randomUUID().toString(), streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS"));
                     if (stream.isTLSEncrypted()) {
                         scramAuthenticator.setTLSChannelBindingData(stream.getTLSFinishMessage());
                     }
@@ -425,7 +424,7 @@ public class ClientSession {
             continueSessionInitialization();
         }
         else if (element instanceof AuthChallenge) {
-            AuthChallenge challenge = (AuthChallenge) element;
+            final AuthChallenge challenge = (AuthChallenge) element;
             checkState(State.Authenticating);
             assert authenticator != null;
             if (authenticator.setChallenge(challenge.getValue())) {
@@ -436,7 +435,7 @@ public class ClientSession {
             }
 	}
 	else if (element instanceof AuthSuccess) {
-            AuthSuccess authSuccess = (AuthSuccess)element;
+            final AuthSuccess authSuccess = (AuthSuccess)element;
             checkState(State.Authenticating);
             if (authenticator != null && !authenticator.setChallenge(authSuccess.getValue())) {
                 finishSession(Error.Type.ServerVerificationFailedError);
@@ -492,8 +491,8 @@ public class ClientSession {
         }
     }
 
-    private boolean checkState(State state) {
-        State currentState = this.state; /* For symbol debugging, as the following overwrites it */
+    private boolean checkState(final State state) {
+        final State currentState = this.state; /* For symbol debugging, as the following overwrites it */
         if (!currentState.equals(state)) {
             finishSession(Error.Type.UnexpectedElementError);
             return false;
@@ -501,7 +500,7 @@ public class ClientSession {
         return true;
     }
 
-    public void sendCredentials(String password) {
+    public void sendCredentials(final String password) {
         if (!checkState(State.WaitingForCredentials)) {
             throw new IllegalStateException("Asking for credentials when we shouldn't be asked.");
         }
@@ -514,8 +513,8 @@ public class ClientSession {
         if (!checkState(State.Encrypting)) {
             return;
         }
-        Certificate certificate = stream.getPeerCertificate();
-        CertificateVerificationError verificationError = stream.getPeerCertificateVerificationError();
+        final Certificate certificate = stream.getPeerCertificate();
+        final CertificateVerificationError verificationError = stream.getPeerCertificateVerificationError();
         if (verificationError != null) {
             checkTrustOrFinish(certificate, verificationError);
         }
@@ -530,7 +529,7 @@ public class ClientSession {
         }
     }
 
-    private void checkTrustOrFinish(Certificate certificate, CertificateVerificationError error) {
+    private void checkTrustOrFinish(final Certificate certificate, final CertificateVerificationError error) {
         if (certificateTrustChecker != null && certificateTrustChecker.isCertificateTrusted(certificate)) {
             continueAfterTLSEncrypted();
         }
@@ -545,8 +544,8 @@ public class ClientSession {
         sendStreamHeader();
     }
 
-    private void handleStreamClosed(SessionStream.Error streamError) {
-	State previousState = state;
+    private void handleStreamClosed(final SessionStream.Error streamError) {
+	final State previousState = state;
 	state = State.Finished;
 
 	if (stanzaAckRequester_ != null) {
@@ -576,7 +575,7 @@ public class ClientSession {
         finishSession((Error.Type)null);
     }
 
-    private void finishSession(Error.Type error) {
+    private void finishSession(final Error.Type error) {
         Error localError = null;
         if (error != null) {
             localError = new Error(error);
@@ -584,7 +583,7 @@ public class ClientSession {
         finishSession(localError);
     }
 
-    private void finishSession(com.isode.stroke.base.Error error) {
+    private void finishSession(final com.isode.stroke.base.Error error) {
         state = State.Finishing;
 	error_ = error;
 	assert stream.isOpen();
@@ -599,11 +598,11 @@ public class ClientSession {
         stream.writeElement(new StanzaAckRequest());
     }
 
-    private void handleStanzaAcked(Stanza stanza) {
+    private void handleStanzaAcked(final Stanza stanza) {
         onStanzaAcked.emit(stanza);
     }
 
-    private void ack(long handledStanzasCount) {
+    private void ack(final long handledStanzasCount) {
         stream.writeElement(new StanzaAck(handledStanzasCount));
     }
 
