@@ -110,6 +110,9 @@ public class MUCPayload extends Payload {
      * @return date, ca be null if not set
      */
     public Date getSince() {
+        if(since_ == null) {
+            return null;
+        }
         return (Date)since_.clone();
     }
 }
