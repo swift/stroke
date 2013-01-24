@@ -1,4 +1,4 @@
-/*  Copyright (c) 2012, Isode Limited, London, England.
+/*  Copyright (c) 2012-2013, Isode Limited, London, England.
  *  All rights reserved.
  *
  *  Acquisition and use of this software and related materials for any
@@ -53,7 +53,7 @@ import com.isode.stroke.tls.TLSContext;
  * 
  */
 public class JSSEContext extends TLSContext {
-
+    
     private static class JSSEContextError {
         public final Exception exception;
         public final String message;
@@ -176,18 +176,13 @@ public class JSSEContext extends TLSContext {
          * some data from the application.  And the higher level won't send 
          * any data until it thinks the handshake is completed.  
          *
-         * So this is a hack to force the handshake to occur: on the assumption
-         * that the first thing to be sent once TLS is running is 
-         * the "<" from the start of a tag, we send a less-than sign now, 
-         * which we'll remember must be removed that from the first message
-         * we get told to send.
+         * So as well as calling beginHandshake(), we also call wrapAndSendData()
+         * even though there is actually no data yet to send.  But sending this
+         * empty buffer will prompt the SSLEngine into doing the handshake.
          */
         
         sslEngine.beginHandshake();
-
-        ByteArray ba = new ByteArray("<".getBytes());
-        hack = HackStatus.SENDING_FAKE_LT;
-        handleDataFromApplication(ba);
+        wrapAndSendData();
                 
     }
 
@@ -314,8 +309,10 @@ public class JSSEContext extends TLSContext {
      * in "plainToSend", and then send all of that to the socket.  Caller
      * is responsible for checking the handshake status on return
      * 
+     * @return the number of bytes that were sent out to the network
+     * 
      */
-    private void wrapAndSendData() {
+    private int wrapAndSendData() {
 
         int bytesSentToSocket = 0;
         ByteArray byteArray = null;
@@ -323,7 +320,7 @@ public class JSSEContext extends TLSContext {
         Status status = null;
         HandshakeStatus handshakeStatus = null;
         boolean handshakeFinished = false;
-       
+        
         synchronized(sendMutex) {
             /* Check if there's anything outstanding to be sent at the
              * top of the loop, so that we clear the "wrappedToSend"
@@ -340,8 +337,8 @@ public class JSSEContext extends TLSContext {
             wrappedToSend.compact();
         } /* end synchronized */
 
-        if (byteArray != null) {
-            int s = byteArray.getSize();
+        if (byteArray != null ) {
+            int s =  byteArray.getSize();
             onDataForNetwork.emit(byteArray);
             bytesSentToSocket += s;
             byteArray = null;
@@ -352,10 +349,13 @@ public class JSSEContext extends TLSContext {
          */
         synchronized(sendMutex) {
             plainToSend.flip();
-            if (!plainToSend.hasRemaining()) {
+            /* If the SSL handshake hasn't completed, then there may not be 
+             * any data from the client in plainToSend
+             */
+            if (!plainToSend.hasRemaining() && handshakeCompleted) {
                 /* Nothing more to be encrypted */
                 plainToSend.compact();
-                return;
+                return bytesSentToSocket;
             }
             try {
                 boolean wrapDone = false;
@@ -379,7 +379,7 @@ public class JSSEContext extends TLSContext {
             catch (SSLException e) {
                 /* This could result from the "enlargeBuffer" running out of space */
                 emitError(e,"SSLEngine.wrap failed");
-                return;
+                return bytesSentToSocket;
             }
             plainToSend.compact();
 
@@ -413,7 +413,7 @@ public class JSSEContext extends TLSContext {
                 /* We already dealt with this, so don't expect to come here
                  */
                 emitError(null, "SSLEngine.wrap returned " + status);
-                return;
+                return bytesSentToSocket;
 
             }
         } /* end synchronized */
@@ -433,7 +433,7 @@ public class JSSEContext extends TLSContext {
         /* Note that there may still be stuff in "plainToSend" that hasn't
          * yet been consumed
          */
-        return;
+        return bytesSentToSocket;
 
     }
 
@@ -468,6 +468,7 @@ public class JSSEContext extends TLSContext {
             wrapAndSendData();
             /* after sending data, need to check handshake status again */
             return true;
+
         case NEED_UNWRAP:
             
             /* SSLEngine wants data from other side that it can unwrap and
@@ -759,36 +760,12 @@ public class JSSEContext extends TLSContext {
                     chunkSize = remaining;
                 }
                 try {
-
                     /* Note that "plainToSend" may not be empty, because it's possible
                      * that calls to SSLEngine.wrap haven't yet consumed everything
                      * in there
                      */
-                    switch (hack) {
-                    case SENDING_FAKE_LT :
-                        plainToSend.put(b, chunkPos, chunkSize);
-                        hack = HackStatus.DISCARD_FIRST_LT;
-                        break;
-
-                    case DISCARD_FIRST_LT:
-                        if (b.length > 0) {
-                            if (b[0] == (byte)'<') {
-                                plainToSend.put(b,1,chunkSize - 1);
-                                hack = HackStatus.HACK_DONE;
-                            }
-                            else {
-                                emitError(null,
-                                        "First character sent after TLS started was " + 
-                                        b[0] + " and not '<'"); 
-                                return;
-                            }
-                        }
-                        break;
-                    case HACK_DONE:
-                        plainToSend.put(b, chunkPos, chunkSize);
-                        break;
-                    }
                     
+                    plainToSend.put(b, chunkPos, chunkSize);
                     remaining = (remaining - chunkSize);
                     chunkPos = (chunkPos + chunkSize);
                 }
@@ -806,7 +783,7 @@ public class JSSEContext extends TLSContext {
                 }
             }
 
-            wrapAndSendData();
+            int sentBytes = wrapAndSendData();
 
             /* Now keep checking SSLEngine until no more handshakes are required */
             do {
@@ -927,16 +904,7 @@ public class JSSEContext extends TLSContext {
      * may be null if no error was found.
      */
     private CertificateVerificationError peerCertificateVerificationError = null;
-    
-    /**
-     * Used to remember what state we're in when doing the hack to overcome the
-     * issue of SSLEngine not starting to handshake until it's got some data
-     * to send
-     */
-    private static enum HackStatus { SENDING_FAKE_LT, DISCARD_FIRST_LT, HACK_DONE }
-    private HackStatus hack = HackStatus.SENDING_FAKE_LT;
-
-          
+              
     private final Logger logger_ = Logger.getLogger(this.getClass().getName());
     
     private KeyManager myKeyManager_ = null;

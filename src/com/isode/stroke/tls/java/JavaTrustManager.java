@@ -52,7 +52,7 @@ public class JavaTrustManager implements X509TrustManager {
             "passphrase".toCharArray());
              */
             TrustManagerFactory tmf =
-                TrustManagerFactory.getInstance("PKIX");
+                    TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
             tmf.init(ks);
 
             TrustManager tms [] = tmf.getTrustManagers();
