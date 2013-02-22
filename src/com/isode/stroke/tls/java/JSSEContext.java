@@ -20,6 +20,7 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
@@ -37,8 +38,10 @@ import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLEngineResult.HandshakeStatus;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.net.ssl.SSLException;
+import javax.net.ssl.X509ExtendedKeyManager;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.tls.CAPICertificate;
 import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.CertificateVerificationError.Type;
@@ -47,12 +50,15 @@ import com.isode.stroke.tls.PKCS12Certificate;
 import com.isode.stroke.tls.TLSContext;
 
 
+
 /**
  * Concrete implementation of a TLSContext which uses SSLEngine 
  * and maybe other stuff? ..tbs...
  * 
  */
 public class JSSEContext extends TLSContext {
+
+	
     
     private static class JSSEContextError {
         public final Exception exception;
@@ -425,6 +431,7 @@ public class JSSEContext extends TLSContext {
         
         if (byteArray != null) {
             int s = byteArray.getSize();
+
             onDataForNetwork.emit(byteArray);
             bytesSentToSocket += s;
             byteArray = null;
@@ -584,25 +591,17 @@ public class JSSEContext extends TLSContext {
         
     }
     
-    
-    @Override
-    public boolean setClientCertificate(CertificateWithKey cert) {
-        if (cert == null || cert.isNull()) {
-            emitError(null,cert + " has no useful contents");
-            return false;
-        }
-        if (!(cert instanceof PKCS12Certificate)) {
-            emitError(null,"setClientCertificate can only work with PKCS12 objects");
-            return false;
-        }
-        PKCS12Certificate p12 = (PKCS12Certificate)cert;
-        if (!p12.isPrivateKeyExportable()) {
-            emitError(null,cert + " does not have exportable private key");
+    /**
+     * Private method to handle PKCS12Certificate case for setClientCertificate
+     */
+    private boolean setClientCertificatePKCS12(PKCS12Certificate p12Cert) {
+        if (!p12Cert.isPrivateKeyExportable()) {
+            emitError(null,p12Cert + " does not have exportable private key");
             return false;
         }
         
         /* Get a reference that can be used in any error messages */
-        File p12File = new File(p12.getCertStoreName());
+        File p12File = new File(p12Cert.getCertStoreName());
         
         /* Attempt to build a usable identity from the P12 file. This set of
          * operations can result in a variety of exceptions, all of which
@@ -618,14 +617,14 @@ public class JSSEContext extends TLSContext {
             kmf = KeyManagerFactory.getInstance("SunX509");
             
             /* The PKCS12Certificate object has read the file contents already */
-            ByteArray ba = p12.getData();
+            ByteArray ba = p12Cert.getData();
             byte[] p12Bytes = ba.getData();
                         
             ByteArrayInputStream bis = new ByteArrayInputStream(p12Bytes);
             
             /* Both of the next two calls require that we supply the password */
-            keyStore.load(bis, p12.getPassword());
-            kmf.init(keyStore, p12.getPassword());
+            keyStore.load(bis, p12Cert.getPassword());
+            kmf.init(keyStore, p12Cert.getPassword());
             
             KeyManager[] keyManagers = kmf.getKeyManagers();
             if (keyManagers == null || keyManagers.length == 0) {
@@ -662,6 +661,185 @@ public class JSSEContext extends TLSContext {
         
         /* Fall through here after any exception */
         return false;
+        
+    }
+
+    /**
+     * Structure used to keep track of a KeyStore/alias tuple
+     */
+    private static class KeyStoreAndAlias {
+        public KeyStore keyStore;
+        public String alias;
+        KeyStoreAndAlias(KeyStore keyStore, String alias) {
+            this.keyStore = keyStore;
+            this.alias = alias;
+        }
+    }
+    
+    
+    /**
+     * See if a given X509Certificate can be found in a specific CAPI keystore. 
+     * @param x509Cert the certificate to look for. Must not be null.
+     * @param keyStoreName the name of the keystore to search. Must not be null.
+     * @return a StoreAndAlias object containing references the keystore and
+     * alias which match, or null if <em>x509Cert</em> was not found.
+     */
+    private KeyStoreAndAlias findCAPIKeyStoreForCertificate(
+            X509Certificate x509Cert, 
+            String keyStoreName) {
+        
+        KeyStore ks = null;
+             
+        /* Try to instantiate a CAPI keystore. This will fail on non-Windows
+         * platforms
+         */      
+        try {
+            ks = KeyStore.getInstance(keyStoreName, CAPIConstants.sunMSCAPIProvider);
+        }
+        catch (NoSuchProviderException e) {  
+            /* Quite likely we're not on Windows */
+            emitError(e, "Unable to instantiate " + CAPIConstants.sunMSCAPIProvider + " provider");
+            return null;
+        }
+        catch (KeyStoreException e) {
+            /* The keystore name is not right. Most likely the caller specified
+             * an unrecognized keystore name when creating the CAPICertificate.
+             */
+            emitError(e, "Cannot load " + keyStoreName + " from " + CAPIConstants.sunMSCAPIProvider);
+            return null;
+        }
+
+        /* All the exceptions that might be thrown here need to be caught but
+         * indicate something unexpected has happened, so the catch clauses 
+         * all emit errors
+         */
+        try {
+            /* For a CAPI keystore, no parameters are required for loading */       
+            ks.load(null,null);            
+            String alias = ks.getCertificateAlias(x509Cert);
+            
+            return (alias == null ? null : new KeyStoreAndAlias(ks, alias));
+
+        } catch (CertificateException e) {
+            emitError(e, "Unexpected exception when loading CAPI keystore");            
+            return null;             
+        } catch (NoSuchAlgorithmException e) {
+            emitError(e, "Unexpected exception when loading CAPI keystore");            
+            return null;             
+        } catch (IOException e) {
+            /* This exception is meant to be for when you're loading a keystore
+             * from a file, and so isn't expected for a CAPI, so emit an error 
+             * error 
+             */
+            emitError(e, "Unexpected exception when loading CAPI keystore");
+            return null;
+        } catch (KeyStoreException e) {
+            /* Thrown by KeyStore.getCertificateAlias when the keystore 
+             * hasn't been initialized, so not expected here
+             */
+            emitError(e, "Unexpected exception when reading CAPI keystore");
+            return null;            
+        }
+    }
+    
+
+    
+    /**
+     * Private method to handle CAPICertificate case for setClientCertificate
+     * @param capiCert a CAPICertificate, not null.
+     * @return <em>true</em> if the operation was successful, <em>false</em>
+     * otherwise.
+     */
+    private boolean setClientCertificateCAPI(CAPICertificate capiCert) {
+        KeyStoreAndAlias keyStoreAndAlias = null;
+
+        X509Certificate x509Cert = capiCert.getX509Certificate();
+        String keyStoreName = capiCert.getKeyStoreName();
+        
+        if (keyStoreName != null) {
+            keyStoreAndAlias = findCAPIKeyStoreForCertificate(x509Cert, keyStoreName);
+        }
+        else {
+            /* Try the list of predefined values, looking for the first match */            
+            for (String keyStore:CAPIConstants.knownSunMSCAPIKeyStores) {
+                keyStoreAndAlias = findCAPIKeyStoreForCertificate(x509Cert, keyStore);
+                if (keyStoreAndAlias != null) {
+                    break;
+                }
+            }
+        }
+        if (keyStoreAndAlias == null) {
+            emitError(null,"Unable to load " + capiCert + " from CAPI");
+            return false;
+        }
+
+        KeyManagerFactory kmf = null;
+
+        try {    
+
+            String defaultAlg = KeyManagerFactory.getDefaultAlgorithm();
+
+            kmf = KeyManagerFactory.getInstance(defaultAlg);
+            kmf.init(keyStoreAndAlias.keyStore,null);
+            KeyManager[] kms = kmf.getKeyManagers();
+            if (kms != null && kms.length > 0) {
+                /* Successfully loaded the KeyManager. Look for the first 
+                 * one which is suitable for our use (there's almost certainly
+                 * only one in the list in any case)
+                 */
+                for (KeyManager km:kms) { 
+                    if (km instanceof X509ExtendedKeyManager) {
+                        CAPIKeyManager ckm = new CAPIKeyManager(
+                                (X509ExtendedKeyManager)km);
+                        
+                        /* Make sure that the alias used for client certificate
+                         * is the one that the caller asked for 
+                         */
+                        ckm.setEngineClientAlias(keyStoreAndAlias.alias);
+                        myKeyManager_ = ckm;
+                        return true;
+                    }
+                }
+                emitError(null,"Unable to find suitable X509ExtendedKeyManager");
+                return false;                
+            }
+            return false;
+
+        } catch (NoSuchAlgorithmException e) {
+            /* From KeyManagerFactory.getInstance() or KeyManagerFactory.init() */
+            return false;
+        } catch (UnrecoverableKeyException e) {
+            /* From KeyManagerFactory.init() */
+            return false;
+        } catch (KeyStoreException e) {
+            /* From KeyManagerFactory.init() */
+            return false;
+        } 
+    }
+    
+    @Override
+    public boolean setClientCertificate(CertificateWithKey cert) {
+        if (cert == null || cert.isNull()) {
+            emitError(null,cert + " has no useful contents");
+            return false;
+        }
+        
+        /* Use subclass-specific method depending on what subclass it is */
+        if (cert instanceof PKCS12Certificate) {
+            return setClientCertificatePKCS12((PKCS12Certificate)cert);
+        }
+        
+        if (cert instanceof CAPICertificate) {
+            return setClientCertificateCAPI((CAPICertificate)cert);
+        }
+        
+        /* Not a type that is recognised 
+         */
+        emitError(null,"setClientCertificate cannot work with " 
+                + cert.getClass() + " objects");
+
+        return false;
+
     }
 
     @Override
@@ -959,8 +1137,8 @@ public class JSSEContext extends TLSContext {
         
         SSLContext sslContext = null;
         for (String protocol:protocols) {
-            try {
-                sslContext = SSLContext.getInstance(protocol);
+            try {            	
+				sslContext = SSLContext.getInstance(protocol);
                 
                 /* If a KeyManager has been set up in setClientCertificate()
                  * then use it; otherwise the "default" implementation will be 
