@@ -26,6 +26,8 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -117,12 +119,13 @@ public class JSSEContext extends TLSContext {
     @Override
     public void connect() {
         try {
-            doSetup();
+            doSetup();            
         }
         catch (SSLException e) {
             emitError(e,"doSetup() failed");
         }       
     }
+
 
     private void doSetup() throws SSLException {
         SSLContext sslContext = getSSLContext();
@@ -142,6 +145,23 @@ public class JSSEContext extends TLSContext {
         catch (IllegalStateException e) {
             /* "the SSLContextImpl requires initialization and init() has not been called" */
             throw new SSLException(e);
+        }
+        
+        /* Restrict cipher suites if necessary */
+        if (restrictedCipherSuites != null) {
+            String[] supportedSuites = sslEngine.getSupportedCipherSuites();
+            Set<String> matchedSuites = new HashSet<String>();
+            for (String suite:supportedSuites) {
+                if (restrictedCipherSuites.contains(suite)) {
+                    matchedSuites.add(suite);
+                }
+            }
+            String[] suitesToEnable = new String[]{};
+            if (!matchedSuites.isEmpty()) {
+                suitesToEnable = (String[])matchedSuites.toArray();
+            }
+        
+            sslEngine.setEnabledCipherSuites(suitesToEnable);
         }
                 
         sslEngine.setUseClientMode(true); /* I am a client */
@@ -1018,10 +1038,21 @@ public class JSSEContext extends TLSContext {
 
     /**
      * Construct a new JSSEContext object. 
+     * @param restrictedCipherSuites a list of cipher suites that are to be
+     * enabled for this context. Null means no restriction
      */
-    public JSSEContext() {
-        /* */
+    public JSSEContext(Set<String> restrictedCipherSuites) {
+        if (restrictedCipherSuites != null) {
+            this.restrictedCipherSuites = new HashSet<String>(restrictedCipherSuites);
+        }
     }
+    
+
+    /**
+     * Specific list of suites to allow - null (the default) means
+     * no restriction.
+     */
+    private Set<String> restrictedCipherSuites = null;
 
     /**
      * Reference to the SSLEngine being used
