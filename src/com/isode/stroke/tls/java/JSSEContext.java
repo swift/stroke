@@ -247,13 +247,19 @@ public class JSSEContext extends TLSContext {
                      * a status is an indication that we need to re-check whether
                      * anything's pending to be written
                      */
-                    if (handshakeStatus == HandshakeStatus.FINISHED) {
+                    if (handshakeStatus == HandshakeStatus.FINISHED ||
+			(!handshakeCompleted &&
+			 handshakeStatus == HandshakeStatus.NOT_HANDSHAKING)) {
                         /* Special case will happen when the handshake completes following
                          * an unwrap.  The first time we tried wrapping some plain stuff,
                          * it triggers the handshake but won't itself have been dealt with.
                          * So now the handshake has finished, we have to try sending it
                          * again
-                         */
+			 * The second checking clause is necessary for certain
+			 * SSLEngine implementations (notably Apache Harmony
+			 * used on Android) which never return FINISHED
+			 */
+
                         handshakeCompleted = true;
                         wrapAndSendData();
                         onConnected.emit();
@@ -410,9 +416,14 @@ public class JSSEContext extends TLSContext {
             plainToSend.compact();
 
             /* FINISHED can only come back for wrap() or unwrap(); so check to 
-             * see if we just had it
+             * see if we just had it.
+	     * The second checking clause is necessary for certain
+	     * SSLEngine implementations (notably Apache Harmony
+	     * used on Android) which never return FINISHED
              */
-            if (handshakeStatus == HandshakeStatus.FINISHED) {
+            if (handshakeStatus == HandshakeStatus.FINISHED ||
+		(!handshakeCompleted &&
+		 handshakeStatus == HandshakeStatus.NOT_HANDSHAKING)) {
                 handshakeFinished = true;
             }
 
