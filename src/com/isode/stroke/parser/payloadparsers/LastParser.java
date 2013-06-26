@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Isode Limited, London, England.
+ * Copyright (c) 2011-2013, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -23,10 +23,10 @@ public class LastParser extends GenericPayloadParser<Last> {
 
     public void handleStartElement(String element, String ns, AttributeMap attributes) {
         if (level_ == 0) {
-            int seconds = 0;
+            Long seconds = null;
 
 		try {
-			seconds = Integer.parseInt(attributes.getAttribute("seconds"));
+			seconds = Long.parseLong(attributes.getAttribute("seconds"));
 		}
 		catch (NumberFormatException ex) {
 		}

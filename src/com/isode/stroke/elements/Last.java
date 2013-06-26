@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Isode Limited, London, England.
+ * Copyright (c) 2011-2013, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -10,19 +10,19 @@
 package com.isode.stroke.elements;
 
 public class Last extends Payload {
-    int seconds_;
+    Long seconds_;
 
     public Last() {}
 
-    public Last(final int seconds) {
+    public Last(final Long seconds) {
         setSeconds(seconds);
     }
 
-    public void setSeconds(final int seconds) {
+    public void setSeconds(final Long seconds) {
         seconds_ = seconds;
     }
 
-    public int getSeconds() {
+    public Long getSeconds() {
         return seconds_;
     }
 }

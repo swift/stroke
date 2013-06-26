@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Isode Limited, London, England.
+ * Copyright (c) 2011-2013 Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -19,6 +19,9 @@ public class LastSerializer extends GenericPayloadSerializer<Last> {
 
     @Override
     protected String serializePayload(Last last) {
-        return "<query xmlns='jabber:iq:last' seconds='" + Integer.toString(last.getSeconds()) + "'/>";
+        if(last.getSeconds() == null) {
+            return  "<query xmlns='jabber:iq:last'/>";
+        }
+        return "<query xmlns='jabber:iq:last' seconds='" + Long.toString(last.getSeconds()) + "'/>";
     }
 }
