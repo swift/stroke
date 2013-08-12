@@ -90,7 +90,12 @@ public class JSSEContext extends TLSContext {
      * Whether the handshake has finished
      */
     private boolean handshakeCompleted = false;
-    
+
+    /**
+     * Whether the server has sent a close notification
+     */
+    private boolean closeNotifyReceived = false;
+
     /**
      * Determine whether an error has occurred.  If an error has occurred, then
      * you probably don't want to try doing any more stuff.
@@ -280,12 +285,26 @@ public class JSSEContext extends TLSContext {
                          */
                         unwrapDone = true;
                         break;
-                    case CLOSED:
-                        /* Engine closed - don't expect this here */
-                        emitError(null, "SSLEngine.unwrap returned " + status);
-                        return bytesConsumed;
-                        
-                    case OK:
+		    case CLOSED:
+			/* This is taken to mean that the server end has
+			 * sent "SSL close notify alert".  Once it sees this,
+			 * ths SSLEngine will respond by generating an
+			 * appropriate handshake response that should be
+			 * sent to the server (as per RFC 2246 7.2.1).  
+			 * In this case, the SSLEngine will move into a
+			 * NEED_WRAP state, and we should emit whatever data
+			 * it's generated over the network.
+			 */
+			closeNotifyReceived = true;
+
+			/* Tell the SSLEngine that the application won't be
+			 * sending any more data (this probably has no effect
+			 * but it does no harm).
+			 */
+			sslEngine.closeOutbound();
+			return bytesConsumed;
+
+		    case OK:
                         /* Some stuff was unwrapped. */
                         bytesConsumed += sslEngineResult.bytesConsumed();
                         bytesProduced = sslEngineResult.bytesProduced();
@@ -381,15 +400,16 @@ public class JSSEContext extends TLSContext {
          */
         synchronized(sendMutex) {
             plainToSend.flip();
-            /* If the SSL handshake hasn't completed, then there may not be 
-             * any data from the client in plainToSend
-             */
-            if (!plainToSend.hasRemaining() && handshakeCompleted) {
-                /* Nothing more to be encrypted */
-                plainToSend.compact();
-                return bytesSentToSocket;
-            }
-            try {
+	    /* It does no harm to call SSLEngine.wrap if there is nothing in
+	     * "plainToSend" and this will be required in at least two
+	     * cases:
+	     * - during the initial handshake, when the application hasn't
+	     *   yet sent anything, but wrap() must be called to generate
+	     *   the TLS handshake data
+	     * - during closure, when wrap() will generate the response to
+	     *   the server's close notify message
+	     */
+	    try {
                 boolean wrapDone = false;
                 do {
                     sslEngineResult = sslEngine.wrap(plainToSend, wrappedToSend);
@@ -428,9 +448,21 @@ public class JSSEContext extends TLSContext {
             }
 
             switch (status) {
+            case CLOSED :
+                /* Engine closed - this is expected if a close notify has
+		 * been sent by the server, and the SSLEngine has finished
+		 * generating the response to that message.
+		 */
+		if (!closeNotifyReceived) {
+		    emitError(null, "SSLEngine.wrap returned " + status);
+		    return (bytesSentToSocket);
+		}
+		/* CLOSED was expected, so fall through to OK, in order
+		 * to send the close response back to the server
+		 */
             case OK:
-                /* This is the only status we expect here. It means the
-                 * data was successfully wrapped and that there's something
+                /* This is the status we expect here. It means data
+                 * was successfully wrapped and that there's something
                  * to be sent.
                  */  
                 wrappedToSend.flip();
@@ -444,8 +476,6 @@ public class JSSEContext extends TLSContext {
 
             case BUFFER_UNDERFLOW:
                 /* Can't happen for a wrap */
-            case CLOSED :
-                /* Engine closed - don't expect this here */
             case BUFFER_OVERFLOW:
                 /* We already dealt with this, so don't expect to come here
                  */
@@ -935,6 +965,15 @@ public class JSSEContext extends TLSContext {
                 /* */
             } while (processHandshakeStatus());
             
+            if (closeNotifyReceived) {
+                /* This is the only way to let the application know that close 
+                 * notify was received.  This check is done after finishing with
+                 * the handshake checks, so that the SSLEngine's response to 
+                 * the close notify has been dealt with.
+                 */
+                emitError(null, "SSL Close notify received");
+                return;
+            }
             
             /* Loop round so long as there are still bytes from the network
              * to be processed
@@ -949,6 +988,13 @@ public class JSSEContext extends TLSContext {
             onError.emit();        
             return;
         }
+	if (closeNotifyReceived) {
+	    /* After the server has closed the TLS connection, no more
+	     * application data should be sent.
+	     */
+	    emitError(null,
+	      "handleDataFromApplication called after SSLEngine closed");
+	}
         byte[] b = data.getData();
 
         /* Need to cope in the case that the application sends a ByteArray
