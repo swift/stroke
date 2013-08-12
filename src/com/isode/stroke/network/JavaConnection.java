@@ -131,10 +131,15 @@ public class JavaConnection extends Connection implements EventOwner {
             } finally {
                 if(socketChannel_ != null) {
                     try {
-                        socketChannel_.close();
-                        selector_.close();
+                        socketChannel_.close();                        
                     } catch (IOException ex) {
                         /* Do we need to return an error if we're already trying to close? */
+                    }
+                    if(selector_ != null) {
+                        try {
+                            selector_.close();
+                        } catch (IOException e) {
+                        }
                     }
                 }
             }
