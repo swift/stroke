@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2013, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -15,7 +15,6 @@ import com.isode.stroke.elements.Stanza;
 import com.isode.stroke.elements.StreamType;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.network.Connection;
-import com.isode.stroke.network.ConnectionFactory;
 import com.isode.stroke.network.Connector;
 import com.isode.stroke.network.DomainNameResolveError;
 import com.isode.stroke.network.NetworkFactories;
@@ -34,7 +33,6 @@ import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.CertificateWithKey;
-import com.isode.stroke.tls.PlatformTLSFactories;
 
 /**
  * The central class for communicating with an XMPP server.
@@ -101,7 +99,6 @@ public class CoreClient {
     private ClientOptions options;
     private CertificateTrustChecker certificateTrustChecker;
     private NetworkFactories networkFactories;
-    private PlatformTLSFactories tlsFactories;
     private SignalConnection sessionStreamDataReadConnection_;
     private SignalConnection sessionStreamDataWrittenConnection_;
     private SignalConnection sessionFinishedConnection_;
@@ -157,7 +154,6 @@ public class CoreClient {
         });
 
         iqRouter_ = new IQRouter(stanzaChannel_);
-        tlsFactories = new PlatformTLSFactories();
     }
 
     /*CoreClient::~CoreClient() {
@@ -252,7 +248,7 @@ public class CoreClient {
             connection_ = connection;
 
             assert (sessionStream_ == null);
-            sessionStream_ = new BasicSessionStream(StreamType.ClientStreamType, connection_, payloadParserFactories_, payloadSerializers_, tlsFactories.getTLSContextFactory(), networkFactories.getTimerFactory());
+            sessionStream_ = new BasicSessionStream(StreamType.ClientStreamType, connection_, payloadParserFactories_, payloadSerializers_, networkFactories.getTLSContextFactory(), networkFactories.getTimerFactory());
             if (certificate_ != null && !certificate_.isNull()) {
                 sessionStream_.setTLSCertificate(certificate_);
             }
