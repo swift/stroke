@@ -25,7 +25,9 @@ public class PlatformDomainNameResolver extends DomainNameResolver {
             public void run() {
                 final Collection<HostAddress> results = new ArrayList<HostAddress>();
                 try {
-                    results.add(new HostAddress(InetAddress.getByName(hostname)));
+                    for (InetAddress result : InetAddress.getAllByName(hostname)) {
+                        results.add(new HostAddress(result));
+                    }
                 } catch (UnknownHostException ex) {
                 }
                 eventLoop.postEvent(new Callback() {
