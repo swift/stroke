@@ -21,6 +21,9 @@ public class ServerIdentityVerifier {
     }
 
     public boolean certificateVerifies(Certificate certificate) {
+        if (certificate==null) {
+            return false;
+        }
         boolean hasSAN = false;
 
         // DNS names
