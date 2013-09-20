@@ -9,7 +9,6 @@
 package com.isode.stroke.parser;
 
 import com.isode.stroke.elements.ProtocolHeader;
-import com.isode.stroke.eventloop.EventLoop;
 import java.util.logging.Logger;
 
 
@@ -40,6 +39,9 @@ public class XMPPParser implements XMLParserClient {
         }
         if (parseErrorOccurred_ || !xmlParseResult) {
             logger_.warning(String.format("When parsing, %b and %b", parseErrorOccurred_, xmlParseResult));
+            if(data !=null) {
+                logger_.warning("xml that caused failure: " + data);  
+            }
         }
         return xmlParseResult && !parseErrorOccurred_;
     }
