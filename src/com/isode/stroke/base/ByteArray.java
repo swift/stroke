@@ -77,7 +77,7 @@ public class ByteArray {
      * @return array copy of internal data, will never be null, but may
      * contain zero elements.
      */
-    public synchronized byte[] getData() {
+    public byte[] getData() {
         if (dataCopy_ == null) {
             dataCopy_ = new byte[getSize()];
             for (int i = 0; i < data_.size(); i++) {
@@ -167,7 +167,7 @@ public class ByteArray {
      * @param b a single byte
      * @return a reference to the updated object
      */
-    public synchronized ByteArray append(byte b) {
+    public ByteArray append(byte b) {
         dataCopy_ = null; /* Invalidate cache */
         data_.add(Byte.valueOf(b));
         return this;
@@ -278,7 +278,7 @@ public class ByteArray {
     /**
      * Clears the contents of this ByteArray, leaving it with zero elements.
      */
-    public synchronized void clear() {
+    public void clear() {
         data_ = new Vector<Byte>();
         dataCopy_ = null;
     }

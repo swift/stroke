@@ -8,6 +8,7 @@
  */
 package com.isode.stroke.network;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -16,6 +17,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,7 +31,7 @@ public class JavaConnection extends Connection implements EventOwner {
     private class Worker implements Runnable {
 
         private final HostAddressPort address_;
-        private final List<ByteArray> writeBuffer_ = Collections.synchronizedList(new ArrayList<ByteArray>());
+        private final List<byte[]> writeBuffer_ = Collections.synchronizedList(new ArrayList<byte[]>());
 
         public Worker(HostAddressPort address) {
             address_ = address;
@@ -156,8 +158,7 @@ public class JavaConnection extends Connection implements EventOwner {
                 return;
             }
 
-            ByteArray data = writeBuffer_.get(0);
-            byte[] bytes = data.getData();
+            byte[] bytes = writeBuffer_.get(0);
             int bytesToWrite = bytes.length;
 
             if (bytesToWrite == 0) {
@@ -167,8 +168,8 @@ public class JavaConnection extends Connection implements EventOwner {
                 writeBuffer_.remove(0);
                 return;
             }
+            
             ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
-
             /*
              * Because the SocketChannel is non-blocking, we have to
              * be prepared to cope with the write operation not
@@ -190,15 +191,13 @@ public class JavaConnection extends Connection implements EventOwner {
             }
 
             /* The buffer was *partly* written.  This means we have to
-             * remove that part.  We do this by creating a new ByteArray
+             * remove that part.  We do this by creating a new byte[]
              * with the remaining bytes in, and replacing the first 
              * element in the list with that.
              */
             byte[] remainingBytes = new byte[bytesToWrite - bytesWritten];
-            System.arraycopy(bytes, bytesWritten,remainingBytes,0, remainingBytes.length);
-            ByteArray leftOver = new ByteArray(remainingBytes);
-
-            writeBuffer_.set(0, leftOver);
+            remainingBytes = Arrays.copyOfRange(bytes, bytesWritten, bytes.length);
+            writeBuffer_.set(0, remainingBytes);
             return;
         }
         
@@ -210,21 +209,21 @@ public class JavaConnection extends Connection implements EventOwner {
         private ByteArray doRead() throws IOException {
 
             ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-            ByteArray data = new ByteArray();
 
             int count = socketChannel_.read(byteBuffer);
             if (count == 0) {
-                return data;
+                return new ByteArray();
             }
+            
+            ByteArrayOutputStream byteArrayOutputStream = 
+                    new ByteArrayOutputStream(1024);
+            
             while (count > 0) {
                 byteBuffer.flip();
                 byte[] result = new byte[byteBuffer.remaining()];
                 byteBuffer.get(result);
                 byteBuffer.compact();
-                for (int i=0; i<result.length; i++) {
-                    data.append(result[i]);
-                }
-
+                byteArrayOutputStream.write(result);
                 count = socketChannel_.read(byteBuffer);
             }
             if (count == -1) {
@@ -233,7 +232,10 @@ public class JavaConnection extends Connection implements EventOwner {
                  */
                 throw new IOException("socketChannel_.read returned -1");
             }
-            return data;
+            
+            /* There is no need to close the ByteArrayOutputStream */
+            return new ByteArray(byteArrayOutputStream.toByteArray());
+
         }
         
         private void handleConnected(final boolean error) {
@@ -299,7 +301,7 @@ public class JavaConnection extends Connection implements EventOwner {
 
     @Override
     public void write(ByteArray data) {
-        worker_.writeBuffer_.add(data);
+        worker_.writeBuffer_.add(data.getData());
         if (selector_ != null) {
             selector_.wakeup();
         }
