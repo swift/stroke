@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2013, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -16,6 +16,8 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.xbill.DNS.Address;
+
 public class PlatformDomainNameResolver extends DomainNameResolver {
 
     private class AddressQuery extends DomainNameAddressQuery implements EventOwner {
@@ -25,10 +27,11 @@ public class PlatformDomainNameResolver extends DomainNameResolver {
             public void run() {
                 final Collection<HostAddress> results = new ArrayList<HostAddress>();
                 try {
-                    for (InetAddress result : InetAddress.getAllByName(hostname)) {
+                    for (InetAddress result : Address.getAllByName(hostname)) {
                         results.add(new HostAddress(result));
                     }
                 } catch (UnknownHostException ex) {
+                    /* results remains empty */
                 }
                 eventLoop.postEvent(new Callback() {
                     public void run() {
@@ -53,17 +56,17 @@ public class PlatformDomainNameResolver extends DomainNameResolver {
     }
 
     public PlatformDomainNameResolver(EventLoop eventLoop) {
-        this.eventLoop = eventLoop;
+        this.eventLoop_ = eventLoop;
     }
 
     @Override
     public DomainNameServiceQuery createServiceQuery(String name) {
-        return new PlatformDomainNameServiceQuery(getNormalized(name), eventLoop);
+        return new PlatformDomainNameServiceQuery(getNormalized(name), eventLoop_);
     }
 
     @Override
     public DomainNameAddressQuery createAddressQuery(String name) {
-        return new AddressQuery(getNormalized(name), eventLoop);
+        return new AddressQuery(getNormalized(name), eventLoop_);
     }
-    private final EventLoop eventLoop;
+    private final EventLoop eventLoop_;
 }

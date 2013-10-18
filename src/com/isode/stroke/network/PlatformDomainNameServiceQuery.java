@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2013, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -9,79 +9,69 @@
  */
 
 package com.isode.stroke.network;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import org.xbill.DNS.Lookup;
+import org.xbill.DNS.Record;
+import org.xbill.DNS.SRVRecord;
+import org.xbill.DNS.TextParseException;
+import org.xbill.DNS.Type;
 
 import com.isode.stroke.eventloop.Event.Callback;
 import com.isode.stroke.eventloop.EventLoop;
-import com.isode.stroke.eventloop.EventOwner;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Hashtable;
-import javax.naming.NamingException;
-import javax.naming.directory.Attribute;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
+import com.isode.stroke.network.DomainNameServiceQuery;
 
-public class PlatformDomainNameServiceQuery extends DomainNameServiceQuery implements EventOwner {
+public class PlatformDomainNameServiceQuery extends DomainNameServiceQuery {
+    private final String service;
+    private final EventLoop eventLoop;
 
-    private class QueryThread extends Thread {
-
-        @Override
-        public void run() {
-            final Collection<Result> results = new ArrayList<Result>();
-            Hashtable env = new Hashtable();
-            env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
-            env.put("java.naming.provider.url", "dns:");
-            DirContext ctx = null;
-            try {
-                ctx = new InitialDirContext(env);
-                Attributes attrs = ctx.getAttributes(service, new String[]{"SRV"});
-                Attribute attribute = attrs.get("SRV");
-                for (int i = 0; attribute != null && i < attribute.size(); i++) {
-                    /* SRV results are going to be returned in the space-separated format
-                     * Priority Weight Port Target
-                     * (See RFC2782)
-                     */
-                    String[] srvParts = ((String) attribute.get(i)).split(" ");
-                    String host = srvParts[3];
-                    if (host.endsWith(".")) {
-                        host = host.substring(0, host.length() - 1);
-                    }
-                    Result result = new Result(host, Integer.parseInt(srvParts[2]), Integer.parseInt(srvParts[0]), Integer.parseInt(srvParts[1]));
-                    results.add(result);
-                }
-            } catch (NamingException ex) {
-                /* Turns out that you get the exception just for not finding a result, so we want to fall through to A lookups and ignore.*/
-            }
-
-            eventLoop.postEvent(new Callback() {
-                public void run() {
-                    onResult.emit(results);
-                }
-            });
-            //close the context as otherwise this will lead to open sockets in
-            //CLOSE_WAIT condition
-            if(ctx != null) {
-                try {
-                    ctx.close();
-                } catch (NamingException e) {
-                    //at least we try to close the context
-                }
-            }
-        }
-    }
-
-    public PlatformDomainNameServiceQuery(String service, EventLoop eventLoop) {
+    public PlatformDomainNameServiceQuery(final String service, final EventLoop eventLoop) {
         this.service = service;
         this.eventLoop = eventLoop;
     }
 
+    private class QueryThread extends Thread {
+        @Override
+        public void run() {
+            final Collection<Result> results = new ArrayList<Result>();
+            Lookup request;
+            try {
+                request = new Lookup(service, Type.SRV);
+                final Record[] records = request.run();
+                if (records != null) {
+                    for (final Record record : records) {
+                        /* It's only anticipated that SRVRecords will be
+                         * returned, but check first
+                         */
+                        if (record instanceof SRVRecord) {
+                            final SRVRecord srv = (SRVRecord) record;
+                            final Result result = new Result(srv.getTarget()
+                                .toString(), srv.getPort(), srv.getPriority(),
+                                srv.getWeight());
+                            results.add(result);
+                        }
+                    }
+                }
+            } catch (final TextParseException e) {
+                /* Lookup failed because "service" was not a valid DNS name;
+                 * leave "results" empty 
+                 */
+            }
+
+            eventLoop.postEvent(new Callback() {
+                @Override
+                public void run() {
+                    onResult.emit(results);
+                }
+            });
+        }
+    }
+
     @Override
     public void run() {
-        QueryThread thread = new QueryThread();
+        final QueryThread thread = new QueryThread();
         thread.setDaemon(true);
         thread.start();
     }
-    private final String service;
-    private final EventLoop eventLoop;
 }

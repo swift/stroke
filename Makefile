@@ -1,6 +1,6 @@
 all: dist/lib/stroke.jar
 
-DEFINES = -Dxpp-dir=third-party/xpp -Djzlib-dir=third-party/jzlib -Dicu4j-dir=third-party/ -Dstax2-dir=third-party/stax2/ -Daalto-dir=third-party/aalto/ 
+DEFINES = -Dxpp-dir=third-party/xpp -Djzlib-dir=third-party/jzlib -Dicu4j-dir=third-party/ -Dstax2-dir=third-party/stax2/ -Daalto-dir=third-party/aalto/ -Ddnsjava-dir=third-party/dnsjava
 JUNIT ?= /usr/share/junit/junit.jar
 
 .PHONY : clean
@@ -13,7 +13,7 @@ distclean: clean
 	rm -rf third-party
 
 .PHONY : dist/lib/stroke.jar
-dist/lib/stroke.jar: third-party/jzlib/jzlib.jar third-party/icu4j.jar third-party/aalto/aalto-xml.jar third-party/stax2/stax2-api.jar
+dist/lib/stroke.jar: third-party/jzlib/jzlib.jar third-party/icu4j.jar third-party/aalto/aalto-xml.jar third-party/stax2/stax2-api.jar third-party/dnsjava/dnsjava.jar
 	ant ${DEFINES}
 
 .PHONY : test
@@ -39,6 +39,10 @@ third-party/jzlib/jzlib.jar:
 third-party/icu4j.jar:
 	mkdir -p third-party
 	curl http://download.icu-project.org/files/icu4j/4.8.1/icu4j-4_8_1.jar -o third-party/icu4j.jar
+
+third-party/dnsjava/dnsjava.jar:
+	mkdir -p third-party/dnsjava
+	curl http://www.dnsjava.org/download/dnsjava-2.1.6.jar -o third-party/dnsjava/dnsjava.jar
 
 third-party/cobertura/cobertura.jar:
 	mkdir -p third-party
