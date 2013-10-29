@@ -44,32 +44,60 @@
     <mkdir dir="${build}"/>
   </target>
 
-  <target name="compile" depends="init"
-        description="compile the source " >
-    <javac srcdir="${src}" destdir="${build}" classpathref="classpath" 
-	   debug="${compile.debug}"
-	   source="1.6"
-	   target="1.6">
+  <target name="-compile-with-examples" depends="init"
+        description="compile the source, including examples "
+        unless="noexamples">
+    <javac srcdir="${src}" destdir="${build}" classpathref="classpath"
+	   debug="${compile.debug}" 
+           source="1.6" 
+           target="1.6">
         <compilerarg line="-encoding utf-8"/>
     </javac>
   </target>
 
-  <target name="dist" depends="compile"
-        description="generate the distribution" >
+  <target name="-compile-without-examples" depends="init"
+        description="compile the source, excluding examples "
+        if="noexamples">
+    <javac srcdir="${src}" destdir="${build}" classpathref="classpath"
+	   debug="${compile.debug}" 
+           source="1.6" 
+           target="1.6">
+      	<exclude name="com/isode/stroke/examples/**"/>
+        <compilerarg line="-encoding utf-8"/>
+    </javac>
+  </target>
+
+
+  <target name="dist" depends="-dist-with-examples,-dist-without-examples"/>
+
+  <target name="-dist-with-examples" depends="-compile-with-examples"
+        description="generate the distribution including examples" 
+        unless="noexamples">
     <mkdir dir="${dist}/lib"/>
 
-    <jar jarfile="${jar}" basedir="${build}"/>
-    <manifest file="MANIFEST.MF">
-        <attribute name="Main-Class" value="${main-class}"/>
-    </manifest>
+    <jar jarfile="${jar}" basedir="${build}">
+        <manifest>
+            <attribute name="Main-Class" value="${main-class}"/>
+        </manifest>
+    </jar>
   </target>
+
+  <target name="-dist-without-examples" depends="-compile-without-examples"
+        description="generate the distribution excluding examples" 
+	if="noexamples">
+    <mkdir dir="${dist}/lib"/>
+
+    <jar jarfile="${jar}" basedir="${build}">
+    </jar>
+  </target>
+
 
 <target name="compile-tests" depends="dist"
         description="compile the test sources " >
-    <javac srcdir="${src.tests}" destdir="${src.tests}" 
+    <javac srcdir="${src.tests}" destdir="${src.tests}"
 	   debug="${compile.debug}"
-	   source="1.6"
-	   target="1.6">
+           source="1.6" 
+           target="1.6">
         <compilerarg line="-encoding utf-8"/>
         <classpath>
             <pathelement location="${jar}"/>
