@@ -8,15 +8,14 @@
  */
 package com.isode.stroke.network;
 
-import com.isode.stroke.eventloop.Event.Callback;
-import com.isode.stroke.eventloop.EventLoop;
-import com.isode.stroke.eventloop.EventOwner;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.xbill.DNS.Address;
+import com.isode.stroke.eventloop.Event.Callback;
+import com.isode.stroke.eventloop.EventLoop;
+import com.isode.stroke.eventloop.EventOwner;
 
 public class PlatformDomainNameResolver extends DomainNameResolver {
 
@@ -27,7 +26,7 @@ public class PlatformDomainNameResolver extends DomainNameResolver {
             public void run() {
                 final Collection<HostAddress> results = new ArrayList<HostAddress>();
                 try {
-                    for (InetAddress result : Address.getAllByName(hostname)) {
+                    for (InetAddress result : InetAddress.getAllByName(hostname)) {
                         results.add(new HostAddress(result));
                     }
                 } catch (UnknownHostException ex) {
