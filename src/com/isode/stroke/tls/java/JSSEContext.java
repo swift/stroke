@@ -163,7 +163,7 @@ public class JSSEContext extends TLSContext {
             }
             String[] suitesToEnable = new String[]{};
             if (!matchedSuites.isEmpty()) {
-                suitesToEnable = (String[])matchedSuites.toArray();
+                suitesToEnable = matchedSuites.toArray(new String[matchedSuites.size()]);
             }
         
             sslEngine.setEnabledCipherSuites(suitesToEnable);
