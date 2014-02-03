@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -67,20 +67,41 @@ public abstract class Request implements IQHandler {
     public boolean handleIQ(IQ iq) {
         boolean handled = false;
         if (sent_ && iq.getID().equals(id_)) {
-            if (iq.getType().equals(IQ.Type.Result)) {
-                handleResponse(iq.getPayload(payload_), null);
-            } else {
-                ErrorPayload errorPayload = iq.getPayload(new ErrorPayload());
-                if (errorPayload != null) {
-                    handleResponse(null, errorPayload);
-                } else {
-                    handleResponse(null, new ErrorPayload(ErrorPayload.Condition.UndefinedCondition));
-                }
-            }
-            router_.removeHandler(this);
-            handled = true;
-        }
+	    if (isCorrectSender(iq.getFrom())) {
+		
+		if (iq.getType().equals(IQ.Type.Result)) {
+		    handleResponse(iq.getPayload(payload_), null);
+		} else {
+		    ErrorPayload errorPayload = iq.getPayload(new ErrorPayload());
+		    if (errorPayload != null) {
+			handleResponse(null, errorPayload);
+		    } else {
+			handleResponse(null, new ErrorPayload(ErrorPayload.Condition.UndefinedCondition));
+		    }
+		}
+		router_.removeHandler(this);
+		handled = true;
+	    }
+	}
         return handled;
     }
+
+    private boolean isCorrectSender(final JID jid) {
+	if (isAccountJID(receiver_)) {
+	    return isAccountJID(jid);
+	}
+	return (jid.compare(receiver_, JID.CompareType.WithResource) == 0);
+    }
+
+    private boolean isAccountJID(final JID jid) {
+	// If the router's JID is not set, we don't check anything
+	if (!router_.getJID().isValid()) {
+	    return true;
+	}
+
+	return jid.isValid() ?
+	    router_.getJID().compare(jid, JID.CompareType.WithoutResource) == 0 : true;
+    }
+	       
 
 }

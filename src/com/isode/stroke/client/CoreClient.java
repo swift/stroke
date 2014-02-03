@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013, Isode Limited, London, England.
+ * Copyright (c) 2010-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -154,6 +154,7 @@ public class CoreClient {
         });
 
         iqRouter_ = new IQRouter(stanzaChannel_);
+        iqRouter_.setJID(jid);
     }
 
     /*CoreClient::~CoreClient() {

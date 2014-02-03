@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -13,6 +13,7 @@ import java.util.Vector;
 import com.isode.stroke.elements.ErrorPayload;
 import com.isode.stroke.elements.IQ;
 import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.jid.JID;
 
 /**
  * This class is responsible for routing all IQ stanzas to the handlers. It's
@@ -26,6 +27,7 @@ public class IQRouter {
 
     private final Vector<IQHandler> handlers_ = new Vector<IQHandler>();
     private final IQChannel channel_;
+    private JID jid_;
 
     public IQRouter(IQChannel channel) {
         channel_ = channel;
@@ -75,4 +77,20 @@ public class IQRouter {
             sendIQ(IQ.createError(iq.getFrom(), iq.getID(), ErrorPayload.Condition.FeatureNotImplemented, ErrorPayload.Type.Cancel));
         }
     }
+
+    /**
+     * Sets the JID of this IQ router.
+     *
+     * This JID is used by requests to check whether incoming results
+     * are addressed correctly
+     * @param jid the JID
+     */
+    public void setJID(final JID jid) {
+	jid_ = jid;
+    }
+
+    public JID getJID() {
+	return jid_;
+    }
+    
 }
