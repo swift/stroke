@@ -56,6 +56,11 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	//addSerializer(new NicknameSerializer());
         addSerializer(new SearchPayloadSerializer());
         addSerializer(new LastSerializer());
+
+		addSerializer(new PubSubSerializer(this));
+		addSerializer(new PubSubEventSerializer(this));
+		addSerializer(new PubSubOwnerPubSubSerializer(this));
+		addSerializer(new PubSubErrorSerializer());
     }
 
 }

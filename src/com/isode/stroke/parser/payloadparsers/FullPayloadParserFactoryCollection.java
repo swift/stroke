@@ -9,8 +9,10 @@
 package com.isode.stroke.parser.payloadparsers;
 
 import com.isode.stroke.parser.GenericPayloadParserFactory;
+import com.isode.stroke.parser.GenericPayloadParserFactory2;
 import com.isode.stroke.parser.PayloadParserFactory;
 import com.isode.stroke.parser.PayloadParserFactoryCollection;
+import com.isode.stroke.parser.PubSubOwnerPubSubParser;
 
 public class FullPayloadParserFactoryCollection extends PayloadParserFactoryCollection {
     public FullPayloadParserFactoryCollection() {
@@ -57,7 +59,12 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	addFactory(new GenericPayloadParserFactory<MUCDestroyPayloadParser>("destroy", 
 	        "http://jabber.org/protocol/muc#owner",MUCDestroyPayloadParser.class));
 	
-	//addFactory(new NicknameParserFactory());        
+	addFactory(new GenericPayloadParserFactory2<PubSubParser>("pubsub", "http://jabber.org/protocol/pubsub", this, PubSubParser.class));
+	addFactory(new GenericPayloadParserFactory2<PubSubOwnerPubSubParser>("pubsub", "http://jabber.org/protocol/pubsub#owner", this, PubSubOwnerPubSubParser.class));
+	addFactory(new GenericPayloadParserFactory2<PubSubEventParser>("event", "http://jabber.org/protocol/pubsub#event", this, PubSubEventParser.class));
+	addFactory(new PubSubErrorParserFactory());
+	
+	//addFactory(new NicknameParserFactory());
 
         PayloadParserFactory defaultFactory = new RawXMLPayloadParserFactory();
         setDefaultFactory(defaultFactory);

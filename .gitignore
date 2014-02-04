@@ -13,3 +13,4 @@ test-results/
 third-party/
 *.patch
 .DS_Store
+/bin

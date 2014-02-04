@@ -14,6 +14,8 @@ import com.isode.stroke.muc.MUCRegistry;
 import com.isode.stroke.network.NetworkFactories;
 import com.isode.stroke.presence.DirectedPresenceSender;
 import com.isode.stroke.presence.StanzaChannelPresenceSender;
+import com.isode.stroke.pubsub.PubSubManager;
+import com.isode.stroke.pubsub.PubSubManagerImpl;
 import com.isode.stroke.queries.responders.SoftwareVersionResponder;
 
 /**
@@ -30,6 +32,7 @@ public class Client extends CoreClient {
     private final DirectedPresenceSender directedPresenceSender; //NOPMD, this is not better as a local variable
     private final StanzaChannelPresenceSender stanzaChannelPresenceSender; //NOPMD, this is not better as a local variable
     private final SoftwareVersionResponder softwareVersionResponder;
+	private final PubSubManager pubSubManager;
 
     /**
      * Constructor.
@@ -57,6 +60,8 @@ public class Client extends CoreClient {
 
         softwareVersionResponder = new SoftwareVersionResponder(getIQRouter());
         softwareVersionResponder.start();
+        
+        pubSubManager = new PubSubManagerImpl(getStanzaChannel(), getIQRouter());
     }
 
     /**
@@ -73,6 +78,14 @@ public class Client extends CoreClient {
      */
     public MUCRegistry getMUCRegistry() {
         return mucRegistry;
+    }
+    
+	/**
+     * Get the manager for publish-subscribe
+     * @return PubSub manager, not null
+     */
+    public PubSubManager getPubSubManager() {
+        return pubSubManager;
     }
     
     /**

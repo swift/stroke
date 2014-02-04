@@ -14,7 +14,7 @@ import com.isode.stroke.serializer.GenericPayloadSerializer;
 class RawXMLPayloadSerializer extends GenericPayloadSerializer<RawXMLPayload> {
 
     public RawXMLPayloadSerializer() {
-        super(RawXMLPayloadSerializer.class);
+        super(RawXMLPayload.class);
     }
 
     @Override

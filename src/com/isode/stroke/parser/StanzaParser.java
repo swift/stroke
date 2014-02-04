@@ -8,7 +8,6 @@
  */
 package com.isode.stroke.parser;
 
-import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.Payload;
 import com.isode.stroke.elements.Stanza;
 import com.isode.stroke.jid.JID;
