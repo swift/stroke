@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -20,8 +20,8 @@ import java.util.Collection;
 
 public class Connector {
 
-    public static Connector create(String hostname, int port, boolean doServiceLookups, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory) {
-        return new Connector(hostname, port, doServiceLookups, resolver, connectionFactory, timerFactory);
+    public static Connector create(String hostname, int port, String serviceLookupPrefix, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory) {
+        return new Connector(hostname, port, serviceLookupPrefix, resolver, connectionFactory, timerFactory);
     }
 
     public void setTimeoutMilliseconds(int milliseconds) {
@@ -35,8 +35,8 @@ public class Connector {
         queriedAllServices = false;
         serviceQueryResults = new ArrayList<Result>();
         
-        if (doServiceLookups) {
-            serviceQuery = resolver.createServiceQuery("_xmpp-client._tcp." + hostname);
+        if (serviceLookupPrefix != null) {
+            serviceQuery = resolver.createServiceQuery(serviceLookupPrefix + hostname);
             serviceQuery.onResult.connect(new Slot1<Collection<DomainNameServiceQuery.Result>>() {
                 public void call(Collection<Result> p1) {
                     handleServiceQueryResult(p1);
@@ -64,13 +64,13 @@ public class Connector {
 
     public final Signal2<Connection, com.isode.stroke.base.Error> onConnectFinished = new Signal2<Connection, com.isode.stroke.base.Error>();
 
-    private Connector(String hostname,int port, boolean doServiceLookups, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory) {
+    private Connector(String hostname,int port, String serviceLookupPrefix, DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory) {
         this.hostname = hostname;
         this.resolver = resolver;
         this.connectionFactory = connectionFactory;
         this.timerFactory = timerFactory;
         this.port = port;
-        this.doServiceLookups = doServiceLookups;
+        this.serviceLookupPrefix = serviceLookupPrefix;
     }
 
     private void handleServiceQueryResult(Collection<Result> result) {
@@ -231,6 +231,6 @@ public class Connector {
     private Connection currentConnection;
     private SignalConnection currentConnectionConnectFinishedConnection;
     private final int port;
-    private final boolean doServiceLookups;
+    private final String serviceLookupPrefix;
     private boolean foundSomeDNS = false;
 }

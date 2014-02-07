@@ -187,7 +187,8 @@ public class CoreClient {
         /* FIXME: Port Proxies */
         String host = (o.manualHostname == null || o.manualHostname.isEmpty()) ? jid_.getDomain() : o.manualHostname;
         int port = o.manualPort;
-        connector_ = Connector.create(host, port, o.manualHostname == null || o.manualHostname.isEmpty(), networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory());
+        String serviceLookupPrefix = (o.manualHostname == null || o.manualHostname.isEmpty() ? "_xmpp-client._tcp." : null);
+        connector_ = Connector.create(host, port, serviceLookupPrefix, networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory());
         connectorConnectFinishedConnection_ = connector_.onConnectFinished.connect(new Slot2<Connection, com.isode.stroke.base.Error>() {
             public void call(Connection p1, com.isode.stroke.base.Error p2) {
                 handleConnectorFinished(p1, p2);
