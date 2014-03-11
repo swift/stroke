@@ -25,7 +25,7 @@ public abstract class StanzaParser implements ElementParser {
     void handleStanzaAttributes(AttributeMap map) {
     }
 
-    Stanza getStanza() {
+    public Stanza getStanza() {
         return (Stanza) getElement();
     }
 

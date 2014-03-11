@@ -49,7 +49,7 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	//addSerializer(new VCardUpdateSerializer());
 	addSerializer(new RawXMLPayloadSerializer());
 	//addSerializer(new StorageSerializer());
-	//addSerializer(new DelaySerializer());
+	addSerializer(new DelaySerializer());
         addSerializer(new FormSerializer());
 	//addSerializer(new PrivateStorageSerializer(this));
         addSerializer(new CommandSerializer());
@@ -61,6 +61,12 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 		addSerializer(new PubSubEventSerializer(this));
 		addSerializer(new PubSubOwnerPubSubSerializer(this));
 		addSerializer(new PubSubErrorSerializer());
+		
+        addSerializer(new ResultSetSerializer());
+        addSerializer(new ForwardedSerializer(this));
+        addSerializer(new MAMResultSerializer(this));
+        addSerializer(new MAMQuerySerializer());
+        addSerializer(new MAMArchivedSerializer());
     }
 
 }

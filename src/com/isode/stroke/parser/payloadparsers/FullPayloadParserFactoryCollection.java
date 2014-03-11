@@ -64,6 +64,13 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	addFactory(new GenericPayloadParserFactory2<PubSubEventParser>("event", "http://jabber.org/protocol/pubsub#event", this, PubSubEventParser.class));
 	addFactory(new PubSubErrorParserFactory());
 	
+    addFactory(new GenericPayloadParserFactory<DelayParser>("delay", "urn:xmpp:delay", DelayParser.class));
+    addFactory(new GenericPayloadParserFactory<ResultSetParser>("set", "http://jabber.org/protocol/rsm", ResultSetParser.class));
+    addFactory(new GenericPayloadParserFactory2<ForwardedParser>("forwarded", "urn:xmpp:forward:0", this, ForwardedParser.class));
+    addFactory(new GenericPayloadParserFactory2<MAMResultParser>("result", "urn:xmpp:mam:0", this, MAMResultParser.class));
+    addFactory(new GenericPayloadParserFactory<MAMQueryParser>("query", "urn:xmpp:mam:0", MAMQueryParser.class));
+    addFactory(new GenericPayloadParserFactory<MAMArchivedParser>("archived", "urn:xmpp:mam:0", MAMArchivedParser.class));
+	
 	//addFactory(new NicknameParserFactory());
 
         PayloadParserFactory defaultFactory = new RawXMLPayloadParserFactory();
