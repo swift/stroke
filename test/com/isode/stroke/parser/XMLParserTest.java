@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2011, Isode Limited, London, England.
+ * Copyright (c) 2010-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -8,7 +8,6 @@
  */
 package com.isode.stroke.parser;
 
-import com.isode.stroke.eventloop.SimpleEventLoop;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
