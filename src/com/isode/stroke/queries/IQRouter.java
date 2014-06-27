@@ -27,7 +27,7 @@ public class IQRouter {
 
     private final Vector<IQHandler> handlers_ = new Vector<IQHandler>();
     private final IQChannel channel_;
-    private JID jid_;
+    private JID jid_ = new JID();
 
     public IQRouter(IQChannel channel) {
         channel_ = channel;
