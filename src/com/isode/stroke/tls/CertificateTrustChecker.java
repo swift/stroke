@@ -4,10 +4,13 @@
  * See Documentation/Licenses/GPLv3.txt for more information.
  */
 /*
- * Copyright (c) 2011, Isode Limited, London, England.
+ * Copyright (c) 2011-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.tls;
+
+import java.util.List;
+
 
 /**
  * A class to implement a check for certificate trust.
@@ -19,5 +22,6 @@ public interface CertificateTrustChecker {
      * trusted. This usually happens when a certificate's validation
      * fails, to check whether to proceed with the connection or not.
      */
-    boolean isCertificateTrusted(Certificate certificate);
+    public boolean isCertificateTrusted(List<Certificate> chain);
+
 }

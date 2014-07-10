@@ -1,4 +1,4 @@
-/*  Copyright (c) 2012-2013, Isode Limited, London, England.
+/*  Copyright (c) 2012-2014, Isode Limited, London, England.
  *  All rights reserved.
  *
  *  Acquisition and use of this software and related materials for any
@@ -26,7 +26,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 import java.util.logging.Level;
@@ -627,8 +629,10 @@ public class JSSEContext extends TLSContext {
         if (certs == null || certs.length == 0) {
             return;
         }
-                
-        peerCertificate = new JavaCertificate(certs[0]);
+        peerCertificateChain = new ArrayList<Certificate>(certs.length);
+        for (X509Certificate x509:certs) {
+            peerCertificateChain.add(new JavaCertificate(x509));
+        }
         
         /* Swiften uses SSL_get_verify_result() for this, and the documentation
          * for that says it "while the verification of a certificate can fail
@@ -1052,10 +1056,16 @@ public class JSSEContext extends TLSContext {
     }
 
 
-
+    @Override
+    public List<Certificate> getPeerCertificateChain() {
+        return peerCertificateChain;
+    }
     @Override
     public Certificate getPeerCertificate() {
-        return peerCertificate;
+        if (peerCertificateChain == null || peerCertificateChain.isEmpty()) {
+            return null;
+        }
+        return (peerCertificateChain.get(0));
     }
 
     @Override
@@ -1161,9 +1171,9 @@ public class JSSEContext extends TLSContext {
     private Object recvMutex = new Object();
     
     /**
-     * The server certificate as obtained from the TLS handshake
+     * The server certificate chain as obtained from the TLS handshake
      */
-    private JavaCertificate peerCertificate = null;
+    private List<Certificate> peerCertificateChain = null;
     
     /**
      * The CertificateVerificationError derived from the peerCertificate. This

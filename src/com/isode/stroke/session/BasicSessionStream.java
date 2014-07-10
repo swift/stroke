@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2010 Remko Tronçon
+ * Copyright (c) 2010-2014 Remko Tronçon
  * All rights reserved. */
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.session;
+
+import java.util.List;
 
 import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.ProtocolHeader;
 import com.isode.stroke.elements.StreamType;
-import com.isode.stroke.eventloop.EventLoop;
 import com.isode.stroke.network.Connection;
 import com.isode.stroke.network.TimerFactory;
 import com.isode.stroke.parser.PayloadParserFactoryCollection;
@@ -23,10 +24,10 @@ import com.isode.stroke.streamstack.ConnectionLayer;
 import com.isode.stroke.streamstack.StreamStack;
 import com.isode.stroke.streamstack.TLSLayer;
 import com.isode.stroke.streamstack.WhitespacePingLayer;
-import com.isode.stroke.tls.TLSContextFactory;
 import com.isode.stroke.streamstack.XMPPLayer;
 import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateVerificationError;
+import com.isode.stroke.tls.TLSContextFactory;
 
 public class BasicSessionStream extends SessionStream {
 
@@ -156,6 +157,11 @@ public class BasicSessionStream extends SessionStream {
         return tlsLayer != null;
     }
 
+    @Override
+    public List<Certificate> getPeerCertificateChain() {
+        return tlsLayer.getPeerCertificateChain();
+    }
+    @Override
     public Certificate getPeerCertificate() {
         return tlsLayer.getPeerCertificate();
     }

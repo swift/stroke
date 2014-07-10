@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2012, Isode Limited, London, England.
+ * Copyright (c) 2011-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -8,6 +8,8 @@
  */
 
 package com.isode.stroke.tls;
+
+import java.util.List;
 
 import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.signals.Signal;
@@ -22,7 +24,16 @@ public abstract class TLSContext {
     public abstract void handleDataFromNetwork(ByteArray data);
     public abstract void handleDataFromApplication(ByteArray data);
 
+    /**
+     * The peer certificate, as presented by the remote entity
+     * @return the peer certificate, which may be null
+     */
     public abstract Certificate getPeerCertificate();
+    /**
+     * The peer's certificate chain, as presented by the remote entity
+     * @return the peer certificate chain, which may be null.
+     */
+    public abstract List<Certificate> getPeerCertificateChain();
     public abstract CertificateVerificationError getPeerCertificateVerificationError();
 
     public abstract ByteArray getFinishMessage();

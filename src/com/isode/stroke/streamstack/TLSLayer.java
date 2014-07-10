@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -8,6 +8,8 @@
  */
 
 package com.isode.stroke.streamstack;
+
+import java.util.List;
 
 import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.signals.Signal;
@@ -54,6 +56,10 @@ public class TLSLayer extends StreamLayer {
         return context.setClientCertificate(certificate);
     }
 
+    public List<Certificate> getPeerCertificateChain() {
+        return context.getPeerCertificateChain();
+    }
+    
     public Certificate getPeerCertificate() {
         return context.getPeerCertificate();
     }

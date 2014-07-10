@@ -1,9 +1,9 @@
 /*
- * Copyright (c) 2010-2012 Isode Limited, London, England.
+ * Copyright (c) 2010-2014 Isode Limited, London, England.
  * All rights reserved.
  */
 /*
- * Copyright (c) 2010-2011 Remko Tronçon.
+ * Copyright (c) 2010-2014 Remko Tronçon.
  * All rights reserved.
  */
 package com.isode.stroke.client;
@@ -48,6 +48,8 @@ import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.ServerIdentityVerifier;
+
+import java.util.List;
 import java.util.UUID;
 
 public class ClientSession {
@@ -513,24 +515,26 @@ public class ClientSession {
         if (!checkState(State.Encrypting)) {
             return;
         }
-        final Certificate certificate = stream.getPeerCertificate();
+        final List<Certificate> certificateChain = stream.getPeerCertificateChain();
+        final Certificate peerCertificate = 
+                (certificateChain == null || certificateChain.isEmpty() ? null : certificateChain.get(0));
         final CertificateVerificationError verificationError = stream.getPeerCertificateVerificationError();
         if (verificationError != null) {
-            checkTrustOrFinish(certificate, verificationError);
+            checkTrustOrFinish(certificateChain, verificationError);
         }
         else {
             final ServerIdentityVerifier identityVerifier = new ServerIdentityVerifier(localJID);
-            if (identityVerifier.certificateVerifies(certificate)) {
+            if (identityVerifier.certificateVerifies(peerCertificate)) {
                 continueAfterTLSEncrypted();
             }
             else {
-                checkTrustOrFinish(certificate, new CertificateVerificationError(CertificateVerificationError.Type.InvalidServerIdentity));
+                checkTrustOrFinish(certificateChain, new CertificateVerificationError(CertificateVerificationError.Type.InvalidServerIdentity));
             }
         }
     }
 
-    private void checkTrustOrFinish(final Certificate certificate, final CertificateVerificationError error) {
-        if (certificateTrustChecker != null && certificateTrustChecker.isCertificateTrusted(certificate)) {
+    private void checkTrustOrFinish(final List<Certificate> certificateChain, final CertificateVerificationError error) {
+        if (certificateTrustChecker != null && certificateTrustChecker.isCertificateTrusted(certificateChain)) {
             continueAfterTLSEncrypted();
         }
         else {
