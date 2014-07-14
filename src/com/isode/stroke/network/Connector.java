@@ -9,7 +9,6 @@
 package com.isode.stroke.network;
 
 import com.isode.stroke.network.DomainNameServiceQuery.Result;
-import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.Signal2;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot;
@@ -35,6 +34,15 @@ public class Connector {
         queriedAllServices = false;
         serviceQueryResults = new ArrayList<Result>();
         
+        if (timeoutMilliseconds > 0) {
+            timer = timerFactory.createTimer(timeoutMilliseconds);
+            timer.onTick.connect(new Slot() {
+                public void call() {
+                    handleTimeout();
+                }
+            });
+            timer.start();
+        }
         if (serviceLookupPrefix != null) {
             serviceQuery = resolver.createServiceQuery(serviceLookupPrefix + hostname);
             serviceQuery.onResult.connect(new Slot1<Collection<DomainNameServiceQuery.Result>>() {
@@ -42,15 +50,6 @@ public class Connector {
                     handleServiceQueryResult(p1);
                 }
             });
-            if (timeoutMilliseconds > 0) {
-                timer = timerFactory.createTimer(timeoutMilliseconds);
-                timer.onTick.connect(new Slot() {
-                    public void call() {
-                        handleTimeout();
-                    }
-                });
-                timer.start();
-            }
             serviceQuery.run();
         }
         else {
