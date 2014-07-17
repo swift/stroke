@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Isode Limited, London, England.
+ * Copyright (c) 2012-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -8,11 +8,7 @@
  */
 package com.isode.stroke.serializer.payloadserializers;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-
+import com.isode.stroke.base.DateTime;
 import com.isode.stroke.elements.MUCPayload;
 import com.isode.stroke.serializer.GenericPayloadSerializer;
 import com.isode.stroke.serializer.xml.XMLElement;
@@ -48,13 +44,7 @@ public class MUCPayloadSerializer extends GenericPayloadSerializer<MUCPayload> {
             history = true;
         }
         if (muc.getSince() != null) {
-            SimpleDateFormat dfm = new SimpleDateFormat("YYYY-MM-dd");
-            SimpleDateFormat tfm = new SimpleDateFormat("hh:mm:ss");
-            Date date = muc.getSince();
-            
-            dfm.setTimeZone(TimeZone.getTimeZone("UTC"));
-            tfm.setTimeZone(TimeZone.getTimeZone("UTC"));
-            String sinceDateString = dfm.format(date) + "T" + tfm.format(date) + "Z";
+            String sinceDateString = DateTime.dateToString(muc.getSince());
             historyElement.setAttribute("since", sinceDateString);
             history = true;
         }

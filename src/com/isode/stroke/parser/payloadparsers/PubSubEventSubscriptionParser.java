@@ -9,15 +9,13 @@
 
 package com.isode.stroke.parser.payloadparsers;
 
+import com.isode.stroke.base.DateTime;
+import com.isode.stroke.elements.PubSubEventSubscription;
+import com.isode.stroke.jid.JID;
 import com.isode.stroke.parser.AttributeMap;
 import com.isode.stroke.parser.GenericPayloadParser;
 import com.isode.stroke.parser.PayloadParser;
 import com.isode.stroke.parser.PayloadParserFactoryCollection;
-import com.isode.stroke.jid.JID;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import com.isode.stroke.elements.PubSubEventSubscription;
 
 public class PubSubEventSubscriptionParser extends GenericPayloadParser<PubSubEventSubscription> {
 public PubSubEventSubscriptionParser(PayloadParserFactoryCollection parsers) {
@@ -48,7 +46,7 @@ public void handleStartElement(String element, String ns, AttributeMap attribute
 		}
 		attributeValue = attributes.getAttribute("expiry");
 		if (!attributeValue.isEmpty()) {
-			getPayloadInternal().setExpiry(stringToDate(attributeValue));
+			getPayloadInternal().setExpiry(DateTime.stringToDate(attributeValue));
 		}
 	}
 
@@ -87,16 +85,6 @@ private static PubSubEventSubscription.SubscriptionType parseSubscriptionType(St
 	} else if (value.equals("unconfigured")) {
 		return PubSubEventSubscription.SubscriptionType.Unconfigured;
 	} else {
-		return null;
-	}
-}
-
-private static Date stringToDate(String date) {
-	String format = "YYYY-MM-ddThh:mm:ssZ";
-	SimpleDateFormat parser = new SimpleDateFormat(format);
-	try {
-		return parser.parse(date);
-	} catch (ParseException e) {
 		return null;
 	}
 }
