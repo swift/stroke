@@ -1,4 +1,4 @@
-/*  Copyright (c) 2012, Isode Limited, London, England.
+/*  Copyright (c) 2012-2014, Isode Limited, London, England.
  *  All rights reserved.
  *
  *  Acquisition and use of this software and related materials for any
@@ -42,18 +42,9 @@ public class JavaTrustManager implements X509TrustManager {
         this.jsseContext = jsseContext;
 
         try {
-            // create a "default" JSSE X509TrustManager.
-
-            KeyStore ks = KeyStore.getInstance("PKCS12");
-            /*
-
-        // This is how you could load trust anchors
-        ks.load(new FileInputStream("trustedCerts"),
-            "passphrase".toCharArray());
-             */
             TrustManagerFactory tmf =
                     TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-            tmf.init(ks);
+            tmf.init((KeyStore) null); //Java's default keystore
 
             TrustManager tms [] = tmf.getTrustManagers();
 
@@ -89,46 +80,29 @@ public class JavaTrustManager implements X509TrustManager {
         // position of checking client certificates.  Just delegate to
         // default trust manager
         pkixTrustManager.checkClientTrusted(chain, authType);
-
     }
 
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType)
-            throws CertificateException {
-        CertificateException certificateException = null; 
+    		throws CertificateException {
+    	CertificateException certificateException = null;         
 
+    	try {
+    		pkixTrustManager.checkServerTrusted(chain, authType);
+    	} catch (CertificateException e) {
+    		certificateException = e;
+    	}
 
-        // TODO: 
-        // Note that we don't call the superclass method here yet, because
-        // it will fail with like this until the TrustManagerFactory has
-        // been initialised with a suitable list of trust anchors
-        // java.lang.RuntimeException: Unexpected error: 
-        // java.security.InvalidAlgorithmParameterException: the trustAnchors parameter must be non-empty
-        
-        /*
-        try {
-            pkixTrustManager.checkServerTrusted(chain, authType);
-        } catch (CertificateException e) {
-            certificateException = e;
-        }
-        catch (Exception e) {
-            emitError(e,"checkServerTrusted failed");
-        }
-        */
-        
-        // TODO: The only type of verification done is the certificate validity.
-        // Need to make "checkServerTrusted" do certificate verification properly
-        // and pass in an appropriate CertificateException
-        if (chain != null && chain.length > 0) {
-            try {
-                chain[0].checkValidity();
-            }
-            catch (CertificateException e) {
-                certificateException = e;
-            }
-        }
+    	if (certificateException == null && chain != null && chain.length > 0) {
+    		try {
+    			chain[0].checkValidity();
+    		}
+    		catch (CertificateException e) {
+    			certificateException = e;
+    		}
+    	}
 
-        jsseContext.setPeerCertificateInfo(chain, certificateException);
+    	jsseContext.setPeerCertificateInfo(chain, certificateException);
         
     }
 

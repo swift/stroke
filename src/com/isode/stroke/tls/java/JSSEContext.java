@@ -646,12 +646,12 @@ public class JSSEContext extends TLSContext {
                 peerCertificateVerificationError = new CertificateVerificationError(Type.NotYetValid);
                 return;
                 
-            }
-            
+            }            
             if (certificateException instanceof CertificateExpiredException) {
                 peerCertificateVerificationError = new CertificateVerificationError(Type.Expired);
                 return;
             }
+            peerCertificateVerificationError = new CertificateVerificationError(Type.UnknownError);
         }
         
     }

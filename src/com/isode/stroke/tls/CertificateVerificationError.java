@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 /*
- * Copyright (c) 2011-2012, Isode Limited, London, England.
+ * Copyright (c) 2011-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.tls;
@@ -25,6 +25,8 @@ public class CertificateVerificationError implements Error {
         InvalidSignature,
         InvalidCA,
         InvalidServerIdentity,
+        Revoked,
+        RevocationCheckFailed
     }
 
     public CertificateVerificationError(Type type) {
