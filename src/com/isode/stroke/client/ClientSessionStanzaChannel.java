@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -16,6 +16,10 @@ import com.isode.stroke.elements.Stanza;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.tls.Certificate;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -76,6 +80,13 @@ public class ClientSessionStanzaChannel extends StanzaChannel {
             return session.getStreamManagementEnabled();
         }
         return false;
+    }
+    
+    public List<Certificate> getPeerCertificateChain() {
+        if (session != null) {
+            return session.getPeerCertificateChain();
+        }
+        return new ArrayList<Certificate>();
     }
 
     public boolean isAvailable() {

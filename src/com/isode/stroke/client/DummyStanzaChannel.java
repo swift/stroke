@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, Isode Limited, London, England.
+ * Copyright (c) 2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -8,6 +8,8 @@
  */
 package com.isode.stroke.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import com.isode.stroke.elements.IQ;
@@ -16,6 +18,7 @@ import com.isode.stroke.elements.Payload;
 import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.Stanza;
 import com.isode.stroke.jid.JID;
+import com.isode.stroke.tls.Certificate;
 
 /**
  * Dummy Stanza Channel for Unit Testing
@@ -111,5 +114,10 @@ public class DummyStanzaChannel extends StanzaChannel {
             return (T)(sentStanzas.get(index));
         }
         return null;
+    }
+
+    @Override
+    public List<Certificate> getPeerCertificateChain() {
+        return new ArrayList<Certificate>();
     }   
 }

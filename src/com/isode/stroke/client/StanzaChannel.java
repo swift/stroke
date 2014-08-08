@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2014, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -9,11 +9,14 @@
 
 package com.isode.stroke.client;
 
+import java.util.List;
+
 import com.isode.stroke.elements.Message;
 import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.Stanza;
 import com.isode.stroke.queries.IQChannel;
 import com.isode.stroke.signals.Signal1;
+import com.isode.stroke.tls.Certificate;
 
 public abstract class StanzaChannel extends IQChannel {
 
@@ -25,6 +28,7 @@ public abstract class StanzaChannel extends IQChannel {
     public abstract boolean isAvailable();
 
     public abstract boolean getStreamManagementEnabled();
+    public abstract List<Certificate> getPeerCertificateChain();
 
     public final Signal1<Message> onMessageReceived = new Signal1<Message>();
     public final Signal1<Presence> onPresenceReceived = new Signal1<Presence>();

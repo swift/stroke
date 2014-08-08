@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 /*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2014, Remko Tronçon.
  * All rights reserved.
  */
 package com.isode.stroke.client;
@@ -29,7 +29,6 @@ import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.signals.Slot2;
-import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.CertificateWithKey;
@@ -468,17 +467,8 @@ public class CoreClient {
      * @return true if the session is initialized and encrypted with TLS,
      * false otherwise.
      */
-    public boolean isSessionTLSEncrypted() {
+    public boolean isStreamEncrypted() {
         return (sessionStream_ != null && sessionStream_.isTLSEncrypted());
-    }
-    
-    /**
-     * If the session is initialized and encrypted with TLS, then the
-     * certificate presented by the peer is returned
-     * @return the peer certificate, if one is available, otherwise null.
-     */
-    public Certificate getSessionCertificate() {
-        return (isSessionTLSEncrypted() ? sessionStream_.getPeerCertificate() : null);
     }
 
     private void resetConnector() {

@@ -176,6 +176,10 @@ public class ClientSession {
     public boolean getRosterVersioningSuported() {
         return rosterVersioningSupported;
     }
+    
+    public List<Certificate> getPeerCertificateChain() {
+        return stream.getPeerCertificateChain();
+    }
 
     public JID getLocalJID() {
         return localJID;
