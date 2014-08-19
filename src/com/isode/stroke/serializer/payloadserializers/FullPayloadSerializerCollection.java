@@ -22,7 +22,7 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
         /*FIXME: Implement what's needed. */
         //addSerializer(new IBBSerializer());
 	addSerializer(new BodySerializer());
-	//addSerializer(new SubjectSerializer());
+	addSerializer(new SubjectSerializer());
 	//addSerializer(new ChatStateSerializer());
 	//addSerializer(new PrioritySerializer());
 	addSerializer(new ErrorSerializer());
