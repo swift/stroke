@@ -177,13 +177,21 @@ public class JavaConnection extends Connection implements EventOwner {
              */
             boolean finishedWriting = false;
             int bytesWritten = socketChannel_.write(byteBuffer);
+            final boolean somethingWasWritten = (bytesWritten != 0);
+            if (somethingWasWritten) {
+                eventLoop_.postEvent(new Callback() {
+                    public void run() {
+                        onDataWritten.emit();
+                    }
+                });
+            }
             finishedWriting = (byteBuffer.remaining() == 0);
             if (finishedWriting) {
                 writeBuffer_.remove(0);
                 return;
             }
             /* Was anything written at all? */
-            if (bytesWritten == 0) {
+            if (!somethingWasWritten) {
                 /* Leave the buffer in the array so that it'll get tried
                  * again later
                  */
