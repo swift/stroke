@@ -1224,8 +1224,8 @@ public class JSSEContext extends TLSContext {
                 /* These work for JRE 7 but may not be available for JRE 6*/
                 "TLSv1.2", "TLSv1.1", 
                 
-                /* These work for JRE 6 */
-                "TLSv1", "TLS", "SSLv3" };
+                /* These work for JRE 6. SSLv3 excluded to avoid POODLE vulnerability */
+                "TLSv1", "TLS" };
         
         /* Accumulate a list of problems which will be discarded if things
          * go well, but including in the error if things fail
