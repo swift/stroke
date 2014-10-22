@@ -13,6 +13,7 @@ package com.isode.stroke.serializer.payloadserializers;
 import org.junit.Test;
 import com.isode.stroke.elements.Form;
 import com.isode.stroke.elements.FormField;
+import com.isode.stroke.elements.FormField.Type;
 import com.isode.stroke.elements.MAMQuery;
 import com.isode.stroke.elements.ResultSet;
 import static org.junit.Assert.assertEquals;
@@ -25,11 +26,11 @@ public class MAMQuerySerializerTest {
 
         Form parameters = new Form();
         
-        FormField.TextSingleFormField fieldType = FormField.TextSingleFormField.create("urn:xmpp:mam:0");
+        FormField fieldType = new FormField(Type.TEXT_SINGLE_TYPE, "urn:xmpp:mam:0");
         fieldType.setName("FORM_TYPE");
         parameters.addField(fieldType);
 
-        FormField.TextSingleFormField fieldStart = FormField.TextSingleFormField.create("2010-08-07T00:00:00Z");
+        FormField fieldStart = new FormField(Type.TEXT_SINGLE_TYPE, "2010-08-07T00:00:00Z");
         fieldStart.setName("start");
         parameters.addField(fieldStart);
 

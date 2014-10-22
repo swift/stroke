@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Isode Limited, London, England.
+ * Copyright (c) 2012-2014 Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -12,7 +12,6 @@ package com.isode.stroke.elements;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.isode.stroke.elements.FormField.HiddenFormField;
 
 /**
  * XEP-0004 Data form. For the relevant Fields, the parsers and serialisers
@@ -34,6 +33,16 @@ public class Form extends Payload {
      * Element "instructions"
      */
     public static final String FORM_ELEMENT_INSTRUCTIONS = "instructions";
+    
+    /**
+     * Element "reported"
+     */
+    public static final String FORM_ELEMENT_REPORTED = "reported";
+    
+    /**
+     * Element "item"
+     */
+    public static final String FORM_ELEMENT_ITEM = "item";
 
     /**
      * Element "field"
@@ -97,13 +106,15 @@ public class Form extends Payload {
         public String getStringForm() {
             return stringForm_;
         }
-    };
+    }
 
     private List<FormField> fields_ = new ArrayList<FormField>();
-    private String title_ = "";
+    private List<FormField> reportedFields_ = new ArrayList<FormField>();
+    private List<FormItem> items_ = new ArrayList<FormItem>();
     private String instructions_ = "";
+    private String title_ = "";
     private Type type_;
-
+    
     /**
      * Create a form of the given type.
      *
@@ -130,7 +141,6 @@ public class Form extends Payload {
         if (field == null) {
             throw new NullPointerException("'field' must not be null");
         }
-
         fields_.add(field);
     }
 
@@ -142,6 +152,52 @@ public class Form extends Payload {
      */
     public List<FormField> getFields() {
         return new ArrayList<FormField>(fields_);
+    }
+    
+    /**
+     * Add a reported element to this Form.
+     * @param reportedField should not be null
+     */
+    public void addReportedField(FormField reportedField) {
+    	if (reportedField == null) {
+    		throw new NullPointerException("'reportedField' should not be null");
+    	}
+    	reportedFields_.add(reportedField);
+    }
+    
+    /**
+     * Return the list of reported fields for this Form.
+     * @return reportedFields_, never null
+     */
+    public List<FormField> getReportedFields() {
+    	return reportedFields_;
+    }
+    
+    /**
+     * Add a list of item elements to the Form.
+     * @param item List<FormField>, should not be null
+     */
+    public void addItem(FormItem item) {
+    	if (item == null) {
+    		throw new NullPointerException("'item' should not be null");
+    	}
+    	items_.add(item);
+    }
+    
+    /**
+     * Get the list of FormItem elements for the form.
+     * @return itemsCopy ArrayList<List<FormItem>>, list of items for the Form,
+     * 	a copy is made
+     */
+    public List<FormItem> getItems() {
+    	return new ArrayList<FormItem>(items_);
+    }
+    
+    /**
+     * Remove all reported fields from this Form.
+     */
+    public void clearReportedFields() {
+    	reportedFields_.clear();
     }
 
     /**
@@ -209,19 +265,11 @@ public class Form extends Payload {
      *         the form, an empty string otherwise, will never be null
      */
     public String getFormType() {
-        String value = null;
-
         FormField field = getField("FORM_TYPE");
-        try {
-            HiddenFormField f = (HiddenFormField) field;
-            if (f != null) {
-                value = f.getValue();
-            }
-        } catch (ClassCastException e) {
-            // value remains null
+        if (field != null && field.getType() == FormField.Type.HIDDEN_TYPE) {
+        	return field.getValues().isEmpty() ? "" : field.getValues().get(0);
         }
-
-        return ((value != null) ? value : "");
+        return "";
     }
 
     /**

@@ -14,8 +14,7 @@ import com.isode.stroke.elements.DiscoItems;
 import com.isode.stroke.elements.ErrorPayload;
 import com.isode.stroke.elements.Form;
 import com.isode.stroke.elements.FormField;
-import com.isode.stroke.elements.FormField.BooleanFormField;
-import com.isode.stroke.elements.FormField.ListSingleFormField;
+import com.isode.stroke.elements.FormField.Type;
 import com.isode.stroke.elements.IQ;
 import com.isode.stroke.elements.Payload;
 import com.isode.stroke.elements.PubSub;
@@ -35,7 +34,6 @@ import com.isode.stroke.elements.PubSubPublish;
 import com.isode.stroke.elements.PubSubRetract;
 import com.isode.stroke.elements.PubSubSubscribe;
 import com.isode.stroke.elements.PubSubSubscriptions;
-import com.isode.stroke.elements.FormField.TextSingleFormField;
 import com.isode.stroke.elements.PubSubUnsubscribe;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.queries.GenericRequest;
@@ -189,15 +187,15 @@ public class PubSubTools {
                 Form form = config.getData();
                 for (FormField field : form.getFields()) {
                     if (field.getName().equals(parameter)) {
-                        if (field instanceof TextSingleFormField) { /* find and update the specified parameter */
-                            TextSingleFormField fieldText = (TextSingleFormField)field;
-                            fieldText.setValue(newValue);
-                        } else if (field instanceof ListSingleFormField) {
-                            ListSingleFormField fieldList = (ListSingleFormField)field;
-                            fieldList.setValue(newValue);
-                        } else if (field instanceof BooleanFormField) {
-                            BooleanFormField fieldBoolean = (BooleanFormField)field;
-                            fieldBoolean.setValue(newValue.equals("1"));
+                        if (field.getType() == Type.TEXT_SINGLE_TYPE) { /* find and update the specified parameter */
+                            FormField fieldText = field;
+                            fieldText.addValue(newValue);
+                        } else if (field.getType() == Type.LIST_SINGLE_TYPE) {
+                            FormField fieldList = field;
+                            fieldList.addValue(newValue);
+                        } else if (field.getType() == Type.BOOLEAN_TYPE) {
+                            FormField fieldBoolean = field;
+                            fieldBoolean.setBoolValue(newValue.equals("1"));
                         }
                     }
                 }

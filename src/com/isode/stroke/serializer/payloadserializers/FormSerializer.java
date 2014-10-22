@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 Isode Limited, London, England.
+ * Copyright (c) 2012-2014 Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -9,23 +9,9 @@
 
 package com.isode.stroke.serializer.payloadserializers;
 
-import java.util.List;
-
 import com.isode.stroke.elements.Form;
 import com.isode.stroke.elements.FormField;
-import com.isode.stroke.elements.FormField.BooleanFormField;
-import com.isode.stroke.elements.FormField.FixedFormField;
-import com.isode.stroke.elements.FormField.GenericFormField;
-import com.isode.stroke.elements.FormField.HiddenFormField;
-import com.isode.stroke.elements.FormField.JIDMultiFormField;
-import com.isode.stroke.elements.FormField.JIDSingleFormField;
-import com.isode.stroke.elements.FormField.ListMultiFormField;
-import com.isode.stroke.elements.FormField.ListSingleFormField;
-import com.isode.stroke.elements.FormField.Option;
-import com.isode.stroke.elements.FormField.TextMultiFormField;
-import com.isode.stroke.elements.FormField.TextPrivateFormField;
-import com.isode.stroke.elements.FormField.TextSingleFormField;
-import com.isode.stroke.jid.JID;
+import com.isode.stroke.elements.FormItem;
 import com.isode.stroke.serializer.GenericPayloadSerializer;
 import com.isode.stroke.serializer.xml.XMLElement;
 import com.isode.stroke.serializer.xml.XMLTextNode;
@@ -34,9 +20,7 @@ import com.isode.stroke.serializer.xml.XMLTextNode;
  * Serializer for {@link Form} element.
  */
 public class FormSerializer extends GenericPayloadSerializer<Form> {
-    /**
-     * Constructor
-     */
+    
     public FormSerializer() {
         super(Form.class);
     }
@@ -45,7 +29,7 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
         if (form == null) {
             throw new NullPointerException("'form' must not be null");
         }
-
+        
         XMLElement formElement = new XMLElement("x", "jabber:x:data");
         String type = form.getType().getStringForm();
         formElement.setAttribute(Form.FORM_ATTRIBUTE_TYPE, type);
@@ -56,13 +40,35 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
             multiLineify(form.getInstructions(),
                     Form.FORM_ELEMENT_INSTRUCTIONS, formElement);
         }
-        for (FormField field : form.getFields()) {
-            formElement.addNode(fieldToXML(field));
+        
+        // Add reported element
+        
+        if (!form.getReportedFields().isEmpty()) {
+        	XMLElement reportedElement = new XMLElement("reported");
+        	for (FormField field : form.getReportedFields()) {
+            	reportedElement.addNode(fieldToXML(field, true));	
+        	}
+        	formElement.addNode(reportedElement);
         }
+        
+        // Add item elements
+        for (FormItem item : form.getItems()) {
+        	XMLElement itemElement = new XMLElement("item");
+        	for (FormField ff : item.getItemFields()) {
+        		itemElement.addNode(fieldToXML(ff, false));
+        	}
+        	formElement.addNode(itemElement);
+        }
+        
+        // Add fields
+        for (FormField field : form.getFields()) {
+            formElement.addNode(fieldToXML(field, true));
+        }
+        
         return formElement.serialize();
     }
-
-    private XMLElement fieldToXML(FormField field) {
+    
+    private XMLElement fieldToXML(FormField field, boolean withTypeAttribute) {
         if (field == null) {
             throw new NullPointerException("'field' must not be null");
         }
@@ -86,87 +92,87 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
             descriptionElement.addNode(new XMLTextNode(field.getDescription()));
             fieldElement.addNode(descriptionElement);
         }
-
-        // Set the value and type
-        String fieldType = "";
-        if (field instanceof BooleanFormField) {
-            fieldType = FormField.FORM_FIELD_TYPE_BOOLEAN;
-            XMLElement valueElement = new XMLElement(
-                    FormField.FORM_FIELD_ELEMENT_VALUE);
-            valueElement.addNode(XMLTextNode.create(((BooleanFormField) field)
-                    .getValue() ? "1" : "0"));
-            fieldElement.addNode(valueElement);
-        } else if (field instanceof FixedFormField) {
-            fieldType = FormField.FORM_FIELD_TYPE_FIXED;
-            serializeValueAsString((FixedFormField) field, fieldElement);
-        } else if (field instanceof HiddenFormField) {
-            fieldType = FormField.FORM_FIELD_TYPE_HIDDEN;
-            serializeValueAsString((HiddenFormField) field, fieldElement);
-        } else if (field instanceof ListSingleFormField) {
-            fieldType = FormField.FORM_FIELD_TYPE_LIST_SINGLE;
-            serializeValueAsString((ListSingleFormField) field, fieldElement);
-        } else if (field instanceof TextPrivateFormField) {
-            fieldType = FormField.FORM_FIELD_TYPE_TEXT_PRIVATE;
-            serializeValueAsString((TextPrivateFormField) field, fieldElement);
-        } else if (field instanceof TextSingleFormField) {
-            fieldType = FormField.FORM_FIELD_TYPE_TEXT_SINGLE;
-            serializeValueAsString((TextSingleFormField) field, fieldElement);
-        } else if (field instanceof JIDMultiFormField) {
-            fieldType = FormField.FORM_FIELD_TYPE_JID_MULTI;
-            List<JID> jids = ((JIDMultiFormField) (field)).getValue();
-            for (JID jid : jids) {
-                XMLElement valueElement = new XMLElement(
-                        FormField.FORM_FIELD_ELEMENT_VALUE);
-                valueElement.addNode(XMLTextNode.create(jid.toString()));
-                fieldElement.addNode(valueElement);
-            }
-        } else if (field instanceof JIDSingleFormField) {
-            fieldType = FormField.FORM_FIELD_TYPE_JID_SINGLE;
-            XMLElement valueElement = new XMLElement(
-                    FormField.FORM_FIELD_ELEMENT_VALUE);
-            JIDSingleFormField jidSingleFormField = (JIDSingleFormField) field;
-            valueElement.addNode(XMLTextNode.create(jidSingleFormField
-                    .getValue().toString()));
-            fieldElement.addNode(valueElement);
-        } else if (field instanceof ListMultiFormField) {
-            fieldType = FormField.FORM_FIELD_TYPE_LIST_MULTI;
-            List<String> lines = ((ListMultiFormField) (field)).getValue();
-            for (String line : lines) {
-                XMLElement valueElement = new XMLElement(
-                        FormField.FORM_FIELD_ELEMENT_VALUE);
-                valueElement.addNode(XMLTextNode.create(line));
-                fieldElement.addNode(valueElement);
-            }
-        } else if (field instanceof TextMultiFormField) {
-            fieldType = FormField.FORM_FIELD_TYPE_TEXT_MULTI;
-            multiLineify(((TextMultiFormField) field).getValue(),
+        
+        String fieldType = field.getType().getDescription();
+        
+        if (!fieldType.isEmpty() && withTypeAttribute) {
+            fieldElement.setAttribute("type", fieldType);
+        }
+        
+        if (fieldType.equals("boolean")) {
+        	XMLElement valueElement = new XMLElement("value");
+        	if (field.getBoolValue() == true) {
+        		valueElement.addNode(XMLTextNode.create("1"));	
+        	} else {
+        		valueElement.addNode(XMLTextNode.create("0"));
+        	}
+        	fieldElement.addNode(valueElement);
+        }
+        
+        else if (fieldType.equals("jid-single")) {
+        	XMLElement valueElement = new XMLElement("value");
+        	valueElement.addNode(XMLTextNode.create(field.getJIDSingleValue().toString()));
+        	fieldElement.addNode(valueElement);
+        }
+        
+        else if (fieldType.equals("jid-multi")) {
+        	for (String jid : field.getValues()){
+            	XMLElement valueElement = new XMLElement("value");
+            	valueElement.addNode(XMLTextNode.create(jid));
+            	fieldElement.addNode(valueElement);
+        	}
+        }
+        
+        else if (fieldType.equals("text-private")) {
+        	XMLElement valueElement = new XMLElement("value");
+        	valueElement.addNode(XMLTextNode.create(field.getTextPrivateValue()));
+        	fieldElement.addNode(valueElement);
+        }
+        
+        else if (fieldType.equals("fixed")) {
+        	XMLElement valueElement = new XMLElement("value");
+        	valueElement.addNode(XMLTextNode.create(field.getFixedValue()));
+        	fieldElement.addNode(valueElement);
+        }
+        
+        else if (fieldType.equals("text-single") ||
+        		fieldType.equals("unknown")) {
+        	XMLElement valueElement = new XMLElement("value");
+        	valueElement.addNode(XMLTextNode.create(field.getTextSingleValue()));
+        	fieldElement.addNode(valueElement);
+        }
+        
+        else if (fieldType.equals("text-multi")) {
+            multiLineify(field.getTextMultiValue(),
                     FormField.FORM_FIELD_ELEMENT_VALUE, fieldElement);
-        } else {
-            assert (false);
+        } 
+        
+        else if (fieldType.equals("list-multi") ||
+        		fieldType.equals("list-single")) {
+        	for (String s : field.getValues()) {
+        		XMLElement valueElement = new XMLElement("value");
+        		valueElement.addNode(XMLTextNode.create(s));
+        		fieldElement.addNode(valueElement);
+        	}
         }
-
-        if (!fieldType.isEmpty()) {
-            fieldElement.setAttribute(FormField.FORM_FIELD_ATTRIBUTE_TYPE,
-                    fieldType);
+        
+        else { // Unknown type
+        	XMLElement valueElement = new XMLElement("value");
+        	valueElement.addNode(XMLTextNode.create(field.getValues().get(0)));
+        	fieldElement.addNode(valueElement);
         }
-
-        for (Option option : field.getOptions()) {
-            XMLElement optionElement = new XMLElement(
-                    FormField.FORM_FIELD_ELEMENT_OPTION);
-            if (!option.label.isEmpty()) {
-                optionElement.setAttribute(
-                        FormField.FORM_FIELD_ATTRIBUTE_OPTION_LABEL,
-                        option.label);
-            }
-
-            XMLElement valueElement = new XMLElement(
-                    FormField.FORM_FIELD_ELEMENT_OPTION_VALUE);
-            valueElement.addNode(XMLTextNode.create(option.value));
-            optionElement.addNode(valueElement);
-
-            fieldElement.addNode(optionElement);
+        
+        for (FormField.Option option : field.getOptions()) {
+        	XMLElement optionElement = new XMLElement("option");
+        	if (!option.label_.isEmpty()) {
+        		optionElement.setAttribute("label", option.label_);
+        	}
+        	XMLElement valueElement = new XMLElement("value");
+        	valueElement.addNode(XMLTextNode.create(option.value_));
+        	optionElement.addNode(valueElement);
+        	fieldElement.addNode(optionElement);
         }
-
+        
         return fieldElement;
     }
 
@@ -186,17 +192,6 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
             lineElement.addNode(new XMLTextNode(line));
             element.addNode(lineElement);
         }
-    }
-
-    private static void serializeValueAsString(GenericFormField<String> field,
-            XMLElement parent) {
-        String value = field.getValue();
-        // FIXME with the proper fix after Swiften is fixed: if (!value.isEmpty()) {
-            XMLElement valueElement = new XMLElement(
-                    FormField.FORM_FIELD_ELEMENT_VALUE);
-            valueElement.addNode(XMLTextNode.create(value));
-            parent.addNode(valueElement);
-        // }
     }
 
     @Override

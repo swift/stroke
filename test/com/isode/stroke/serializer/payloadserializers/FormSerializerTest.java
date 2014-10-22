@@ -1,36 +1,23 @@
 /*
- * Copyright (c) 2012 Isode Limited, London, England.
+ * Copyright (c) 2012-2014 Isode Limited, London, England.
  * All rights reserved.
  */
 /*
  * Copyright (c) 2010 Remko Tronçon
  * All rights reserved.
  */
-
 package com.isode.stroke.serializer.payloadserializers;
 
 import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.isode.stroke.elements.Form;
-import com.isode.stroke.elements.FormField;
 import com.isode.stroke.elements.Form.Type;
-import com.isode.stroke.elements.FormField.BooleanFormField;
-import com.isode.stroke.elements.FormField.FixedFormField;
-import com.isode.stroke.elements.FormField.HiddenFormField;
-import com.isode.stroke.elements.FormField.JIDMultiFormField;
-import com.isode.stroke.elements.FormField.ListMultiFormField;
-import com.isode.stroke.elements.FormField.ListSingleFormField;
+import com.isode.stroke.elements.FormField;
 import com.isode.stroke.elements.FormField.Option;
-import com.isode.stroke.elements.FormField.TextMultiFormField;
-import com.isode.stroke.elements.FormField.TextPrivateFormField;
-import com.isode.stroke.elements.FormField.TextSingleFormField;
-import com.isode.stroke.jid.JID;
+import com.isode.stroke.elements.FormItem;
 
 public class FormSerializerTest {
     @BeforeClass
@@ -58,38 +45,51 @@ public class FormSerializerTest {
         FormSerializer testling = new FormSerializer();
         Form form = new Form(Type.FORM_TYPE);
 
-        FormField field = HiddenFormField.create("jabber:bot");
+        FormField field = new FormField(FormField.Type.UNKNOWN_TYPE);
+        field.setName("field name");
+        field.setLabel("description");
+        field.addValue("someText");
+        form.addReportedField(field);
+        
+        FormItem item = new FormItem();
+        field = new FormField(FormField.Type.UNKNOWN_TYPE);
+        field.setName("itemField");
+        field.addValue("itemValue");
+        item.addItemField(field);
+        form.addItem(item);
+
+        field = new FormField(FormField.Type.HIDDEN_TYPE, "jabber:bot");
         field.setName("FORM_TYPE");
         form.addField(field);
+        
+        form.addField(new FormField(FormField.Type.FIXED_TYPE, "Section 1: Bot Info"));
 
-        form.addField(FixedFormField.create("Section 1: Bot Info"));
-
-        field = TextSingleFormField.create();
+        field = new FormField(FormField.Type.TEXT_SINGLE_TYPE);
         field.setName("botname");
         field.setLabel("The name of your bot");
         form.addField(field);
 
-        field = TextMultiFormField
-                .create("This is a bot.\nA quite good one actually");
+        field = new FormField(FormField.Type.TEXT_MULTI_TYPE, 
+        		"This is a bot.\nA quite good one actually");
         field.setName("description");
         field.setLabel("Helpful description of your bot");
         form.addField(field);
 
-        field = BooleanFormField.create(true);
+        field = new FormField(FormField.Type.BOOLEAN_TYPE);
+        field.setBoolValue(true);
         field.setName("public");
         field.setLabel("Public bot?");
         field.setRequired(true);
         form.addField(field);
 
-        field = TextPrivateFormField.create();
+        field = new FormField(FormField.Type.TEXT_PRIVATE_TYPE);
         field.setName("password");
         field.setLabel("Password for special access");
         form.addField(field);
 
-        List<String> values = new ArrayList<String>();
-        values.add("news");
-        values.add("search");
-        field = ListMultiFormField.create(values);
+        field = new FormField(FormField.Type.LIST_MULTI_TYPE);
+        field.addValue("news");
+        field.addValue("search");
         field.setName("features");
         field.setLabel("What features will the bot support?");
         field.addOption(new Option("Contests", "contests"));
@@ -99,7 +99,7 @@ public class FormSerializerTest {
         field.addOption(new Option("Search", "search"));
         form.addField(field);
 
-        field = ListSingleFormField.create("20");
+        field = new FormField(FormField.Type.LIST_SINGLE_TYPE, "20");
         field.setName("maxsubs");
         field.setLabel("Maximum number of subscribers");
         field.addOption(new Option("10", "10"));
@@ -109,11 +109,18 @@ public class FormSerializerTest {
         field.addOption(new Option("100", "100"));
         field.addOption(new Option("", "none"));
         form.addField(field);
+        
+        String jid = "user@example.com";
+        field = new FormField(FormField.Type.JID_SINGLE_TYPE);
+        field.addValue(jid);
+        field.setName("jidSingle");
+        field.setLabel("jidSingleLabel");
+        field.setDescription("jidSingleDescription");
+        form.addField(field);
 
-        List<JID> jids = new ArrayList<JID>();
-        jids.add(new JID("foo@bar.com"));
-        jids.add(new JID("baz@fum.org"));
-        field = JIDMultiFormField.create(jids);
+        field = new FormField(FormField.Type.JID_MULTI_TYPE);
+        field.addValue("foo@bar.com");
+        field.addValue("baz@fum.org");
         field.setName("invitelist");
         field.setLabel("People to invite");
         field.setDescription("Tell all your friends about your new bot!");
@@ -121,6 +128,16 @@ public class FormSerializerTest {
 
         assertEquals(
                 "<x type=\"form\" xmlns=\"jabber:x:data\">"
+                        + "<reported>"
+                        + "<field label=\"description\" type=\"unknown\" var=\"field name\">"
+                        + "<value>someText</value>"
+                        + "</field>"
+                        + "</reported>"
+                        + "<item>"
+                        + "<field var=\"itemField\">"
+                        + "<value>itemValue</value>"
+                        + "</field>"
+                        + "</item>"
                         + "<field type=\"hidden\" var=\"FORM_TYPE\">"
                         + "<value>jabber:bot</value>"
                         + "</field>"
@@ -150,10 +167,36 @@ public class FormSerializerTest {
                         + "<option label=\"100\"><value>100</value></option>"
                         + "<option><value>none</value></option>"
                         + "</field>"
+                        + "<field label=\"jidSingleLabel\" type=\"jid-single\" var=\"jidSingle\">"
+                        + "<desc>jidSingleDescription</desc>"
+                        + "<value>user@example.com</value>"
+                        + "</field>"
                         + "<field label=\"People to invite\" type=\"jid-multi\" var=\"invitelist\">"
                         + "<desc>Tell all your friends about your new bot!</desc>"
                         + "<value>foo@bar.com</value>"
                         + "<value>baz@fum.org</value>" + "</field>" + "</x>",
+                        
+                        /*
+                        + "<field label=\"booleanField\" type=\"boolean\"><value>0</value></field>"
+                        + "<field label=\"fixedField\" type=\"fixed\"><value>Fixed></value></field>"
+                        + "<field label=\"hiddenField\" type=\"hidden\"/>"
+                        + "<field label=\"listSingleField\" type=\"list-single\">"
+                        	+ "<option label=\"option1\"><value>listVal</value></option>"
+                        	+ "<option label=\"option2\"><value>listVal</value></option>"
+                        	+ "<option label=\"option3\"><value>listVal</value></option>"
+                        + "</field>"
+                        + "<field label=\"listMultiField\" type=\"list-multi\">"
+                        	+ "<option label=\"option1\"><value>listVal</value></option>"
+                        	+ "<option label=\"option1\"><value>listVal</value></option>"
+                        	+ "<option label=\"option1\"><value>listVal</value></option>"
+                        + "</field>"
+                        + "<field label=\"textPrivateField\" type=\"text-private\"><value>textPrivateVal</value></field>"
+                        + "<field label=\"textMultiField\" type=\"text-multi\">"
+                        	+ ""
+                        	+ ""
+                        	+ ""
+                        + "</field>"
+                        */
                 testling.serialize(form));
     }
 }

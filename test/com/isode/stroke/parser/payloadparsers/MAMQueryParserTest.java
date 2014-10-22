@@ -45,12 +45,13 @@ public class MAMQueryParserTest {
         assertEquals("id0", payload.getQueryID());
 
         assertTrue(payload.getForm() != null);
-        FormField.TextSingleFormField fieldType = (FormField.TextSingleFormField)payload.getForm().getField("FORM_TYPE");
+        
+        FormField fieldType = payload.getForm().getField("FORM_TYPE");
         assertTrue(fieldType != null);
-        assertEquals("urn:xmpp:mam:0", fieldType.getValue());
-        FormField.TextSingleFormField fieldStart = (FormField.TextSingleFormField)payload.getForm().getField("start");
+        assertEquals("urn:xmpp:mam:0", fieldType.getTextSingleValue());
+        FormField fieldStart = payload.getForm().getField("start");
         assertTrue(fieldStart != null);
-        assertEquals("2010-08-07T00:00:00Z", fieldStart.getValue());
+        assertEquals("2010-08-07T00:00:00Z", fieldStart.getTextSingleValue());
 
         assertTrue(payload.getResultSet() != null);
         ResultSet resultSet = payload.getResultSet();
