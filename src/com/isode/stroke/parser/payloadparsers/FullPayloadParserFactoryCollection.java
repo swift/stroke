@@ -69,7 +69,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
     addFactory(new GenericPayloadParserFactory2<ForwardedParser>("forwarded", "urn:xmpp:forward:0", this, ForwardedParser.class));
     addFactory(new GenericPayloadParserFactory2<MAMResultParser>("result", "urn:xmpp:mam:0", this, MAMResultParser.class));
     addFactory(new GenericPayloadParserFactory<MAMQueryParser>("query", "urn:xmpp:mam:0", MAMQueryParser.class));
-    addFactory(new GenericPayloadParserFactory<MAMArchivedParser>("archived", "urn:xmpp:mam:0", MAMArchivedParser.class));
+    addFactory(new GenericPayloadParserFactory<MAMFinParser>("fin", "urn:xmpp:mam:0", MAMFinParser.class));
 	
 	//addFactory(new NicknameParserFactory());
 

@@ -24,9 +24,14 @@ public class MAMQueryParser extends GenericPayloadParser<MAMQuery> {
 
     public void handleStartElement(String element, String ns, AttributeMap attributes) {
         if (level_ == 0) {
-            String attributeValue = attributes.getAttributeValue("queryid");
-            if (attributeValue != null) {
-                getPayloadInternal().setQueryID(attributeValue);
+            MAMQuery payloadInternal = getPayloadInternal();
+            String queryIDValue = attributes.getAttributeValue("queryid");
+            if (queryIDValue != null) {
+                payloadInternal.setQueryID(queryIDValue);
+            }
+            String nodeValue = attributes.getAttributeValue("node");
+            if (nodeValue != null) {
+                payloadInternal.setNode(nodeValue);
             }
         } else if (level_ == 1) {
             if (element == "x" && ns == "jabber:x:data") {

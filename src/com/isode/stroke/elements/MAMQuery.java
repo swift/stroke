@@ -11,12 +11,21 @@
 package com.isode.stroke.elements;
 
 public class MAMQuery extends Payload {
+    
     public void setQueryID(String queryID) {
         queryID_ = queryID;
     }
     
     public String getQueryID() {
         return queryID_;
+    }
+    
+    public void setNode(String node) {
+        node_ = node;
+    }
+    
+    public String getNode() {
+        return node_;
     }
     
     public void setForm(Form form) {
@@ -36,6 +45,7 @@ public class MAMQuery extends Payload {
     }
     
     private String queryID_;
+    private String node_;
     private Form form_;
     private ResultSet resultSet_;
 }

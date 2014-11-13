@@ -21,6 +21,10 @@ public class MAMQuerySerializer extends GenericPayloadSerializer<MAMQuery> {
         if (payload.getQueryID() != null) {
             element.setAttribute("queryid", payload.getQueryID());
         }
+        
+        if (payload.getNode() != null) {
+            element.setAttribute("node", payload.getNode());
+        }
     
         if (payload.getForm() != null) {
             element.addNode(new XMLRawTextNode((new FormSerializer()).serialize(payload.getForm())));

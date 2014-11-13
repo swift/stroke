@@ -39,11 +39,12 @@ public class MAMQuerySerializerTest {
 
         MAMQuery query = new MAMQuery();
         query.setQueryID("id0");
+        query.setNode("node1");
         query.setForm(parameters);
         query.setResultSet(set);
 
         String expectedResult =
-            "<query queryid=\"id0\" xmlns=\"urn:xmpp:mam:0\">"
+            "<query node=\"node1\" queryid=\"id0\" xmlns=\"urn:xmpp:mam:0\">"
           +     "<x type=\"form\" xmlns=\"jabber:x:data\">"
           +         "<field type=\"text-single\" var=\"FORM_TYPE\">"
           +            "<value>urn:xmpp:mam:0</value>"
