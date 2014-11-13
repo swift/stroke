@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.elements;
@@ -118,6 +114,10 @@ public class Presence extends Stanza {
      */
     public void setPriority(int priority) {
         updatePayload(new Priority(priority));
+    }
+    
+    public boolean isAvailable() {
+        return type_ != null && type_ == Type.Available;
     }
 
     @Override

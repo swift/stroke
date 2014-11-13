@@ -1,9 +1,5 @@
 /*
-* Copyright (c) 2014, Isode Limited, London, England.
-* All rights reserved.
-*/
-/*
-* Copyright (c) 2014, Remko Tronçon.
+* Copyright (c) 2013-2015, Isode Limited, London, England.
 * All rights reserved.
 */
 
@@ -30,40 +26,40 @@ public class PubSubParser extends GenericPayloadParser<PubSub> {
     
     public void handleStartElement(String element, String ns, AttributeMap attributes) {
         if (level_ == 1) {
-            if (element == "items" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("items".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubItemsParser(parsers_);
             }
-            if (element == "create" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("create".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubCreateParser(parsers_);
             }
-            if (element == "publish" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("publish".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubPublishParser(parsers_);
             }
-            if (element == "affiliations" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("affiliations".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubAffiliationsParser(parsers_);
             }
-            if (element == "retract" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("retract".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubRetractParser(parsers_);
             }
-            if (element == "options" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("options".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubOptionsParser(parsers_);
             }
-            if (element == "configure" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("configure".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubConfigureParser(parsers_);
             }
-            if (element == "default" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("default".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubDefaultParser(parsers_);
             }
-            if (element == "subscriptions" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("subscriptions".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubSubscriptionsParser(parsers_);
             }
-            if (element == "subscribe" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("subscribe".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubSubscribeParser(parsers_);
             }
-            if (element == "unsubscribe" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("unsubscribe".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubUnsubscribeParser(parsers_);
             }
-            if (element == "subscription" && ns == "http://jabber.org/protocol/pubsub") {
+            if ("subscription".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                 currentPayloadParser_ = new PubSubSubscriptionParser(parsers_);
             }
         }
@@ -83,10 +79,10 @@ public class PubSubParser extends GenericPayloadParser<PubSub> {
             
             if (level_ == 1) {
                 if (currentPayloadParser_ != null) {
-                    if (element == "options" && ns == "http://jabber.org/protocol/pubsub") {
+                    if ("options".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                         optionsPayload_ = (PubSubOptions)currentPayloadParser_.getPayload();
                     }
-                    else if (element == "configure" && ns == "http://jabber.org/protocol/pubsub") {
+                    else if ("configure".equals(element) && "http://jabber.org/protocol/pubsub".equals(ns)) {
                         configurePayload_ = (PubSubConfigure)currentPayloadParser_.getPayload();
                     }
                     else {

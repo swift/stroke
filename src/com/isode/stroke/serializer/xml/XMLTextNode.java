@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.serializer.xml;
@@ -13,7 +9,7 @@ public class XMLTextNode implements XMLNode {
     private String text_;
 
     public XMLTextNode(String text) {
-        text_ = text;
+        text_ = text != null ? text : "";
         text_ = text_.replaceAll("&", "&amp;"); // Should come first
         text_ = text_.replaceAll("<", "&lt;");
         text_ = text_.replaceAll(">", "&gt;");

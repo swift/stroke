@@ -1,15 +1,13 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 
 package com.isode.stroke.elements;
 
 import com.isode.stroke.jid.JID;
+
+import java.util.Date;
 import java.util.Vector;
 
 /**
@@ -48,7 +46,8 @@ public abstract class Stanza implements Element {
      * @param type payload type object instance, not null
      * @return payload of given type, can be null
      */
-    public <T extends Payload> T getPayload(T type) {
+    @SuppressWarnings("unchecked")
+	public <T extends Payload> T getPayload(T type) {
         for (Payload payload : payloads_) {
             if (payload.getClass().isAssignableFrom(type.getClass())) {
                 return (T)payload;
@@ -63,7 +62,8 @@ public abstract class Stanza implements Element {
      * @param type payload type object instance, not null
      * @return list of payloads of given type, not null but can be empty
      */
-    public <T extends Payload> Vector<T> getPayloads(T type) {
+    @SuppressWarnings("unchecked")
+	public <T extends Payload> Vector<T> getPayloads(T type) {
         Vector<T> results = new Vector<T>();
         for (Payload payload : payloads_) {
             if (payload.getClass().isAssignableFrom(type.getClass())) {
@@ -168,4 +168,8 @@ public abstract class Stanza implements Element {
         " id=\"" + id_ + "\"";
     }
 
+    public Date getTimestamp() {
+    	Delay delay = getPayload(new Delay());
+    	return delay != null ? delay.getStamp() : null;
+    }
 }

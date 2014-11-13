@@ -1,10 +1,5 @@
 /*
-* Copyright (c) 2014 Kevin Smith and Remko Tronçon
-* All rights reserved.
-*/
-
-/*
-* Copyright (c) 2014, Isode Limited, London, England.
+* Copyright (c) 2014-2015, Isode Limited, London, England.
 * All rights reserved.
 */
 
@@ -23,7 +18,7 @@ public class ResultSetParser extends GenericPayloadParser<ResultSet> {
     public void handleStartElement(String element, String ns, AttributeMap attributes) {
         currentText_ = "";
         if (level_ == 1) {
-            if (element == "first" && ns == "http://jabber.org/protocol/rsm") {
+            if ("first".equals(element) && "http://jabber.org/protocol/rsm".equals(ns)) {
                 String attributeValue = attributes.getAttributeValue("index");
                 if (attributeValue != null) {
                     getPayloadInternal().setFirstIDIndex(Long.parseLong(attributeValue));
@@ -36,17 +31,17 @@ public class ResultSetParser extends GenericPayloadParser<ResultSet> {
     public void handleEndElement(String element, String ns) {
         --level_;
         if (level_ == 1) {
-            if (element == "max") {
+            if ("max".equals(element)) {
                 getPayloadInternal().setMaxItems(Long.parseLong(currentText_));
-            } else if (element == "count") {
+            } else if ("count".equals(element)) {
                 getPayloadInternal().setCount(Long.parseLong(currentText_));
-            } else if (element == "first") {
+            } else if ("first".equals(element)) {
                 getPayloadInternal().setFirstID(currentText_);
-            } else if (element == "last") {
+            } else if ("last".equals(element)) {
                 getPayloadInternal().setLastID(currentText_);
-            } else if (element == "after") {
+            } else if ("after".equals(element)) {
                 getPayloadInternal().setAfter(currentText_);
-            } else if (element == "before") {
+            } else if ("before".equals(element)) {
                 getPayloadInternal().setBefore(currentText_);
             }
         }

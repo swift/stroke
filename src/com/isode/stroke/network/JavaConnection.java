@@ -160,6 +160,7 @@ public class JavaConnection extends Connection implements EventOwner {
                     if(selector_ != null) {
                         try {
                             selector_.close();
+                            selector_ = null;
                         } catch (IOException e) {
                         }
                     }
@@ -382,7 +383,7 @@ public class JavaConnection extends Connection implements EventOwner {
     private boolean disconnecting_ = false;
     private boolean disconnected_ = false;
     private SocketChannel socketChannel_;
-    private Selector selector_;
+    private volatile Selector selector_;
     private SelectionKey selectionKey_;
     private Worker worker_;
 

@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.elements;
@@ -25,11 +21,11 @@ public class StatusShow extends Payload {
         type_ = type;
     }
 
-    void setType(Type type) {
+    public void setType(Type type) {
         type_ = type;
     }
 
-    Type getType() {
+    public Type getType() {
         return type_;
     }
 
@@ -50,4 +46,27 @@ public class StatusShow extends Payload {
         }
         return "Unknown";
     }
+
+    /**
+	 * Can be used for rough ordering of Types.
+	 * Greater magnitude = more available.
+	 */
+	public static int typeToAvailabilityOrdering(Type type) {
+		switch (type) {
+			case Online: return 4;
+			case FFC: return 5;
+			case Away: return 2;
+			case XA: return 1;
+			case DND: return 3;
+			case None: return 0;
+		}
+		assert(false);
+		return 0;
+	}
+	
+    @Override
+    public String toString() {
+        return "StatusShow : " + type_.toString();
+    }
+
 }

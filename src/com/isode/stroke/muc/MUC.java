@@ -1,13 +1,10 @@
 /*
- * Copyright (c) 2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Kevin Smith
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.muc;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +29,7 @@ import com.isode.stroke.jid.JID.CompareType;
 import com.isode.stroke.presence.DirectedPresenceSender;
 import com.isode.stroke.queries.GenericRequest;
 import com.isode.stroke.queries.IQRouter;
+import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.Signal2;
 import com.isode.stroke.signals.Signal3;
@@ -69,6 +67,8 @@ public class MUC {
 
     public Signal3<ErrorPayload,JID,MUCOccupant.Role> onRoleChangeFailed = 
         new Signal3<ErrorPayload,JID,MUCOccupant.Role>();
+
+    public final Signal onUnlocked = new Signal();
 
     private boolean createAsReservedIfNew;
     private IQRouter iqRouter_;
@@ -253,25 +253,44 @@ public class MUC {
         return occupants.containsKey(nick);
     }
 
+    public Map<String, MUCOccupant> getOccupants() {
+        return Collections.unmodifiableMap(occupants);
+    }
+
     /**
      * Invite the person with give JID to the chat room
      * @param person jabber ID o the person to invite,not nul
      */
     public void invitePerson(JID person) {
-        invitePerson(person,"");
+        invitePerson(person, "", false, false);
     }
+    
+    /**
+     * Send an invite for the person to join the MUC 
+     * @param person jabber ID of the person to invite, not null
+     * @param reason join reason, not null
+     * @param isImpromptu 
+     */
+    public void invitePerson(JID person, String reason, boolean isImpromptu) {
+        invitePerson(person, reason, isImpromptu, false);
+    }
+
 
     /**
      * Send an invite for the person to join the MUC 
      * @param person jabber ID of the person to invite, not null
      * @param reason join reason, not null
+     * @param isImpromptu 
+     * @param isReuseChat 
      */
-    public void invitePerson(JID person, String reason) {
+    public void invitePerson(JID person, String reason, boolean isImpromptu, boolean isReuseChat) {
         Message message = new Message();
         message.setTo(person);
         message.setType(Message.Type.Normal);
         MUCInvitationPayload invite = new MUCInvitationPayload();
         invite.setReason(reason);
+        invite.setIsImpromptu(isImpromptu);
+        invite.setIsContinuation(isReuseChat);
         invite.setJID(ownMUCJID.toBare());
         message.addPayload(invite);
         stanzaChannel.sendMessage(message);

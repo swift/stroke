@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.parser.payloadparsers;
@@ -12,27 +8,27 @@ import com.isode.stroke.parser.GenericPayloadParserFactory;
 import com.isode.stroke.parser.GenericPayloadParserFactory2;
 import com.isode.stroke.parser.PayloadParserFactory;
 import com.isode.stroke.parser.PayloadParserFactoryCollection;
-import com.isode.stroke.parser.PubSubOwnerPubSubParser;
+import com.isode.stroke.parser.payloadparsers.PubSubOwnerPubSubParser;
 
 public class FullPayloadParserFactoryCollection extends PayloadParserFactoryCollection {
     public FullPayloadParserFactoryCollection() {
         /* TODO: Port more */
         //addFactory(new GenericPayloadParserFactory<IBBParser>("", "http://jabber.org/protocol/ibb"));
-	//addFactory(new GenericPayloadParserFactory<StatusShowParser>("show", StatusShowParser.class));
-	//addFactory(new GenericPayloadParserFactory<StatusParser>("status", StatusParser.class));
-	//addFactory(new GenericPayloadParserFactory<ReplaceParser>("replace", "http://swift.im/protocol/replace"));
+	addFactory(new GenericPayloadParserFactory<StatusShowParser>("show", StatusShowParser.class));
+	addFactory(new GenericPayloadParserFactory<StatusParser>("status", StatusParser.class));
+	addFactory(new GenericPayloadParserFactory<ReplaceParser>("replace", "http://swift.im/protocol/replace", ReplaceParser.class));
+	addFactory(new GenericPayloadParserFactory<ReplaceParser>("replace", "urn:xmpp:message-correct:0", ReplaceParser.class));
 	addFactory(new GenericPayloadParserFactory<LastParser>("query", "jabber:iq:last", LastParser.class));
 	addFactory(new GenericPayloadParserFactory<BodyParser>("body", BodyParser.class));
-	//addFactory(new GenericPayloadParserFactory<SubjectParser>("subject", SubjectParser.class));
+	addFactory(new GenericPayloadParserFactory<SubjectParser>("subject", SubjectParser.class));
 	//addFactory(new GenericPayloadParserFactory<PriorityParser>("priority", PriorityParser.class));
 	addFactory(new ErrorParserFactory(this));
 	addFactory(new SoftwareVersionParserFactory());
-	//addFactory(new StorageParserFactory());
+	addFactory(new GenericPayloadParserFactory<StorageParser>("storage", "storage:bookmarks", StorageParser.class));
 	addFactory(new RosterParserFactory());
 	addFactory(new GenericPayloadParserFactory<DiscoInfoParser>("query", "http://jabber.org/protocol/disco#info", DiscoInfoParser.class));
 	addFactory(new GenericPayloadParserFactory<DiscoItemsParser>("query", "http://jabber.org/protocol/disco#items", DiscoItemsParser.class));
 	addFactory(new GenericPayloadParserFactory<CapsInfoParser> ("c", "http://jabber.org/protocol/caps", CapsInfoParser.class));
-	//addFactory(new CapsInfoParserFactory());
 	addFactory(new ResourceBindParserFactory());
 	addFactory(new StartSessionParserFactory());
 	//addFactory(new SecurityLabelParserFactory());
@@ -45,9 +41,9 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	//addFactory(new StreamInitiationParserFactory());
 	//addFactory(new BytestreamsParserFactory());
 	//addFactory(new VCardUpdateParserFactory());
-	//addFactory(new VCardParserFactory());
-	//addFactory(new PrivateStorageParserFactory(this));
-	addFactory(new ChatStateParserFactory());
+    addFactory(new GenericPayloadParserFactory<VCardParser>("vCard", "vcard-temp", VCardParser.class));
+	addFactory(new PrivateStorageParserFactory(this));
+    addFactory(new ChatStateParserFactory());
 	//addFactory(new DelayParserFactory());
 	addFactory(new MUCUserPayloadParserFactory(this));
 	addFactory(new MUCOwnerPayloadParserFactory(this));
@@ -59,6 +55,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	        "http://jabber.org/protocol/muc#user",MUCDestroyPayloadParser.class));
 	addFactory(new GenericPayloadParserFactory<MUCDestroyPayloadParser>("destroy", 
 	        "http://jabber.org/protocol/muc#owner",MUCDestroyPayloadParser.class));
+    addFactory(new GenericPayloadParserFactory<IdleParser>("idle", "urn:xmpp:idle:1",IdleParser.class));
 	
 	addFactory(new GenericPayloadParserFactory2<PubSubParser>("pubsub", "http://jabber.org/protocol/pubsub", this, PubSubParser.class));
 	addFactory(new GenericPayloadParserFactory2<PubSubOwnerPubSubParser>("pubsub", "http://jabber.org/protocol/pubsub#owner", this, PubSubOwnerPubSubParser.class));

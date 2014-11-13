@@ -1,9 +1,10 @@
 /*
- * Copyright (c) 2011-2013 Isode Limited, London, England.
+ * Copyright (c) 2011-2015 Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.network;
 
+import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.eventloop.EventLoop;
 import com.isode.stroke.tls.PlatformTLSFactories;
 import com.isode.stroke.tls.TLSContextFactory;
@@ -16,6 +17,7 @@ public class JavaNetworkFactories implements NetworkFactories {
         connections_ = new JavaConnectionFactory(eventLoop_);
         dns_ = new PlatformDomainNameResolver(eventLoop_);
         platformTLSFactories_ = new PlatformTLSFactories();
+        cryptoProvider_ = new JavaCryptoProvider();
     }
 
     public TimerFactory getTimerFactory() {
@@ -34,9 +36,15 @@ public class JavaNetworkFactories implements NetworkFactories {
         return platformTLSFactories_.getTLSContextFactory();        
     }
     
+    @Override
+    public CryptoProvider getCryptoProvider() {
+        return cryptoProvider_;
+    }
+
     private final EventLoop eventLoop_;
     private final JavaTimerFactory timers_;
     private final JavaConnectionFactory connections_;
     private final PlatformDomainNameResolver dns_;
     private final PlatformTLSFactories platformTLSFactories_;
+    private final CryptoProvider cryptoProvider_;
 }

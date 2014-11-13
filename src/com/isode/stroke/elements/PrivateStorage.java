@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.elements;
@@ -15,7 +11,9 @@ package com.isode.stroke.elements;
  */
 public class PrivateStorage extends Payload {
     
-    /**
+    public PrivateStorage() {}
+
+        /**
      * Constructor 
      * @param p payload, not null
      */

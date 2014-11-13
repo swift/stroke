@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2011, Kevin Smith
+ * Copyright (c) 2011-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.elements;
@@ -20,6 +16,8 @@ public class MUCInvitationPayload extends Payload {
     private String password_;
     private String reason_;
     private String thread_;
+    private boolean impromptu_;
+
 
     /**
      * Create the payload 
@@ -42,6 +40,22 @@ public class MUCInvitationPayload extends Payload {
      */
     public boolean getIsContinuation() {
         return continuation_;
+    }
+
+    /**
+     * Set the impromptu value
+     * @param b value to set
+     */
+    public void setIsImpromptu(boolean b) {
+        impromptu_ = b;
+    }
+
+    /**
+     * Get the impromptu value
+     * @return impromptu value
+     */
+    public boolean getIsImpromptu() {
+        return impromptu_;
     }
 
     /**

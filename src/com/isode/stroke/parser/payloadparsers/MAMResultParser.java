@@ -1,10 +1,5 @@
 /*
-* Copyright (c) 2014 Kevin Smith and Remko Tronçon
-* All rights reserved.
-*/
-
-/*
-* Copyright (c) 2014, Isode Limited, London, England.
+* Copyright (c) 2014-2015, Isode Limited, London, England.
 * All rights reserved.
 */
 
@@ -33,7 +28,7 @@ public class MAMResultParser extends GenericPayloadParser<MAMResult> {
                 getPayloadInternal().setQueryID(attributeValue);
             }
         } else if (level_ == 1) {
-            if (element == "forwarded" && ns == "urn:xmpp:forward:0") {
+            if ("forwarded".equals(element) && "urn:xmpp:forward:0".equals(ns)) {
                 payloadParser_ = new ForwardedParser(factories_);
             }
         }

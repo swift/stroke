@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -23,15 +23,23 @@ public class RosterItemPayload {
     };
 
     public RosterItemPayload() {
+    	jid_ = new JID();
+    	name_ = "";
         subscription_ = Subscription.None;
         ask_ = false;
+        groups_ = new ArrayList<String>();
     }
 
-    public RosterItemPayload(JID jid, String name, Subscription subscription) {
+    public RosterItemPayload(JID jid, String name, Subscription subscription, Collection<String> groups) {
         jid_ = jid;
         name_ = name;
         subscription_ = subscription;
         ask_ = false;
+        groups_ = groups;
+    }
+
+    public RosterItemPayload(JID jid, String name, Subscription subscription) {
+    	this(jid, name, subscription, new ArrayList<String>());
     }
 
     public void setJID(JID jid) {
@@ -81,6 +89,6 @@ public class RosterItemPayload {
     private JID jid_;
     private String name_;
     private Subscription subscription_;
-    private ArrayList<String> groups_ = new ArrayList<String>();
+    private Collection<String> groups_;
     private boolean ask_;
 }

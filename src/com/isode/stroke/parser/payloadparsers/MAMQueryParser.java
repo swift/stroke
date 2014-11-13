@@ -1,10 +1,5 @@
 /*
-* Copyright (c) 2014 Kevin Smith and Remko Tronçon
-* All rights reserved.
-*/
-
-/*
-* Copyright (c) 2014, Isode Limited, London, England.
+* Copyright (c) 2014-2015, Isode Limited, London, England.
 * All rights reserved.
 */
 
@@ -34,9 +29,9 @@ public class MAMQueryParser extends GenericPayloadParser<MAMQuery> {
                 payloadInternal.setNode(nodeValue);
             }
         } else if (level_ == 1) {
-            if (element == "x" && ns == "jabber:x:data") {
+            if ("x".equals(element) && "jabber:x:data".equals(ns)) {
                 formParser_ = new FormParser();
-            } else if (element == "set" && ns == "http://jabber.org/protocol/rsm") {
+            } else if ("set".equals(element) && "http://jabber.org/protocol/rsm".equals(ns)) {
                 resultSetParser_ = new ResultSetParser();
             }
         }

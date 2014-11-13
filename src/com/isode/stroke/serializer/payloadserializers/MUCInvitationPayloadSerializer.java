@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2011, Kevin Smith
+ * Copyright (c) 2011-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.serializer.payloadserializers;
@@ -40,6 +36,9 @@ public class MUCInvitationPayloadSerializer extends GenericPayloadSerializer<MUC
         }
         if (payload.getThread() != null && !payload.getThread().isEmpty()) {
             mucElement.setAttribute("thread", payload.getThread());
+        }
+        if (payload.getIsImpromptu()) {
+            mucElement.addNode(new XMLElement("impromptu", "http://swift.im/impromptu"));
         }
         return mucElement.serialize();
     }

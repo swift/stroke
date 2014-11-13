@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.serializer.payloadserializers;
@@ -34,8 +30,8 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	addSerializer(new MUCOwnerPayloadSerializer(this));
 	addSerializer(new MUCUserPayloadSerializer(this));
 	addSerializer(new SoftwareVersionSerializer());
-	//addSerializer(new StatusSerializer());
-	//addSerializer(new StatusShowSerializer());
+	addSerializer(new StatusSerializer());
+	addSerializer(new StatusShowSerializer());
 	addSerializer(new DiscoInfoSerializer());
 	addSerializer(new DiscoItemsSerializer());
 	addSerializer(new CapsInfoSerializer());
@@ -45,17 +41,19 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	//addSerializer(new SecurityLabelsCatalogSerializer());
 	//addSerializer(new StreamInitiationSerializer());
 	//addSerializer(new BytestreamsSerializer());
-	//addSerializer(new VCardSerializer());
+	addSerializer(new VCardSerializer());
 	//addSerializer(new VCardUpdateSerializer());
 	addSerializer(new RawXMLPayloadSerializer());
-	//addSerializer(new StorageSerializer());
+	addSerializer(new StorageSerializer());
 	addSerializer(new DelaySerializer());
         addSerializer(new FormSerializer());
-	//addSerializer(new PrivateStorageSerializer(this));
+	addSerializer(new PrivateStorageSerializer(this));
         addSerializer(new CommandSerializer());
 	//addSerializer(new NicknameSerializer());
         addSerializer(new SearchPayloadSerializer());
+        addSerializer(new ReplaceSerializer());
         addSerializer(new LastSerializer());
+        addSerializer(new IdleSerializer());
 
 		addSerializer(new PubSubSerializer(this));
 		addSerializer(new PubSubEventSerializer(this));

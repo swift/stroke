@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.parser;
@@ -35,7 +31,7 @@ public class XMPPParser implements XMLParserClient {
             xmlParseResult = xmlParser_.parse(data);
         } catch (Exception e) {
             parseErrorOccurred_ = true;
-            logger_.warning("Data " + data + " caused:\n" + e.getMessage());
+            logger_.log(java.util.logging.Level.WARNING, "Data " + data + " caused:\n" + e.getMessage(), e);
         }
         if (parseErrorOccurred_ || !xmlParseResult) {
             logger_.warning(String.format("When parsing, %b and %b",

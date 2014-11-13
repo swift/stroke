@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010-2014, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.queries;
@@ -63,7 +59,17 @@ public class IQRouter {
         return channel_.isAvailable();
     }
 
-    private void handleIQ(IQ iq) {
+	/**
+	 * Checks whether the given jid is the account JID (i.e. it is either
+	 * the bare JID, or it is the empty JID).
+	 * Can be used to check whether a stanza is sent by the server on behalf
+	 * of the user's account.
+	 */
+    public boolean isAccountJID(final JID jid) {
+		return jid.isValid() ? jid_.toBare().compare(jid, JID.CompareType.WithResource) == 0 : true;
+	}
+
+	private void handleIQ(IQ iq) {
         boolean handled = false;
         synchronized (handlers_) {
             for (IQHandler handler : handlers_) {

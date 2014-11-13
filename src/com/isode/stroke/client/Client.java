@@ -1,22 +1,31 @@
 /*
- * Copyright (c) 2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.client;
 
+import com.isode.stroke.disco.CapsManager;
+import com.isode.stroke.disco.ClientDiscoManager;
+import com.isode.stroke.disco.EntityCapsManager;
+import com.isode.stroke.disco.EntityCapsProvider;
+import com.isode.stroke.elements.Presence;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.muc.MUCManager;
 import com.isode.stroke.muc.MUCRegistry;
 import com.isode.stroke.network.NetworkFactories;
 import com.isode.stroke.presence.DirectedPresenceSender;
+import com.isode.stroke.presence.PresenceOracle;
+import com.isode.stroke.presence.PresenceSender;
 import com.isode.stroke.presence.StanzaChannelPresenceSender;
+import com.isode.stroke.presence.SubscriptionManager;
 import com.isode.stroke.pubsub.PubSubManager;
 import com.isode.stroke.pubsub.PubSubManagerImpl;
 import com.isode.stroke.queries.responders.SoftwareVersionResponder;
+import com.isode.stroke.roster.XMPPRoster;
+import com.isode.stroke.roster.XMPPRosterController;
+import com.isode.stroke.roster.XMPPRosterImpl;
+import com.isode.stroke.signals.Signal1;
+import com.isode.stroke.vcards.VCardManager;
 
 /**
  * Provides the core functionality for writing XMPP client software.
@@ -32,7 +41,21 @@ public class Client extends CoreClient {
     private final DirectedPresenceSender directedPresenceSender; //NOPMD, this is not better as a local variable
     private final StanzaChannelPresenceSender stanzaChannelPresenceSender; //NOPMD, this is not better as a local variable
     private final SoftwareVersionResponder softwareVersionResponder;
-	private final PubSubManager pubSubManager;
+    private final PubSubManager pubSubManager;
+    private final XMPPRosterImpl roster;
+    private final XMPPRosterController rosterController;
+    private final PresenceOracle presenceOracle;
+    private final Storages storages;
+    private final MemoryStorages memoryStorages;
+    private final VCardManager vcardManager;
+    private final CapsManager capsManager;
+    private final EntityCapsManager entityCapsManager;
+    private final NickManager nickManager;
+    private final NickResolver nickResolver;
+    private final SubscriptionManager subscriptionManager;
+    private final ClientDiscoManager discoManager;
+
+    final Signal1<Presence> onPresenceChange = new Signal1<Presence>();
 
     /**
      * Constructor.
@@ -50,18 +73,42 @@ public class Client extends CoreClient {
      * @param networkFactories An implementation of network interaction, must
      *            not be null.
      */
-    public  Client(final JID jid, final String password, final NetworkFactories networkFactories) {
+    public  Client(final JID jid, final String password, final NetworkFactories networkFactories, Storages storages) {
         super(jid, password, networkFactories);
+        
+        this.storages = storages;
+        memoryStorages = new MemoryStorages(networkFactories.getCryptoProvider());
+        
+        softwareVersionResponder = new SoftwareVersionResponder(getIQRouter());
+        softwareVersionResponder.start();
+        
+        roster = new XMPPRosterImpl();
+    	rosterController = new XMPPRosterController(getIQRouter(), roster, getStorages().getRosterStorage());
+
+    	subscriptionManager = new SubscriptionManager(getStanzaChannel());
+    	
+    	presenceOracle = new PresenceOracle(getStanzaChannel());
+    	presenceOracle.onPresenceChange.connect(onPresenceChange);
+
         stanzaChannelPresenceSender = new StanzaChannelPresenceSender(getStanzaChannel());
         directedPresenceSender = new DirectedPresenceSender(stanzaChannelPresenceSender);
+        discoManager = new ClientDiscoManager(getIQRouter(), directedPresenceSender, networkFactories.getCryptoProvider());
 
         mucRegistry = new MUCRegistry();
         mucManager = new MUCManager(getStanzaChannel(), getIQRouter(), directedPresenceSender, mucRegistry);
 
-        softwareVersionResponder = new SoftwareVersionResponder(getIQRouter());
-        softwareVersionResponder.start();
-        
-        pubSubManager = new PubSubManagerImpl(getStanzaChannel(), getIQRouter());
+        vcardManager = new VCardManager(jid, getIQRouter(), getStorages().getVCardStorage());
+        capsManager = new CapsManager(getStorages().getCapsStorage(), getStanzaChannel(), getIQRouter(), networkFactories.getCryptoProvider());
+        entityCapsManager = new EntityCapsManager(capsManager, getStanzaChannel());
+
+    	nickManager = new NickManagerImpl(jid.toBare(), vcardManager);
+    	nickResolver = new NickResolver(jid.toBare(), roster, vcardManager, mucRegistry);
+
+    	pubSubManager = new PubSubManagerImpl(getStanzaChannel(), getIQRouter());
+    }
+    
+    public  Client(final JID jid, final String password, final NetworkFactories networkFactories) {
+        this(jid, password, networkFactories, null);
     }
 
     /**
@@ -88,6 +135,10 @@ public class Client extends CoreClient {
         return pubSubManager;
     }
     
+    public XMPPRoster getRoster() {
+    	return roster;
+    }
+    
     /**
      * Sets the software version of the client.                  
      *
@@ -96,4 +147,63 @@ public class Client extends CoreClient {
     public void setSoftwareVersion(final String name, final String version, final String os) {
         softwareVersionResponder.setVersion(name, version, os);
     }
+
+
+    public void requestRoster() {
+    	// FIXME: We should set this once when the session is finished, but there
+    	// is currently no callback for this
+    	if (getSession() != null) {
+    		rosterController.setUseVersioning(getSession().getRosterVersioningSuported());
+    	}
+    	rosterController.requestRoster();
+    }
+
+    public Presence getLastPresence(final JID jid) {
+    	return presenceOracle.getLastPresence(jid);
+    }
+
+    public Presence getHighestPriorityPresence(final JID bareJID) {
+    	return presenceOracle.getHighestPriorityPresence(bareJID);
+    }
+
+    public PresenceOracle getPresenceOracle() {
+		return presenceOracle;
+	}
+    
+	public NickManager getNickManager() {
+    	return nickManager;
+    }
+
+    public NickResolver getNickResolver() {
+    	return nickResolver;
+    }
+    
+    public SubscriptionManager getSubscriptionManager() {
+    	return subscriptionManager;
+    }
+    
+    public ClientDiscoManager getDiscoManager() {
+        return discoManager;
+    }
+    
+    public VCardManager getVCardManager() {
+    	return vcardManager;
+    }
+    
+    private Storages getStorages()  {
+    	if (storages != null) {
+    		return storages;
+    	}
+    	return memoryStorages;
+    }
+    
+    public PresenceSender getPresenceSender() {
+        return discoManager.getPresenceSender();
+    }
+
+    public EntityCapsProvider getEntityCapsProvider() {
+        return entityCapsManager;
+    }
+
+    
 }

@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010-2014, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010-2014, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.client;
@@ -286,6 +282,10 @@ public class CoreClient {
             connector_.stop();
         }
     }
+    
+    public boolean isActive() {
+    	return (session_ != null && !session_.isFinished()) || connector_ != null;
+    }
 
     public void setCertificate(final CertificateWithKey certificate) {
         certificate_ = certificate;
@@ -476,6 +476,10 @@ public class CoreClient {
             connectorConnectFinishedConnection_.disconnect();
         }
         connector_ = null;
+    }
+    
+    protected ClientSession getSession() {
+    	return session_;
     }
 
     private void resetSession() {

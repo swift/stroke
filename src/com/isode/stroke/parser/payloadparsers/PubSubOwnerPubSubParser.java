@@ -1,16 +1,16 @@
 /*
- * Copyright (c) 2014, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2014, Remko Tronçon.
+ * Copyright (c) 2013-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 
-package com.isode.stroke.parser;
+package com.isode.stroke.parser.payloadparsers;
 
 import com.isode.stroke.elements.PubSubOwnerPayload;
 import com.isode.stroke.elements.PubSubOwnerPubSub;
+import com.isode.stroke.parser.AttributeMap;
+import com.isode.stroke.parser.GenericPayloadParser;
+import com.isode.stroke.parser.PayloadParser;
+import com.isode.stroke.parser.PayloadParserFactoryCollection;
 import com.isode.stroke.parser.payloadparsers.PubSubOwnerAffiliationsParser;
 import com.isode.stroke.parser.payloadparsers.PubSubOwnerConfigureParser;
 import com.isode.stroke.parser.payloadparsers.PubSubOwnerDefaultParser;
@@ -30,30 +30,30 @@ public class PubSubOwnerPubSubParser extends
     public void handleStartElement(String element, String ns,
             AttributeMap attributes) {
         if (level_ == 1) {
-            if (element == "configure"
-                    && ns == "http://jabber.org/protocol/pubsub#owner") {
+            if ("configure".equals(element)
+                    && "http://jabber.org/protocol/pubsub#owner".equals(ns)) {
                 currentPayloadParser_ = new PubSubOwnerConfigureParser(parsers_);
             }
-            if (element == "subscriptions"
-                    && ns == "http://jabber.org/protocol/pubsub#owner") {
+            if ("subscriptions".equals(element)
+                    && "http://jabber.org/protocol/pubsub#owner".equals(ns)) {
                 currentPayloadParser_ = new PubSubOwnerSubscriptionsParser(
                         parsers_);
             }
-            if (element == "default"
-                    && ns == "http://jabber.org/protocol/pubsub#owner") {
+            if ("default".equals(element)
+                    && "http://jabber.org/protocol/pubsub#owner".equals(ns)) {
                 currentPayloadParser_ = new PubSubOwnerDefaultParser(parsers_);
             }
-            if (element == "purge"
-                    && ns == "http://jabber.org/protocol/pubsub#owner") {
+            if ("purge".equals(element)
+                    && "http://jabber.org/protocol/pubsub#owner".equals(ns)) {
                 currentPayloadParser_ = new PubSubOwnerPurgeParser(parsers_);
             }
-            if (element == "affiliations"
-                    && ns == "http://jabber.org/protocol/pubsub#owner") {
+            if ("affiliations".equals(element)
+                    && "http://jabber.org/protocol/pubsub#owner".equals(ns)) {
                 currentPayloadParser_ = new PubSubOwnerAffiliationsParser(
                         parsers_);
             }
-            if (element == "delete"
-                    && ns == "http://jabber.org/protocol/pubsub#owner") {
+            if ("delete".equals(element)
+                    && "http://jabber.org/protocol/pubsub#owner".equals(ns)) {
                 currentPayloadParser_ = new PubSubOwnerDeleteParser(parsers_);
             }
         }

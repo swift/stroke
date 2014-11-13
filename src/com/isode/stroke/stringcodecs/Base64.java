@@ -1,10 +1,5 @@
 /*
- * Copyright (c) 2010 Remko Tronçon
- * Licensed under the GNU General Public License v3.
- * See Documentation/Licenses/GPLv3.txt for more information.
- */
-/*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.stringcodecs;
@@ -19,5 +14,9 @@ public class Base64 {
 
     public static String encode(ByteArray input) {
         return Base64BSD.encodeToString(input.getData(), false);
+    }
+
+    public static String encode(byte[] input) {
+        return Base64BSD.encodeToString(input, false);
     }
 }

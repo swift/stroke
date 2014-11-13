@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -9,13 +9,16 @@
 package com.isode.stroke.elements;
 
 import com.isode.stroke.jid.JID;
+
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 /**
  * Roster.
  */
 public class RosterPayload extends Payload {
+    private final ArrayList<RosterItemPayload> items_ = new ArrayList<RosterItemPayload>();
+	private String version_;
 
     public RosterPayload() {
     }
@@ -33,9 +36,16 @@ public class RosterPayload extends Payload {
         items_.add(item);
     }
 
-    public Collection<RosterItemPayload> getItems() {
+    public List<RosterItemPayload> getItems() {
         return items_;
     }
 
-    private final ArrayList<RosterItemPayload> items_ = new ArrayList<RosterItemPayload>();
+	public String getVersion() {
+		return version_;
+	}
+
+	public void setVersion(String version) {
+		this.version_ = version;
+	}
+
 }

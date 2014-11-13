@@ -1,10 +1,5 @@
 /*
- * Copyright (c) 2014 Kevin Smith and Remko Tronçon
- * All rights reserved.
- */
-
-/*
- * Copyright (c) 2014, Isode Limited, London, England.
+ * Copyright (c) 2014-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 
@@ -28,13 +23,13 @@ public class ForwardedParser extends GenericPayloadParser<Forwarded> {
     
     public void handleStartElement(String element, String ns, AttributeMap attributes) {
         if (level_ == 1) {
-            if (element == "iq") { /* begin parsing a nested stanza? */
+            if ("iq".equals(element)) { /* begin parsing a nested stanza? */
                 childParser_ = new IQParser(factories_);
-            } else if (element == "message") {
+            } else if ("message".equals(element)) {
                 childParser_ = new MessageParser(factories_);
-            } else if (element == "presence") {
+            } else if ("presence".equals(element)) {
                 childParser_ = new PresenceParser(factories_);
-            } else if (element == "delay" && ns == "urn:xmpp:delay") {
+            } else if ("delay".equals(element) && "urn:xmpp:delay".equals(ns)) {
                 delayParser_ = new DelayParser();
             }
         }

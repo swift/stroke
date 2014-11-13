@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2011, Kevin Smith
+ * Copyright (c) 2011-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.parser.payloadparsers;
@@ -11,6 +7,7 @@ package com.isode.stroke.parser.payloadparsers;
 import com.isode.stroke.elements.MUCInvitationPayload;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.parser.GenericPayloadTreeParser;
+import com.isode.stroke.parser.tree.NullParserElement;
 import com.isode.stroke.parser.tree.ParserElement;
 
 /**
@@ -31,5 +28,7 @@ public class MUCInvitationPayloadParser extends GenericPayloadTreeParser<MUCInvi
         invite.setPassword(root.getAttributes().getAttribute("password"));
         invite.setReason(root.getAttributes().getAttribute("reason"));
         invite.setThread(root.getAttributes().getAttribute("thread"));
+        ParserElement impromptuNode = root.getChild("impromptu", "http://swift.im/impromptu");
+        invite.setIsImpromptu(!(impromptuNode instanceof NullParserElement));
     }
 }

@@ -1,9 +1,5 @@
 /*
-* Copyright (c) 2014, Isode Limited, London, England.
-* All rights reserved.
-*/
-/*
-* Copyright (c) 2014, Remko Tronçon.
+* Copyright (c) 2013-2015, Isode Limited, London, England.
 * All rights reserved.
 */
 
@@ -25,22 +21,22 @@ public PubSubEventParser(PayloadParserFactoryCollection parser) {
 @Override
 public void handleStartElement(String element, String ns, AttributeMap attributes) {
 	if (level_ == 1) {
-		if (element == "items" && ns == "http://jabber.org/protocol/pubsub#event") {
+		if ("items".equals(element) && "http://jabber.org/protocol/pubsub#event".equals(ns)) {
 			currentPayloadParser_ = new PubSubEventItemsParser(parsers_);
 		}
-		if (element == "collection" && ns == "http://jabber.org/protocol/pubsub#event") {
+		if ("collection".equals(element) && "http://jabber.org/protocol/pubsub#event".equals(ns)) {
 			currentPayloadParser_ = new PubSubEventCollectionParser(parsers_);
 		}
-		if (element == "purge" && ns == "http://jabber.org/protocol/pubsub#event") {
+		if ("purge".equals(element) && "http://jabber.org/protocol/pubsub#event".equals(ns)) {
 			currentPayloadParser_ = new PubSubEventPurgeParser(parsers_);
 		}
-		if (element == "configuration" && ns == "http://jabber.org/protocol/pubsub#event") {
+		if ("configuration".equals(element) && "http://jabber.org/protocol/pubsub#event".equals(ns)) {
 			currentPayloadParser_ = new PubSubEventConfigurationParser(parsers_);
 		}
-		if (element == "delete" && ns == "http://jabber.org/protocol/pubsub#event") {
+		if ("delete".equals(element) && "http://jabber.org/protocol/pubsub#event".equals(ns)) {
 			currentPayloadParser_ = new PubSubEventDeleteParser(parsers_);
 		}
-		if (element == "subscription" && ns == "http://jabber.org/protocol/pubsub#event") {
+		if ("subscription".equals(element) && "http://jabber.org/protocol/pubsub#event".equals(ns)) {
 			currentPayloadParser_ = new PubSubEventSubscriptionParser(parsers_);
 		}
 	}
