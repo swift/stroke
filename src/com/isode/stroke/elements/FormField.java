@@ -47,7 +47,7 @@ public class FormField {
     private Type type_;
     
     public enum Type {
-    	UNKNOWN_TYPE("unknown"),
+	UNKNOWN_TYPE(""),
     	BOOLEAN_TYPE("boolean"),
     	FIXED_TYPE("fixed"),
     	HIDDEN_TYPE("hidden"),
@@ -76,18 +76,21 @@ public class FormField {
         }
     }
     
+    public FormField() {
+	this(Type.UNKNOWN_TYPE);
+    }
+
+    public FormField(Type type, String value) {
+	this(type);
+	addValue(value);
+    }
+
     public FormField(Type type) {
     	type_ = type;
     	required_ = false;
     	if (type == Type.BOOLEAN_TYPE) {
     		setBoolValue(false);
     	}
-    }
-    
-    public FormField(Type type, String value) {
-    	addValue(value);
-    	type_ = type;
-        required_ = false;
     }
     
     /**
@@ -293,12 +296,13 @@ public class FormField {
      * @return value boolean, will return false if FormField has no values
      */
     public boolean getBoolValue() {
-    	if (type_ != Type.BOOLEAN_TYPE) {
+	if (type_ != Type.BOOLEAN_TYPE && type_ != Type.UNKNOWN_TYPE) {
     		throw new IllegalArgumentException(ILLEGAL_ARG_EX_STR + type_);
     	}
         return values_.isEmpty() ? false : values_.get(0).equals("true") || values_.get(0).equals("1");
     }
     
+
     /**
      * Sets the value of a FormField with type boolean to a boolean value.
      * @param bool boolean
@@ -313,7 +317,7 @@ public class FormField {
      * @return JID value, or empty JID is FormField has no values
      */
     public JID getJIDSingleValue() {
-    	if (type_ != Type.JID_SINGLE_TYPE) {
+	if (type_ != Type.JID_SINGLE_TYPE && type_ != Type.UNKNOWN_TYPE) {
     		throw new IllegalArgumentException(ILLEGAL_ARG_EX_STR + type_);
     	}
     	return values_.isEmpty() ? new JID() : JID.fromString(values_.get(0));
@@ -325,7 +329,7 @@ public class FormField {
      * @return JID value, or empty JID is FormField has no values
      */
     public JID getJIDMultiValue(int index) {
-    	if (type_ != Type.JID_MULTI_TYPE) {
+	if (type_ != Type.JID_MULTI_TYPE && type_ != Type.UNKNOWN_TYPE) {
     		throw new IllegalArgumentException(ILLEGAL_ARG_EX_STR + type_);
     	}
     	return values_.isEmpty() ? new JID() : JID.fromString(values_.get(index));
@@ -336,7 +340,7 @@ public class FormField {
      * @return value String, empty String if FormField has no values
      */
     public String getTextPrivateValue() {
-    	if (type_ != Type.TEXT_PRIVATE_TYPE) {
+	if (type_ != Type.TEXT_PRIVATE_TYPE && type_ != Type.UNKNOWN_TYPE) {
     		throw new IllegalArgumentException(ILLEGAL_ARG_EX_STR + type_);
     	}
     	return values_.isEmpty() ? "" : values_.get(0);
@@ -347,7 +351,7 @@ public class FormField {
      * @return value String, or empty String if invalid FormField type
      */
     public String getFixedValue() {
-    	if (type_ != Type.FIXED_TYPE) {
+	if (type_ != Type.FIXED_TYPE && type_ != Type.UNKNOWN_TYPE) {
     		throw new IllegalArgumentException(ILLEGAL_ARG_EX_STR + type_);
     	}
     	return values_.isEmpty() ? "" : values_.get(0);
@@ -370,7 +374,7 @@ public class FormField {
      * @return value String
      */
     public String getTextMultiValue() {
-    	if (type_ != Type.TEXT_MULTI_TYPE) {
+	if (type_ != Type.TEXT_MULTI_TYPE && type_ != Type.UNKNOWN_TYPE) {
     		throw new IllegalArgumentException(ILLEGAL_ARG_EX_STR + type_);
     	}
     	StringBuilder val = new StringBuilder();
@@ -389,16 +393,16 @@ public class FormField {
      * @param val String value to set, must not be null
      */
     public void setTextMultiValue(String val) {
-    	if (type_ != Type.TEXT_MULTI_TYPE) {
+	if (type_ != Type.TEXT_MULTI_TYPE && type_ != Type.UNKNOWN_TYPE) {
     		throw new IllegalArgumentException(ILLEGAL_ARG_EX_STR + type_);
     	}
     	values_.clear();
-    	if (val.contains("\r\n")){
+	if (val.indexOf("\r\n") != -1) {
     		for (String s : val.split("\r\n")) {
     			values_.add(s);
     		}
     	} 
-    	else if (val.contains("\n")){
+	else if (val.indexOf("\n") != -1){
     		for (String s : val.split("\n")) {
     			values_.add(s);
     		}

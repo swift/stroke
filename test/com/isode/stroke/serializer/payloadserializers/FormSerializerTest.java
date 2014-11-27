@@ -51,6 +51,11 @@ public class FormSerializerTest {
         field.addValue("someText");
         form.addReportedField(field);
         
+        field = new FormField(FormField.Type.TEXT_MULTI_TYPE);
+        field.setLabel("text-multi-field");
+        field.setTextMultiValue("This is some text\nthis is some more");
+        form.addField(field);
+
         FormItem item = new FormItem();
         field = new FormField(FormField.Type.UNKNOWN_TYPE);
         field.setName("itemField");
@@ -69,8 +74,8 @@ public class FormSerializerTest {
         field.setLabel("The name of your bot");
         form.addField(field);
 
-        field = new FormField(FormField.Type.TEXT_MULTI_TYPE, 
-        		"This is a bot.\nA quite good one actually");
+        field = new FormField(FormField.Type.TEXT_MULTI_TYPE);
+        field.setTextMultiValue("This is a bot.\nA quite good one actually");
         field.setName("description");
         field.setLabel("Helpful description of your bot");
         form.addField(field);
@@ -129,7 +134,7 @@ public class FormSerializerTest {
         assertEquals(
                 "<x type=\"form\" xmlns=\"jabber:x:data\">"
                         + "<reported>"
-                        + "<field label=\"description\" type=\"unknown\" var=\"field name\">"
+                        + "<field label=\"description\" var=\"field name\">"
                         + "<value>someText</value>"
                         + "</field>"
                         + "</reported>"
@@ -138,17 +143,20 @@ public class FormSerializerTest {
                         + "<value>itemValue</value>"
                         + "</field>"
                         + "</item>"
+                        + "<field label=\"text-multi-field\" type=\"text-multi\">"
+                        + "<value>This is some text</value><value>this is some more</value>"
+                        + "</field>"
                         + "<field type=\"hidden\" var=\"FORM_TYPE\">"
                         + "<value>jabber:bot</value>"
                         + "</field>"
                         + "<field type=\"fixed\"><value>Section 1: Bot Info</value></field>"
-                        + "<field label=\"The name of your bot\" type=\"text-single\" var=\"botname\"><value></value></field>"
+                        + "<field label=\"The name of your bot\" type=\"text-single\" var=\"botname\"/>"
                         + "<field label=\"Helpful description of your bot\" type=\"text-multi\" var=\"description\"><value>This is a bot.</value><value>A quite good one actually</value></field>"
                         + "<field label=\"Public bot?\" type=\"boolean\" var=\"public\">"
                         + "<required/>"
                         + "<value>1</value>"
                         + "</field>"
-                        + "<field label=\"Password for special access\" type=\"text-private\" var=\"password\"><value></value></field>"
+                        + "<field label=\"Password for special access\" type=\"text-private\" var=\"password\"/>"
                         + "<field label=\"What features will the bot support?\" type=\"list-multi\" var=\"features\">"
                         + "<value>news</value>"
                         + "<value>search</value>"

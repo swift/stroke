@@ -93,72 +93,14 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
             fieldElement.addNode(descriptionElement);
         }
         
-        String fieldType = field.getType().getDescription();
-        
-        if (!fieldType.isEmpty() && withTypeAttribute) {
-            fieldElement.setAttribute("type", fieldType);
+        FormField.Type fieldType = field.getType();
+        if (fieldType != FormField.Type.UNKNOWN_TYPE && withTypeAttribute) {
+		fieldElement.setAttribute("type", fieldType.getDescription());
         }
-        
-        if (fieldType.equals("boolean")) {
+
+        for (String s : field.getValues()) {
         	XMLElement valueElement = new XMLElement("value");
-        	if (field.getBoolValue() == true) {
-        		valueElement.addNode(XMLTextNode.create("1"));	
-        	} else {
-        		valueElement.addNode(XMLTextNode.create("0"));
-        	}
-        	fieldElement.addNode(valueElement);
-        }
-        
-        else if (fieldType.equals("jid-single")) {
-        	XMLElement valueElement = new XMLElement("value");
-        	valueElement.addNode(XMLTextNode.create(field.getJIDSingleValue().toString()));
-        	fieldElement.addNode(valueElement);
-        }
-        
-        else if (fieldType.equals("jid-multi")) {
-        	for (String jid : field.getValues()){
-            	XMLElement valueElement = new XMLElement("value");
-            	valueElement.addNode(XMLTextNode.create(jid));
-            	fieldElement.addNode(valueElement);
-        	}
-        }
-        
-        else if (fieldType.equals("text-private")) {
-        	XMLElement valueElement = new XMLElement("value");
-        	valueElement.addNode(XMLTextNode.create(field.getTextPrivateValue()));
-        	fieldElement.addNode(valueElement);
-        }
-        
-        else if (fieldType.equals("fixed")) {
-        	XMLElement valueElement = new XMLElement("value");
-        	valueElement.addNode(XMLTextNode.create(field.getFixedValue()));
-        	fieldElement.addNode(valueElement);
-        }
-        
-        else if (fieldType.equals("text-single") ||
-        		fieldType.equals("unknown")) {
-        	XMLElement valueElement = new XMLElement("value");
-        	valueElement.addNode(XMLTextNode.create(field.getTextSingleValue()));
-        	fieldElement.addNode(valueElement);
-        }
-        
-        else if (fieldType.equals("text-multi")) {
-            multiLineify(field.getTextMultiValue(),
-                    FormField.FORM_FIELD_ELEMENT_VALUE, fieldElement);
-        } 
-        
-        else if (fieldType.equals("list-multi") ||
-        		fieldType.equals("list-single")) {
-        	for (String s : field.getValues()) {
-        		XMLElement valueElement = new XMLElement("value");
-        		valueElement.addNode(XMLTextNode.create(s));
-        		fieldElement.addNode(valueElement);
-        	}
-        }
-        
-        else { // Unknown type
-        	XMLElement valueElement = new XMLElement("value");
-        	valueElement.addNode(XMLTextNode.create(field.getValues().get(0)));
+		valueElement.addNode(XMLTextNode.create(s));
         	fieldElement.addNode(valueElement);
         }
         
@@ -172,7 +114,6 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
         	optionElement.addNode(valueElement);
         	fieldElement.addNode(optionElement);
         }
-        
         return fieldElement;
     }
 
