@@ -66,6 +66,7 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
         addSerializer(new ForwardedSerializer(this));
         addSerializer(new MAMResultSerializer(this));
         addSerializer(new MAMQuerySerializer());
+        addSerializer(new MAMFinSerializer());
     }
 
 }
