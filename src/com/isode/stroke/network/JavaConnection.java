@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 /*
- * Copyright (c) 2010-2013, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.network;
@@ -340,7 +340,9 @@ public class JavaConnection extends Connection implements EventOwner {
     @Override
     public void disconnect() {
         disconnecting_ = true;
-        if (selector_ != null) {
+        // Check "isOpen" to Avoid Android crash see
+        //   https://code.google.com/p/android/issues/detail?id=80785
+        if (selector_ != null && selector_.isOpen()) {
             selector_.wakeup();
         }
     }
@@ -348,7 +350,9 @@ public class JavaConnection extends Connection implements EventOwner {
     @Override
     public void write(ByteArray data) {
         worker_.writeBuffer_.add(data.getData());
-        if (selector_ != null) {
+        // Check "isOpen" to Avoid Android crash see
+        //   https://code.google.com/p/android/issues/detail?id=80785
+        if (selector_ != null && selector_.isOpen()) {
             selector_.wakeup();
         }
 
