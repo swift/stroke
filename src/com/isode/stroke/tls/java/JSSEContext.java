@@ -1,4 +1,4 @@
-/*  Copyright (c) 2012-2014, Isode Limited, London, England.
+/*  Copyright (c) 2012-2015, Isode Limited, London, England.
  *  All rights reserved.
  *
  *  Acquisition and use of this software and related materials for any
@@ -236,6 +236,7 @@ public class JSSEContext extends TLSContext {
         int bytesProduced = 0;
         int bytesConsumed = 0;
         int bytesToUnwrap = 0;
+        int lastConsumed = 0;
         HandshakeStatus handshakeStatus = null;
         ByteArray byteArray = null;
 
@@ -245,27 +246,34 @@ public class JSSEContext extends TLSContext {
                 
                 boolean unwrapDone = false;
                 do {
+                    int positionBeforeUnwrap = encryptedReceived.position();
                     bytesToUnwrap = encryptedReceived.remaining();
                     sslEngineResult = sslEngine.unwrap(encryptedReceived, unwrappedReceived);
                     status = sslEngineResult.getStatus();
                     handshakeStatus = sslEngineResult.getHandshakeStatus();
+                    /*
+                     * This should match sslEngineResult.bytesConsumed(), but we can't use this
+                     * due to Android Lollipop bug: https://code.google.com/p/android/issues/detail?id=93740
+                     */
+                    lastConsumed = encryptedReceived.position() - positionBeforeUnwrap;
+
                     /* A call to unwrap can generate a status of FINISHED, which
                      * you won't get from SSLEngine.getHandshakeStatus.  Such
                      * a status is an indication that we need to re-check whether
                      * anything's pending to be written
                      */
                     if (handshakeStatus == HandshakeStatus.FINISHED ||
-			(!handshakeCompleted &&
-			 handshakeStatus == HandshakeStatus.NOT_HANDSHAKING)) {
+                        (!handshakeCompleted &&
+                         handshakeStatus == HandshakeStatus.NOT_HANDSHAKING)) {
                         /* Special case will happen when the handshake completes following
                          * an unwrap.  The first time we tried wrapping some plain stuff,
                          * it triggers the handshake but won't itself have been dealt with.
                          * So now the handshake has finished, we have to try sending it
                          * again
-			 * The second checking clause is necessary for certain
-			 * SSLEngine implementations (notably Apache Harmony
-			 * used on Android) which never return FINISHED
-			 */
+                         * The second checking clause is necessary for certain
+                         * SSLEngine implementations (notably Apache Harmony
+                         * used on Android) which never return FINISHED
+                         */
 
                         handshakeCompleted = true;
                         wrapAndSendData();
@@ -308,20 +316,20 @@ public class JSSEContext extends TLSContext {
 
 		    case OK:
                         /* Some stuff was unwrapped. */
-                        bytesConsumed += sslEngineResult.bytesConsumed();
+                        bytesConsumed += lastConsumed;
                         bytesProduced = sslEngineResult.bytesProduced();
                         
                         /* It may be that the unwrap consumed some, but not all of
                          * the data. In which case, the loop continues to give it
                          * another chance to process whatever's remaining
                          */
-                        if (sslEngineResult.bytesConsumed() == 0) {
+                        if (lastConsumed == 0) {
                             /* No point looping around again */
                             unwrapDone = true;
                         }
                         else {
                             /* It consumed some bytes, but perhaps not everything */
-                            unwrapDone = (sslEngineResult.bytesConsumed() == bytesToUnwrap);
+                            unwrapDone = (lastConsumed == bytesToUnwrap);
                         }
                         break;
                     }
@@ -329,9 +337,7 @@ public class JSSEContext extends TLSContext {
                 
                 encryptedReceived.compact();
 
-
-
-                bytesConsumed += sslEngineResult.bytesConsumed();
+                bytesConsumed += lastConsumed;
                 bytesProduced = sslEngineResult.bytesProduced();
             }
             catch (SSLException e) {
