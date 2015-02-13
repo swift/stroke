@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 
@@ -42,7 +38,7 @@ public class MUCBookmark {
      * @param room room jabber id, not null
      * @param bookmarkName name of bookmark, can be null
      */
-    MUCBookmark(JID room, String bookmarkName) {
+    public MUCBookmark(JID room, String bookmarkName) {
         this.room_ = room; 
         this.name_ = bookmarkName; 
         this.autojoin_ = false;

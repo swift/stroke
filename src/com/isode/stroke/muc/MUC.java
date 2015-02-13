@@ -625,7 +625,7 @@ public class MUC {
         return ownMUCJID.compare(j, CompareType.WithoutResource) == 0;
     }
 
-    private void handleUserLeft(LeavingType type) {
+    public void handleUserLeft(LeavingType type) {
         String resource = ownMUCJID.getResource();
         if (occupants.containsKey(resource)) {
             MUCOccupant me = occupants.get(resource);

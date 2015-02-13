@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.elements;
@@ -23,6 +19,10 @@ public class Message extends Stanza {
             return subject.getText();
         }
         return "";
+    }
+    
+    public boolean hasSubject() {
+        return getPayload(new Subject()) != null;
     }
 
     public void setSubject(String subject) {

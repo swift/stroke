@@ -172,4 +172,16 @@ public abstract class Stanza implements Element {
     	Delay delay = getPayload(new Delay());
     	return delay != null ? delay.getStamp() : null;
     }
+    
+    public Date getTimestampFrom(final JID jid) {
+        Vector<Delay> delays = getPayloads(new Delay());
+        for (int i = 0; i < delays.size(); ++i) {
+            Delay delay = delays.get(i);
+            if (delay.getFrom().equals(jid)) {
+                return delay.getStamp();
+            }
+        }
+        return getTimestamp();
+    }
+
 }
