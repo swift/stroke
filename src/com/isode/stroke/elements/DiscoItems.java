@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010, Kevin Smith.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.elements;
@@ -85,7 +81,7 @@ public class DiscoItems extends Payload {
     }
 
     public List<Item> getItems() {
-        return new ArrayList(items_);
+        return new ArrayList<Item>(items_);
     }
 
     public void addItem(Item item) {

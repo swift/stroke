@@ -1,9 +1,5 @@
 /*
-* Copyright (c) 2014, Isode Limited, London, England.
-* All rights reserved.
-*/
-/*
-* Copyright (c) 2014, Remko Tronçon.
+* Copyright (c) 2013-2015, Isode Limited, London, England.
 * All rights reserved.
 */
 
@@ -12,9 +8,7 @@ package com.isode.stroke.serializer.payloadserializers;
 import com.isode.stroke.serializer.GenericPayloadSerializer;
 import com.isode.stroke.serializer.PayloadSerializerCollection;
 import com.isode.stroke.serializer.xml.XMLElement;
-import com.isode.stroke.elements.PubSubEventAssociate;
 import com.isode.stroke.serializer.xml.XMLRawTextNode;
-import com.isode.stroke.elements.PubSubEventDisassociate;
 import com.isode.stroke.elements.PubSubEventCollection;
 
 public class PubSubEventCollectionSerializer extends GenericPayloadSerializer<PubSubEventCollection> {

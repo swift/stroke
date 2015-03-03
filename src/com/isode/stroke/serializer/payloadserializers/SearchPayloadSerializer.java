@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.serializer.payloadserializers;
@@ -11,7 +7,6 @@ package com.isode.stroke.serializer.payloadserializers;
 import com.isode.stroke.elements.SearchPayload;
 import com.isode.stroke.serializer.GenericPayloadSerializer;
 import com.isode.stroke.serializer.xml.XMLElement;
-import com.isode.stroke.serializer.xml.XMLTextNode;
 
 /**
  * SearchPayload to String.

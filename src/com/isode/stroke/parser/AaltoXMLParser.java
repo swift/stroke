@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.parser;
@@ -8,7 +8,6 @@ import com.fasterxml.aalto.AsyncInputFeeder;
 import com.fasterxml.aalto.AsyncXMLStreamReader;
 import com.fasterxml.aalto.stax.InputFactoryImpl;
 import com.isode.stroke.base.ByteArray;
-import com.isode.stroke.eventloop.EventLoop;
 import java.util.logging.Logger;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamConstants;

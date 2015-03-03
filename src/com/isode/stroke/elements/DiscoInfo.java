@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 /*
- * Copyright (c) 2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.elements;
@@ -174,7 +174,7 @@ public class DiscoInfo extends Payload {
      * @return Copy of the list of identities. Non-null.
      */
     public List<Identity> getIdentities() {
-        return new ArrayList(identities_);
+        return new ArrayList<Identity>(identities_);
     }
 
     /**
@@ -191,7 +191,7 @@ public class DiscoInfo extends Payload {
      * @return Copy of the list of features. Nonnull.
      */
     public List<String> getFeatures() {
-        return new ArrayList(features_);
+        return new ArrayList<String>(features_);
     }
 
     /**
@@ -221,7 +221,7 @@ public class DiscoInfo extends Payload {
      * @return A copy of the list, where the contents are references to the same objects.
      */
     public List<Form> getExtensions() {
-        return new ArrayList(extensions_);
+        return new ArrayList<Form>(extensions_);
     }
 
 }

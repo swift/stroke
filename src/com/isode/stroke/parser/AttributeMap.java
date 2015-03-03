@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.parser;
@@ -94,7 +90,7 @@ public class AttributeMap {
      * Internal method (used for unit tests).
      */
     public List<Entry> getEntries() {
-        return new ArrayList(attributes);
+        return new ArrayList<Entry>(attributes);
     }
 
     private String getInternal(String name, String ns) {

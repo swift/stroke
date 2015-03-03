@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010, 2011 Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, 2011 Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.parser;
@@ -12,7 +8,7 @@ public class GenericPayloadParserFactory<T extends PayloadParser> implements Pay
 
     private final String tag_;
     private final String xmlns_;
-    private final Class payloadClass_;
+    private final Class<? extends PayloadParser> payloadClass_;
 
     public GenericPayloadParserFactory(final String tag, final Class<? extends PayloadParser> payloadClass) {
         this(tag, "", payloadClass);

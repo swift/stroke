@@ -1,14 +1,9 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.parser.payloadparsers;
 
-import com.isode.stroke.elements.Payload;
 import com.isode.stroke.elements.RosterItemPayload;
 import com.isode.stroke.elements.RosterPayload;
 import com.isode.stroke.jid.JID;

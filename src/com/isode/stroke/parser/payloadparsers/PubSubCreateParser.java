@@ -1,9 +1,5 @@
 /*
-* Copyright (c) 2014, Isode Limited, London, England.
-* All rights reserved.
-*/
-/*
-* Copyright (c) 2014, Remko Tronçon.
+* Copyright (c) 2013-2015, Isode Limited, London, England.
 * All rights reserved.
 */
 
@@ -13,7 +9,6 @@ import com.isode.stroke.parser.AttributeMap;
 import com.isode.stroke.parser.GenericPayloadParser;
 import com.isode.stroke.parser.PayloadParser;
 import com.isode.stroke.parser.PayloadParserFactoryCollection;
-import com.isode.stroke.elements.PubSubConfigure;
 import com.isode.stroke.elements.PubSubCreate;
 
 public class PubSubCreateParser extends GenericPayloadParser<PubSubCreate> {
