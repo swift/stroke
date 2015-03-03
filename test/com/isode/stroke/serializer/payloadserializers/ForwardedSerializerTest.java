@@ -1,16 +1,12 @@
 /*
-* Copyright (c) 2014 Kevin Smith and Remko Tronçon
-* All rights reserved.
-*/
-
-/*
-* Copyright (c) 2014, Isode Limited, London, England.
+* Copyright (c) 2014-2015, Isode Limited, London, England.
 * All rights reserved.
 */
 
 package com.isode.stroke.serializer.payloadserializers;
 
 import org.junit.Test;
+
 import com.isode.stroke.base.DateTime;
 import com.isode.stroke.elements.Delay;
 import com.isode.stroke.elements.Forwarded;
@@ -18,7 +14,9 @@ import com.isode.stroke.elements.IQ;
 import com.isode.stroke.elements.Message;
 import com.isode.stroke.elements.Payload;
 import com.isode.stroke.elements.Presence;
+import com.isode.stroke.elements.Subject;
 import com.isode.stroke.jid.JID;
+
 import static org.junit.Assert.assertEquals;
 
 public class ForwardedSerializerTest {
@@ -27,7 +25,7 @@ public class ForwardedSerializerTest {
     public void testSerializeIQ() {
         ForwardedSerializer serializer = new ForwardedSerializer(serializers_);
 
-        IQ iq = IQ.createResult(JID.fromString("juliet@capulet.lit/balcony"), JID.fromString("romeo@montague.lit/orchard"), "id0", new Payload());
+        IQ iq = IQ.createResult(JID.fromString("juliet@capulet.lit/balcony"), JID.fromString("romeo@montague.lit/orchard"), "id0", new Subject("text"));
 
         Forwarded forwarded = new Forwarded();
         forwarded.setStanza(iq);
@@ -36,7 +34,7 @@ public class ForwardedSerializerTest {
         String expectedResult = 
             "<forwarded xmlns=\"urn:xmpp:forward:0\">"
           +     "<delay stamp=\"2010-07-10T23:08:25Z\" xmlns=\"urn:xmpp:delay\"/>"
-          +     "<iq from=\"romeo@montague.lit/orchard\" id=\"id0\" to=\"juliet@capulet.lit/balcony\" type=\"result\"/>"
+          +     "<iq from=\"romeo@montague.lit/orchard\" id=\"id0\" to=\"juliet@capulet.lit/balcony\" type=\"result\"><subject>text</subject></iq>"
           + "</forwarded>";
 
         assertEquals(expectedResult, serializer.serialize(forwarded));

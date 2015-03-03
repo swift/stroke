@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
- * All rights reserved.
- */
-/*
- * Copyright (c) 2010, Remko Tronçon.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.serializer;
@@ -50,6 +46,7 @@ public abstract class StanzaSerializer implements ElementSerializer {
             } else {
                 /*TODO: port*/
                 assert false;
+                throw new UnsupportedOperationException("No serializer for payload: " + payload.getClass().getSimpleName());
                 //std::cerr << "Could not find serializer for " << typeid(*(payload.get())).name() << std::endl;
             }
         }
