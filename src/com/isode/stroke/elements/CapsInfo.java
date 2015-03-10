@@ -77,8 +77,8 @@ public class CapsInfo extends Payload implements Comparable<CapsInfo> {
 			}
 		}
 		else {
-				return node_.compareTo(other.node_);
-			}
+			return node_.compareTo(other.node_);
+		}
 	}
 
 	/**
