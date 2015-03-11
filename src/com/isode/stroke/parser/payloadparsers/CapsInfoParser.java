@@ -17,27 +17,6 @@ public class CapsInfoParser extends GenericPayloadParser<CapsInfo> {
 	}
 
 	/**
-	* CapsInfoParser(node);
-	*/
-	public CapsInfoParser(String node) {
-		super(new CapsInfo(node));
-	}
-
-	/**
-	* CapsInfoParser(node, version);
-	*/
-	public CapsInfoParser(String node, String version) {
-		super(new CapsInfo(node, version));
-	}
-
-	/**
-	* CapsInfoParser(node, version, hash);
-	*/
-	public CapsInfoParser(String node, String version, String hash) {
-		super(new CapsInfo(node, version, hash));
-	}
-
-	/**
 	* @param attributes, notnull.
 	*/
 	public void handleStartElement(String element, String ns, AttributeMap attributes) {
