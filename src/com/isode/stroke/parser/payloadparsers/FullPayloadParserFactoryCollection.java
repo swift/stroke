@@ -47,7 +47,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	//addFactory(new VCardUpdateParserFactory());
 	//addFactory(new VCardParserFactory());
 	//addFactory(new PrivateStorageParserFactory(this));
-	//addFactory(new ChatStateParserFactory());
+	addFactory(new ChatStateParserFactory());
 	//addFactory(new DelayParserFactory());
 	addFactory(new MUCUserPayloadParserFactory(this));
 	addFactory(new MUCOwnerPayloadParserFactory(this));
