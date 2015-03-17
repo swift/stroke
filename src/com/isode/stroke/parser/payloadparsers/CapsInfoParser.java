@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2010 Isode Limited.
+ * All rights reserved.
+ * See the COPYING file for more information.
+ */
+/*
+ * Copyright (c) 2015, Tarun Gupta.
+ * All rights reserved.
+ */
+
 package com.isode.stroke.parser.payloadparsers;
 
 import com.isode.stroke.parser.GenericPayloadParser;

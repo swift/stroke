@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2010 Isode Limited.
+ * All rights reserved.
+ * See the COPYING file for more information.
+ */
+/*
+ * Copyright (c) 2015, Tarun Gupta.
+ * All rights reserved.
+ */
+
 package com.isode.stroke.serializer.payloadserializers;
 
 import com.isode.stroke.serializer.GenericPayloadSerializer;
