@@ -31,16 +31,16 @@ public class ChatStateSerializer extends GenericPayloadSerializer<ChatState> {
 	protected String serializePayload(ChatState chatState) {
 		NotNull.exceptIfNull(chatState, "chatState");
 		String result = "<";
-		ChatState.ChatStateType stat = chatState.getChatState();
-		if(stat == ChatState.ChatStateType.Active) {
+		ChatState.ChatStateType state = chatState.getChatState();
+		if (state == ChatState.ChatStateType.Active) {
 			result = result.concat("active");
-		} else if (stat == ChatState.ChatStateType.Composing) {
+		} else if (state == ChatState.ChatStateType.Composing) {
 			result = result.concat("composing");
-		} else if (stat == ChatState.ChatStateType.Paused) {
+		} else if (state == ChatState.ChatStateType.Paused) {
 			result = result.concat("paused");
-		} else if (stat == ChatState.ChatStateType.Inactive) {
+		} else if (state == ChatState.ChatStateType.Inactive) {
 			result = result.concat("inactive");	
-		} else if (stat == ChatState.ChatStateType.Gone) {
+		} else if (state == ChatState.ChatStateType.Gone) {
 			result = result.concat("gone");
 		}
 		result = result.concat(" xmlns=\"http://jabber.org/protocol/chatstates\"/>");

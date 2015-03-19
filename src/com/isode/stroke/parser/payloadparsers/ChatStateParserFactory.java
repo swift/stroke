@@ -29,8 +29,8 @@ public class ChatStateParserFactory implements PayloadParserFactory {
 	* @param attributes, notnull
 	*/
 	public boolean canParse(String element, String ns, AttributeMap attributes) {
-		return  ((ns == "http://jabber.org/protocol/chatstates") && 
-			(element == "active" || element == "composing" || element == "paused" || element == "inactive" || element == "gone"));
+		return  ((ns.equals("http://jabber.org/protocol/chatstates")) && 
+			(element.equals("active") || element.equals("composing") || element.equals("paused") || element.equals("inactive") || element.equals("gone")));
 	}
 
 	/**
