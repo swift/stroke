@@ -331,6 +331,9 @@ public class JSSEContext extends TLSContext {
                             /* It consumed some bytes, but perhaps not everything */
                             unwrapDone = (lastConsumed == bytesToUnwrap);
                         }
+                        // At this stage "lastConsumed" has already been added to 
+                        // "bytesConsumed"; don't do it again after exiting the while loop
+                        lastConsumed = 0;
                         break;
                     }
                 } while (!unwrapDone);
