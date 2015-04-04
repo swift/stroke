@@ -20,7 +20,8 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
         //addFactory(new GenericPayloadParserFactory<IBBParser>("", "http://jabber.org/protocol/ibb"));
 	//addFactory(new GenericPayloadParserFactory<StatusShowParser>("show", StatusShowParser.class));
 	//addFactory(new GenericPayloadParserFactory<StatusParser>("status", StatusParser.class));
-	//addFactory(new GenericPayloadParserFactory<ReplaceParser>("replace", "http://swift.im/protocol/replace"));
+	addFactory(new GenericPayloadParserFactory<ReplaceParser>("replace", "http://swift.im/protocol/replace", ReplaceParser.class));
+	addFactory(new GenericPayloadParserFactory<ReplaceParser>("replace", "urn:xmpp:message-correct:0", ReplaceParser.class));
 	addFactory(new GenericPayloadParserFactory<LastParser>("query", "jabber:iq:last", LastParser.class));
 	addFactory(new GenericPayloadParserFactory<BodyParser>("body", BodyParser.class));
 	//addFactory(new GenericPayloadParserFactory<SubjectParser>("subject", SubjectParser.class));
