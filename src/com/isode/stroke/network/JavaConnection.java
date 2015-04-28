@@ -1,8 +1,4 @@
 /*
- * Copyright (c) 2010 Remko Tronçon
- * All rights reserved.
- */
-/*
  * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
@@ -52,6 +48,8 @@ public class JavaConnection extends Connection implements EventOwner {
 
         private final HostAddressPort address_;
         private final List<byte[]> writeBuffer_ = Collections.synchronizedList(new ArrayList<byte[]>());
+        private SelectionKey selectionKey_;
+        private boolean disconnected_ = false;
 
         public Worker(HostAddressPort address) {
             address_ = address;
@@ -77,26 +75,9 @@ public class JavaConnection extends Connection implements EventOwner {
                     return;
                 }
                 handleConnected(false);
+                
                 while (!disconnecting_) {
-
-                    /* This will block until something is ready on the selector,
-                     * including someone calling selector.wakeup(), or until the
-                     * thread is interrupted
-                     */
-                    try {
-                        selector_.select();
-                    } catch (IOException e) {
-                        disconnected_ = true;
-                        handleDisconnected(null);
-                        break;
-                    }
-
                     /* Something(s) happened.  See what needs doing */
-                    if (disconnecting_) {
-                        handleDisconnected(null);
-                        /* No point doing anything else */
-                        break;
-                    }
                     boolean writeNeeded = isWriteNeeded();
                     boolean readNeeded = selectionKey_.isReadable();
                     
@@ -148,7 +129,18 @@ public class JavaConnection extends Connection implements EventOwner {
                          */
                         selector_.wakeup();
                     }
-                }            
+
+                    /* This will block until something is ready on the selector,
+                     * including someone calling selector.wakeup(), or until the
+                     * thread is interrupted
+                     */
+                    try {
+                        selector_.select();
+                    } catch (IOException e) {
+                        disconnected_ = true;
+                        break;
+                    }
+                }
                 handleDisconnected(null);
             } finally {
                 if(socketChannel_ != null) {
@@ -159,8 +151,9 @@ public class JavaConnection extends Connection implements EventOwner {
                     }
                     if(selector_ != null) {
                         try {
-                            selector_.close();
-                            selector_ = null;
+                            synchronized (selectorLock_) {
+                                selector_.close();
+                            }
                         } catch (IOException e) {
                         }
                     }
@@ -343,8 +336,12 @@ public class JavaConnection extends Connection implements EventOwner {
         disconnecting_ = true;
         // Check "isOpen" to Avoid Android crash see
         //   https://code.google.com/p/android/issues/detail?id=80785
-        if (selector_ != null && selector_.isOpen()) {
-            selector_.wakeup();
+        if (selector_ != null) {
+            synchronized (selectorLock_) {
+                if (selector_.isOpen()) {
+                    selector_.wakeup();
+                }
+            }
         }
     }
 
@@ -353,8 +350,12 @@ public class JavaConnection extends Connection implements EventOwner {
         worker_.writeBuffer_.add(data.getData());
         // Check "isOpen" to Avoid Android crash see
         //   https://code.google.com/p/android/issues/detail?id=80785
-        if (selector_ != null && selector_.isOpen()) {
-            selector_.wakeup();
+        if (selector_ != null) {
+            synchronized (selectorLock_) {
+                if (selector_.isOpen()) {
+                    selector_.wakeup();
+                }
+            }
         }
 
     }
@@ -381,10 +382,9 @@ public class JavaConnection extends Connection implements EventOwner {
     
     private final EventLoop eventLoop_;
     private boolean disconnecting_ = false;
-    private boolean disconnected_ = false;
     private SocketChannel socketChannel_;
-    private volatile Selector selector_;
-    private SelectionKey selectionKey_;
+    private Selector selector_;
+    private final Object selectorLock_ = new Object(); // use private lock object that is not visible elsewhere
     private Worker worker_;
 
 }
