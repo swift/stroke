@@ -31,8 +31,8 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	addFactory(new GenericPayloadParserFactory<CapsInfoParser> ("c", "http://jabber.org/protocol/caps", CapsInfoParser.class));
 	addFactory(new ResourceBindParserFactory());
 	addFactory(new StartSessionParserFactory());
-	//addFactory(new SecurityLabelParserFactory());
-	//addFactory(new SecurityLabelsCatalogParserFactory());
+	addFactory(new SecurityLabelParserFactory());
+	addFactory(new GenericPayloadParserFactory<SecurityLabelsCatalogParser>("catalog", "urn:xmpp:sec-label:catalog:2", SecurityLabelsCatalogParser.class));
         addFactory(new FormParserFactory());
         addFactory(new GenericPayloadParserFactory<CommandParser>("command",
                 "http://jabber.org/protocol/commands", CommandParser.class));

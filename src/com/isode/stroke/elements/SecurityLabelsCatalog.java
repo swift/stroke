@@ -4,38 +4,39 @@
  */
 package com.isode.stroke.elements;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import com.isode.stroke.jid.JID;
 
 public class SecurityLabelsCatalog extends Payload {
 	private JID to_;
-	private String name_;
-	private String description_;
-	private Collection<Item> items_;
+	private String name_ = "";
+	private String description_ = "";
+	private Collection<Item> items_ = new ArrayList<Item>();
 
-	public class Item {
+	public static class Item {
 		private SecurityLabel label_;
-		private String selector_;
+		private String selector_ = "";
 		private boolean default_;
 
 		public SecurityLabel getLabel() {
 			return label_;
 		}
 
-		void setLabel(SecurityLabel label) {
+		public void setLabel(SecurityLabel label) {
 			label_ = label;
 		}
 
-		final String getSelector() { return selector_; }
+		public final String getSelector() { return selector_; }
 
-		void setSelector(final String selector) {
+		public void setSelector(final String selector) {
 			selector_ = selector;
 		}
 
-		boolean getIsDefault() { return default_; }
+		public boolean getIsDefault() { return default_; }
 
-		void setIsDefault(boolean isDefault) {
+		public void setIsDefault(boolean isDefault) {
 			default_ = isDefault;
 		}
 	};
