@@ -5,7 +5,7 @@
 package com.isode.stroke.elements;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.List;
 
 import com.isode.stroke.jid.JID;
 
@@ -13,7 +13,7 @@ public class SecurityLabelsCatalog extends Payload {
 	private JID to_;
 	private String name_ = "";
 	private String description_ = "";
-	private Collection<Item> items_ = new ArrayList<Item>();
+	private List<Item> items_ = new ArrayList<Item>();
 
 	public static class Item {
 		private SecurityLabel label_;
@@ -49,7 +49,7 @@ public class SecurityLabelsCatalog extends Payload {
 		to_ = to;
 	}
 
-	public final Collection<Item> getItems() {
+	public final List<Item> getItems() {
 		return items_;
 	}
 
