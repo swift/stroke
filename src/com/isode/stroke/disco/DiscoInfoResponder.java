@@ -14,7 +14,7 @@ import com.isode.stroke.queries.GetResponder;
 import com.isode.stroke.queries.IQRouter;
 
 public class DiscoInfoResponder extends GetResponder<DiscoInfo> {
-    private DiscoInfo info_;
+    private DiscoInfo info_ = new DiscoInfo();
     private Map<String, DiscoInfo> nodeInfo_ = new HashMap<String, DiscoInfo>();
 
     public DiscoInfoResponder(IQRouter router) {
