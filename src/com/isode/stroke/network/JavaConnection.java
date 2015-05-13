@@ -76,7 +76,7 @@ public class JavaConnection extends Connection implements EventOwner {
                 }
                 handleConnected(false);
                 
-                while (!disconnecting_) {
+                while (!disconnecting_ || isWriteNeeded()) {
                     /* Something(s) happened.  See what needs doing */
                     boolean writeNeeded = isWriteNeeded();
                     boolean readNeeded = selectionKey_.isReadable();
