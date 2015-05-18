@@ -26,7 +26,7 @@ third-party/aalto/aalto-xml.jar:
 
 third-party/stax2/stax2-api.jar:
 	mkdir -p third-party/stax2
-	curl http://repository.codehaus.org/org/codehaus/woodstox/stax2-api/3.0.3/stax2-api-3.0.3.jar -o third-party/stax2/stax2-api.jar
+	curl http://repo.maven.apache.org/maven2/org/codehaus/woodstox/stax2-api/3.0.3/stax2-api-3.0.3.jar -o third-party/stax2/stax2-api.jar
 
 third-party/jzlib/jzlib.jar:
 	mkdir -p third-party
