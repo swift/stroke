@@ -55,6 +55,9 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
         addSerializer(new LastSerializer());
         addSerializer(new IdleSerializer());
 
+        addSerializer(new DeliveryReceiptSerializer());
+        addSerializer(new DeliveryReceiptRequestSerializer());
+
 		addSerializer(new PubSubSerializer(this));
 		addSerializer(new PubSubEventSerializer(this));
 		addSerializer(new PubSubOwnerPubSubSerializer(this));

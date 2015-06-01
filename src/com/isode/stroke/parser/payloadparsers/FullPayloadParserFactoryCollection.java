@@ -57,6 +57,9 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	        "http://jabber.org/protocol/muc#owner",MUCDestroyPayloadParser.class));
     addFactory(new GenericPayloadParserFactory<IdleParser>("idle", "urn:xmpp:idle:1",IdleParser.class));
 	
+	addFactory(new DeliveryReceiptParserFactory());
+	addFactory(new DeliveryReceiptRequestParserFactory());
+	
 	addFactory(new GenericPayloadParserFactory2<PubSubParser>("pubsub", "http://jabber.org/protocol/pubsub", this, PubSubParser.class));
 	addFactory(new GenericPayloadParserFactory2<PubSubOwnerPubSubParser>("pubsub", "http://jabber.org/protocol/pubsub#owner", this, PubSubOwnerPubSubParser.class));
 	addFactory(new GenericPayloadParserFactory2<PubSubEventParser>("event", "http://jabber.org/protocol/pubsub#event", this, PubSubEventParser.class));
