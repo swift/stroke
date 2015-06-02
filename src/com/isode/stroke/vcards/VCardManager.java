@@ -39,7 +39,7 @@ public class VCardManager {
         this.storage = vcardStorage;
     }
 
-    void delete() {
+    public void delete() {
     }
 
     public VCard getVCard(final JID jid) {
@@ -54,7 +54,7 @@ public class VCardManager {
         return vcard;
     }
 
-    void requestVCard(final JID requestedJID) {
+    public void requestVCard(final JID requestedJID) {
         final JID jid = requestedJID.compare(ownJID, JID.CompareType.WithoutResource) == 0 ? new JID() : requestedJID;
         if (requestedVCards.contains(jid)) {
             return;
@@ -75,7 +75,7 @@ public class VCardManager {
     }
 
 
-    void handleVCardReceived(final JID actualJID, VCard vcard, ErrorPayload error) {
+    private void handleVCardReceived(final JID actualJID, VCard vcard, ErrorPayload error) {
         if (error != null || vcard == null) {
             vcard = new VCard();
         }
@@ -84,7 +84,7 @@ public class VCardManager {
         setVCard(jid, vcard);
     }
 
-    SetVCardRequest createSetVCardRequest(final VCard vcard) {
+    public SetVCardRequest createSetVCardRequest(final VCard vcard) {
         SetVCardRequest request = SetVCardRequest.create(vcard, iqRouter);
         request.onResponse.connect(new Slot2<VCard, ErrorPayload>() {
                 @Override
@@ -95,13 +95,13 @@ public class VCardManager {
         return request;
     }
 
-    void handleSetVCardResponse(VCard vcard, ErrorPayload error) {
+    private void handleSetVCardResponse(VCard vcard, ErrorPayload error) {
         if (error == null) {
             setVCard(ownJID.toBare(), vcard);
         }
     }
 
-    void setVCard(final JID jid, VCard vcard) {
+    private void setVCard(final JID jid, VCard vcard) {
         storage.setVCard(jid, vcard);
         onVCardChanged.emit(jid, vcard);
         if (jid.compare(ownJID, JID.CompareType.WithoutResource) == 0) {
@@ -109,7 +109,7 @@ public class VCardManager {
         }
     }
 
-//	String getPhotoHash(final JID jid) {
-//		return storage.getPhotoHash(jid);
-//	}
+	public String getPhotoHash(final JID jid) {
+		return storage.getPhotoHash(jid);
+	}
 }
