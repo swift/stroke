@@ -5,6 +5,7 @@
 package com.isode.stroke.network;
 
 import com.isode.stroke.crypto.CryptoProvider;
+import com.isode.stroke.crypto.JavaCryptoProvider;
 import com.isode.stroke.eventloop.EventLoop;
 import com.isode.stroke.tls.PlatformTLSFactories;
 import com.isode.stroke.tls.TLSContextFactory;
