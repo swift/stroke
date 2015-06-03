@@ -40,7 +40,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
         addFactory(new SearchPayloadParserFactory());
 	//addFactory(new StreamInitiationParserFactory());
 	//addFactory(new BytestreamsParserFactory());
-	//addFactory(new VCardUpdateParserFactory());
+	addFactory(new GenericPayloadParserFactory<VCardUpdateParser>("x", "vcard-temp:x:update", VCardUpdateParser.class));
     addFactory(new GenericPayloadParserFactory<VCardParser>("vCard", "vcard-temp", VCardParser.class));
 	addFactory(new PrivateStorageParserFactory(this));
     addFactory(new ChatStateParserFactory());

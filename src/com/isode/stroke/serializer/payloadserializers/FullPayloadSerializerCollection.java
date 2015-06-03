@@ -42,7 +42,7 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	//addSerializer(new StreamInitiationSerializer());
 	//addSerializer(new BytestreamsSerializer());
 	addSerializer(new VCardSerializer());
-	//addSerializer(new VCardUpdateSerializer());
+	addSerializer(new VCardUpdateSerializer());
 	addSerializer(new RawXMLPayloadSerializer());
 	addSerializer(new StorageSerializer());
 	addSerializer(new DelaySerializer());
