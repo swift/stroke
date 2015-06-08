@@ -39,7 +39,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
         //addFactery(new InBandRegistrationPayloadParserFactory());
         addFactory(new SearchPayloadParserFactory());
 	//addFactory(new StreamInitiationParserFactory());
-	//addFactory(new BytestreamsParserFactory());
+	addFactory(new GenericPayloadParserFactory<BytestreamsParser>("query", "http://jabber.org/protocol/bytestreams", BytestreamsParser.class));
 	addFactory(new GenericPayloadParserFactory<VCardUpdateParser>("x", "vcard-temp:x:update", VCardUpdateParser.class));
     addFactory(new GenericPayloadParserFactory<VCardParser>("vCard", "vcard-temp", VCardParser.class));
 	addFactory(new PrivateStorageParserFactory(this));
