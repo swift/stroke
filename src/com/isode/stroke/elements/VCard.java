@@ -132,7 +132,14 @@ public class VCard extends Payload implements Serializable {
     public final String getNickname() { return nick_; }
 
     public void setPhoto(final ByteArray photo) { photo_ = photo; }
-    public final ByteArray getPhoto() { return photo_; }
+    public final ByteArray getPhoto() {
+    	if(this.photo_ != null) {
+    		return photo_;
+    	}
+    	else {
+    		return new ByteArray();
+    	}
+    }
 
     public void setPhotoType(final String photoType) { photoType_ = photoType; }
     public final String getPhotoType() { return photoType_; }
