@@ -71,7 +71,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
     addFactory(new GenericPayloadParserFactory2<MAMResultParser>("result", "urn:xmpp:mam:0", this, MAMResultParser.class));
     addFactory(new GenericPayloadParserFactory<MAMQueryParser>("query", "urn:xmpp:mam:0", MAMQueryParser.class));
     addFactory(new GenericPayloadParserFactory<MAMFinParser>("fin", "urn:xmpp:mam:0", MAMFinParser.class));
-	
+	addFactory(new GenericPayloadParserFactory<UserTuneParser>("tune", "http://jabber.org/protocol/tune", UserTuneParser.class));
 	//addFactory(new NicknameParserFactory());
 
         PayloadParserFactory defaultFactory = new RawXMLPayloadParserFactory();
