@@ -69,6 +69,7 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
         addSerializer(new MAMQuerySerializer());
         addSerializer(new MAMFinSerializer());
         addSerializer(new UserTuneSerializer(this));
+        addSerializer(new UserLocationSerializer(this));
     }
 
 }
