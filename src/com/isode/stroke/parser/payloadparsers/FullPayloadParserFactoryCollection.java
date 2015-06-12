@@ -36,7 +36,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
         addFactory(new FormParserFactory());
         addFactory(new GenericPayloadParserFactory<CommandParser>("command",
                 "http://jabber.org/protocol/commands", CommandParser.class));
-        //addFactery(new InBandRegistrationPayloadParserFactory());
+        addFactory(new GenericPayloadParserFactory<InBandRegistrationPayloadParser>("query", "jabber:iq:register", InBandRegistrationPayloadParser.class));
         addFactory(new SearchPayloadParserFactory());
 	//addFactory(new StreamInitiationParserFactory());
 	addFactory(new GenericPayloadParserFactory<BytestreamsParser>("query", "http://jabber.org/protocol/bytestreams", BytestreamsParser.class));

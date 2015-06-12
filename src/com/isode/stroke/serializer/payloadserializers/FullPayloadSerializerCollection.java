@@ -22,6 +22,7 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	addSerializer(new ChatStateSerializer());
 	//addSerializer(new PrioritySerializer());
 	addSerializer(new ErrorSerializer());
+	addSerializer(new InBandRegistrationPayloadSerializer());
 	addSerializer(new RosterSerializer());
 	addSerializer(new MUCPayloadSerializer());
 	addSerializer(new MUCDestroyPayloadSerializer());
