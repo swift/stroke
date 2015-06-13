@@ -71,6 +71,7 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
         addSerializer(new MAMFinSerializer());
         addSerializer(new UserTuneSerializer(this));
         addSerializer(new UserLocationSerializer(this));
+        addSerializer(new IsodeIQDelegationSerializer(this));
     }
 
 }
