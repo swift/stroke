@@ -23,6 +23,7 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	//addSerializer(new PrioritySerializer());
 	addSerializer(new ErrorSerializer());
 	addSerializer(new InBandRegistrationPayloadSerializer());
+	addSerializer(new IBBSerializer());
 	addSerializer(new RosterSerializer());
 	addSerializer(new MUCPayloadSerializer());
 	addSerializer(new MUCDestroyPayloadSerializer());

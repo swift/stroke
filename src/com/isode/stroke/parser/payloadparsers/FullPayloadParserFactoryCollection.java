@@ -27,6 +27,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	addFactory(new GenericPayloadParserFactory<IsodeIQDelegationParser>("delegate", "http://isode.com/iq_delegation", IsodeIQDelegationParser.class));
 	addFactory(new GenericPayloadParserFactory<StorageParser>("storage", "storage:bookmarks", StorageParser.class));
 	addFactory(new RosterParserFactory());
+	addFactory(new GenericPayloadParserFactory<IBBParser>("data", "http://jabber.org/protocol/ibb", IBBParser.class));
 	addFactory(new GenericPayloadParserFactory<DiscoInfoParser>("query", "http://jabber.org/protocol/disco#info", DiscoInfoParser.class));
 	addFactory(new GenericPayloadParserFactory<DiscoItemsParser>("query", "http://jabber.org/protocol/disco#items", DiscoItemsParser.class));
 	addFactory(new GenericPayloadParserFactory<CapsInfoParser> ("c", "http://jabber.org/protocol/caps", CapsInfoParser.class));
