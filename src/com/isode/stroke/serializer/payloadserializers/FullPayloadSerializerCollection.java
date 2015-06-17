@@ -57,7 +57,7 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
         addSerializer(new FormSerializer());
 	addSerializer(new PrivateStorageSerializer(this));
         addSerializer(new CommandSerializer());
-	//addSerializer(new NicknameSerializer());
+	addSerializer(new NicknameSerializer());
         addSerializer(new SearchPayloadSerializer());
         addSerializer(new ReplaceSerializer());
         addSerializer(new LastSerializer());

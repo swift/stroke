@@ -83,7 +83,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
     addFactory(new GenericPayloadParserFactory<MAMFinParser>("fin", "urn:xmpp:mam:0", MAMFinParser.class));
 	addFactory(new GenericPayloadParserFactory<UserTuneParser>("tune", "http://jabber.org/protocol/tune", UserTuneParser.class));
 	addFactory(new GenericPayloadParserFactory<UserLocationParser>("geoloc", "http://jabber.org/protocol/geoloc", UserLocationParser.class));
-	//addFactory(new NicknameParserFactory());
+	addFactory(new GenericPayloadParserFactory<NicknameParser>("nick", "http://jabber.org/protocol/nick", NicknameParser.class));
 
         PayloadParserFactory defaultFactory = new RawXMLPayloadParserFactory();
         setDefaultFactory(defaultFactory);
