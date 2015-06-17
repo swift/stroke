@@ -86,9 +86,19 @@ public class RosterItemPayload {
     public boolean getSubscriptionRequested() {
         return ask_;
     }
+
+    public String getUnknownContent() { 
+        return unknownContent_; 
+    }
+   
+    public void addUnknownContent(String c) { 
+        unknownContent_ += c;
+    }
+
     private JID jid_;
     private String name_;
     private Subscription subscription_;
     private Collection<String> groups_;
     private boolean ask_;
+    private String unknownContent_ = "";
 }

@@ -9,6 +9,7 @@ import com.isode.stroke.elements.RosterPayload;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.parser.AttributeMap;
 import com.isode.stroke.parser.GenericPayloadParser;
+import com.isode.stroke.parser.SerializingParser;
 
 public class RosterParser extends GenericPayloadParser<RosterPayload> {
 
@@ -17,7 +18,13 @@ public class RosterParser extends GenericPayloadParser<RosterPayload> {
     }
 
     public void handleStartElement(String element, String ns, AttributeMap attributes) {
-        if (level_ == PayloadLevel) {
+        if (level_ == TopLevel) {
+            String ver = attributes.getAttributeValue("ver");
+            if (ver != null) {
+                getPayloadInternal().setVersion(ver);
+            }
+        }
+        else if (level_ == PayloadLevel) {
             if (element.equals("item")) {
                 inItem_ = true;
                 currentItem_ = new RosterItemPayload();
@@ -30,7 +37,7 @@ public class RosterParser extends GenericPayloadParser<RosterPayload> {
                     currentItem_.setSubscription(RosterItemPayload.Subscription.Both);
                 } else if ("to".equals(subscription)) {
                     currentItem_.setSubscription(RosterItemPayload.Subscription.To);
-                } else if ("frome".equals(subscription)) {
+                } else if ("from".equals(subscription)) {
                     currentItem_.setSubscription(RosterItemPayload.Subscription.From);
                 } else if ("remove".equals(subscription)) {
                     currentItem_.setSubscription(RosterItemPayload.Subscription.Remove);
@@ -42,10 +49,19 @@ public class RosterParser extends GenericPayloadParser<RosterPayload> {
                     currentItem_.setSubscriptionRequested();
                 }
             }
-        } else if (level_ == ItemLevel) {
+        }
+        else if (level_ == ItemLevel) {
             if (element.equals("group")) {
                 currentText_ = "";
             }
+            else {
+                assert(unknownContentParser_ == null);
+                unknownContentParser_ = new SerializingParser();
+                unknownContentParser_.handleStartElement(element, ns, attributes);
+            }
+        }
+        else if (unknownContentParser_ != null) {
+            unknownContentParser_.handleStartElement(element, ns, attributes);
         }
         ++level_;
     }
@@ -57,15 +73,29 @@ public class RosterParser extends GenericPayloadParser<RosterPayload> {
                 getPayloadInternal().addItem(currentItem_);
                 inItem_ = false;
             }
-        } else if (level_ == ItemLevel) {
-            if (element.equals("group")) {
+        }
+        else if (level_ == ItemLevel) {
+            if (unknownContentParser_ != null) {
+                unknownContentParser_.handleEndElement(element, ns);
+                currentItem_.addUnknownContent(unknownContentParser_.getResult());
+                unknownContentParser_ = null;
+            }
+            else if (element.equals("group")) {
                 currentItem_.addGroup(currentText_);
             }
+        }
+        else if (unknownContentParser_ != null) {
+            unknownContentParser_.handleEndElement(element, ns);
         }
     }
 
     public void handleCharacterData(String data) {
-        currentText_ += data;
+        if (unknownContentParser_ != null) {
+            unknownContentParser_.handleCharacterData(data);
+        }
+        else {
+            currentText_ += data;
+        }
     }
     private final int TopLevel = 0;
     private final int PayloadLevel = 1;
@@ -74,4 +104,5 @@ public class RosterParser extends GenericPayloadParser<RosterPayload> {
     private boolean inItem_ = false;
     private RosterItemPayload currentItem_;
     private String currentText_;
+    private SerializingParser unknownContentParser_;
 }

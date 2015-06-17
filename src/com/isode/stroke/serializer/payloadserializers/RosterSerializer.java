@@ -13,6 +13,7 @@ import com.isode.stroke.elements.RosterPayload;
 import com.isode.stroke.serializer.GenericPayloadSerializer;
 import com.isode.stroke.serializer.xml.XMLElement;
 import com.isode.stroke.serializer.xml.XMLTextNode;
+import com.isode.stroke.serializer.xml.XMLRawTextNode;
 
 /**
  * Roster to string.
@@ -26,6 +27,9 @@ public class RosterSerializer extends GenericPayloadSerializer<RosterPayload> {
     @Override
     protected String serializePayload(RosterPayload roster) {
         XMLElement queryElement = new XMLElement("query", "jabber:iq:roster");
+       	if (roster.getVersion() != null) {
+			queryElement.setAttribute("ver", roster.getVersion());
+		}
 	for (RosterItemPayload item : roster.getItems()) {
 		XMLElement itemElement = new XMLElement("item");
 		itemElement.setAttribute("jid", item.getJID().toString());
@@ -51,6 +55,11 @@ public class RosterSerializer extends GenericPayloadSerializer<RosterPayload> {
 			XMLElement groupElement = new XMLElement("group");
 			groupElement.addNode(new XMLTextNode(group));
 			itemElement.addNode(groupElement);
+		}
+
+
+		if (item.getUnknownContent().length() != 0) {
+			itemElement.addNode(new XMLRawTextNode(item.getUnknownContent()));
 		}
 
 		queryElement.addNode(itemElement);
