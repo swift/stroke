@@ -24,6 +24,12 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	addSerializer(new ErrorSerializer());
 	addSerializer(new InBandRegistrationPayloadSerializer());
 	addSerializer(new IBBSerializer());
+	addSerializer(new JingleIBBTransportPayloadSerializer());
+	addSerializer(new JingleS5BTransportPayloadSerializer());
+	addSerializer(new JingleFileTransferFileInfoSerializer());
+	addSerializer(new JingleFileTransferDescriptionSerializer());
+	addSerializer(new JingleFileTransferHashSerializer());
+	addSerializer(new JingleContentPayloadSerializer());
 	addSerializer(new RosterSerializer());
 	addSerializer(new MUCPayloadSerializer());
 	addSerializer(new MUCDestroyPayloadSerializer());

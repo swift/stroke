@@ -21,6 +21,14 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	addFactory(new GenericPayloadParserFactory<LastParser>("query", "jabber:iq:last", LastParser.class));
 	addFactory(new GenericPayloadParserFactory<BodyParser>("body", BodyParser.class));
 	addFactory(new GenericPayloadParserFactory<SubjectParser>("subject", SubjectParser.class));
+	addFactory(new JingleParserFactory(this));
+	addFactory(new GenericPayloadParserFactory<JingleReasonParser>("reason", "urn:xmpp:jingle:1", JingleReasonParser.class));
+	addFactory(new GenericPayloadParserFactory<JingleFileTransferFileInfoParser>("file", "", JingleFileTransferFileInfoParser.class));
+	addFactory(new JingleFileTransferDescriptionParserFactory(this));
+	addFactory(new GenericPayloadParserFactory<JingleFileTransferHashParser>("checksum", "urn:xmpp:jingle:apps:file-transfer:4", JingleFileTransferHashParser.class));
+	addFactory(new GenericPayloadParserFactory<JingleIBBTransportMethodPayloadParser>("transport", "urn:xmpp:jingle:transports:ibb:1", JingleIBBTransportMethodPayloadParser.class));
+	addFactory(new GenericPayloadParserFactory<JingleS5BTransportMethodPayloadParser>("transport", "urn:xmpp:jingle:transports:s5b:1", JingleS5BTransportMethodPayloadParser.class));
+	addFactory(new JingleContentPayloadParserFactory(this));
 	//addFactory(new GenericPayloadParserFactory<PriorityParser>("priority", PriorityParser.class));
 	addFactory(new ErrorParserFactory(this));
 	addFactory(new SoftwareVersionParserFactory());

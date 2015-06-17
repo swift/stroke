@@ -53,7 +53,7 @@ public class HostAddress {
         return address_ != null;
     }
 
-    InetAddress getInetAddress() {
+    public InetAddress getInetAddress() {
         return address_;
     }
     
