@@ -14,6 +14,11 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
     public FullPayloadParserFactoryCollection() {
         /* TODO: Port more */
         //addFactory(new GenericPayloadParserFactory<IBBParser>("", "http://jabber.org/protocol/ibb"));
+	addFactory(new GenericPayloadParserFactory<CarbonsDisableParser>("disable", "urn:xmpp:carbons:2", CarbonsDisableParser.class));
+	addFactory(new GenericPayloadParserFactory<CarbonsEnableParser>("enable", "urn:xmpp:carbons:2", CarbonsEnableParser.class));
+	addFactory(new GenericPayloadParserFactory<CarbonsPrivateParser>("private", "urn:xmpp:carbons:2", CarbonsPrivateParser.class));
+	addFactory(new GenericPayloadParserFactory2<CarbonsReceivedParser>("received", "urn:xmpp:carbons:2", this, CarbonsReceivedParser.class));
+	addFactory(new GenericPayloadParserFactory2<CarbonsSentParser>("sent", "urn:xmpp:carbons:2", this, CarbonsSentParser.class));        
 	addFactory(new GenericPayloadParserFactory<StatusShowParser>("show", StatusShowParser.class));
 	addFactory(new GenericPayloadParserFactory<StatusParser>("status", StatusParser.class));
 	addFactory(new GenericPayloadParserFactory<ReplaceParser>("replace", "http://swift.im/protocol/replace", ReplaceParser.class));
@@ -50,6 +55,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
         addFactory(new GenericPayloadParserFactory<InBandRegistrationPayloadParser>("query", "jabber:iq:register", InBandRegistrationPayloadParser.class));
         addFactory(new SearchPayloadParserFactory());
 	//addFactory(new StreamInitiationParserFactory());
+	addFactory(new GenericPayloadParserFactory<ThreadParser>("thread", ThreadParser.class));        
 	addFactory(new GenericPayloadParserFactory<BytestreamsParser>("query", "http://jabber.org/protocol/bytestreams", BytestreamsParser.class));
 	addFactory(new GenericPayloadParserFactory<VCardUpdateParser>("x", "vcard-temp:x:update", VCardUpdateParser.class));
     addFactory(new GenericPayloadParserFactory<VCardParser>("vCard", "vcard-temp", VCardParser.class));

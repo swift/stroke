@@ -20,6 +20,11 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	addSerializer(new BodySerializer());
 	addSerializer(new SubjectSerializer());
 	addSerializer(new ChatStateSerializer());
+	addSerializer(new CarbonsDisableSerializer());
+	addSerializer(new CarbonsEnableSerializer());
+	addSerializer(new CarbonsPrivateSerializer());
+	addSerializer(new CarbonsReceivedSerializer(this));
+	addSerializer(new CarbonsSentSerializer(this));
 	//addSerializer(new PrioritySerializer());
 	addSerializer(new ErrorSerializer());
 	addSerializer(new InBandRegistrationPayloadSerializer());
@@ -48,7 +53,9 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	addSerializer(new StartSessionSerializer());
 	addSerializer(new SecurityLabelSerializer());
 	addSerializer(new SecurityLabelsCatalogSerializer());
+	//addSerializer(new StreamInitiationFileInfoSerializer());
 	//addSerializer(new StreamInitiationSerializer());
+	addSerializer(new ThreadSerializer());
 	addSerializer(new BytestreamsSerializer());
 	addSerializer(new VCardSerializer());
 	addSerializer(new VCardUpdateSerializer());
