@@ -53,8 +53,8 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	addSerializer(new StartSessionSerializer());
 	addSerializer(new SecurityLabelSerializer());
 	addSerializer(new SecurityLabelsCatalogSerializer());
-	//addSerializer(new StreamInitiationFileInfoSerializer());
-	//addSerializer(new StreamInitiationSerializer());
+	addSerializer(new StreamInitiationFileInfoSerializer());
+	addSerializer(new StreamInitiationSerializer());
 	addSerializer(new ThreadSerializer());
 	addSerializer(new BytestreamsSerializer());
 	addSerializer(new VCardSerializer());

@@ -54,7 +54,8 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
                 "http://jabber.org/protocol/commands", CommandParser.class));
         addFactory(new GenericPayloadParserFactory<InBandRegistrationPayloadParser>("query", "jabber:iq:register", InBandRegistrationPayloadParser.class));
         addFactory(new SearchPayloadParserFactory());
-	//addFactory(new StreamInitiationParserFactory());
+	addFactory(new GenericPayloadParserFactory<StreamInitiationFileInfoParser>("file", "http://jabber.org/protocol/si/profile/file-transfer", StreamInitiationFileInfoParser.class));
+	addFactory(new GenericPayloadParserFactory<StreamInitiationParser>("si", "http://jabber.org/protocol/si", StreamInitiationParser.class));        
 	addFactory(new GenericPayloadParserFactory<ThreadParser>("thread", ThreadParser.class));        
 	addFactory(new GenericPayloadParserFactory<BytestreamsParser>("query", "http://jabber.org/protocol/bytestreams", BytestreamsParser.class));
 	addFactory(new GenericPayloadParserFactory<VCardUpdateParser>("x", "vcard-temp:x:update", VCardUpdateParser.class));

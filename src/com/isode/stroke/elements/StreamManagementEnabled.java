@@ -10,6 +10,10 @@ package com.isode.stroke.elements;
 
 public class StreamManagementEnabled implements Element {
 
+    public StreamManagementEnabled() {
+        this.resumeSupported = false;
+    }
+
     public void setResumeSupported() {
         resumeSupported = true;
     }
