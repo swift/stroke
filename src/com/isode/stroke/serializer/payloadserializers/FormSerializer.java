@@ -12,15 +12,22 @@ package com.isode.stroke.serializer.payloadserializers;
 import com.isode.stroke.elements.Form;
 import com.isode.stroke.elements.FormField;
 import com.isode.stroke.elements.FormItem;
+import com.isode.stroke.elements.FormSection;
+import com.isode.stroke.elements.FormText;
+import com.isode.stroke.elements.FormPage;
+import com.isode.stroke.elements.FormReportedRef;
 import com.isode.stroke.serializer.GenericPayloadSerializer;
 import com.isode.stroke.serializer.xml.XMLElement;
 import com.isode.stroke.serializer.xml.XMLTextNode;
+import java.util.Vector;
 
 /**
  * Serializer for {@link Form} element.
  */
 public class FormSerializer extends GenericPayloadSerializer<Form> {
-    
+
+    private Vector<FormField> fields_ = new Vector<FormField>();
+
     public FormSerializer() {
         super(Form.class);
     }
@@ -42,6 +49,14 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
         }
         
         // Add reported element
+
+        for(FormPage page : form.getPages()) {
+            formElement.addNode(pageToXML(page));
+        }
+
+        for(FormField field : form.getFields()) {
+            formElement.addNode(fieldToXML(field, true));
+        }
         
         if (!form.getReportedFields().isEmpty()) {
         	XMLElement reportedElement = new XMLElement("reported");
@@ -59,12 +74,15 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
         	}
         	formElement.addNode(itemElement);
         }
-        
-        // Add fields
-        for (FormField field : form.getFields()) {
-            formElement.addNode(fieldToXML(field, true));
+
+        for(FormText text : form.getTextElements()) {
+            formElement.addNode(textToXML(text));
         }
         
+        for(FormField field : fields_) {
+            formElement.addNode(fieldToXML(field,true));
+        }
+
         return formElement.serialize();
     }
     
@@ -115,6 +133,65 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
         	fieldElement.addNode(optionElement);
         }
         return fieldElement;
+    }
+
+    private XMLElement textToXML(FormText text) {
+        XMLElement textElement = new XMLElement("text");
+        textElement.addNode(new XMLTextNode(text.getTextString()));
+        return textElement;
+    }
+
+    private XMLElement fieldRefToXML(String ref) {
+        XMLElement fieldRefElement = new XMLElement("fieldref");
+        fieldRefElement.setAttribute("var", ref);
+        return fieldRefElement;
+    }
+
+    /*private XMLElement reportedRefToXML(FormReportedRef reportedRef) {
+
+    }*/
+
+    private XMLElement pageToXML(FormPage page) {
+        XMLElement pageElement = new XMLElement("page");
+        pageElement.setAttribute("xmlns", page.getXMLNS());
+        if (!page.getLabel().isEmpty()) {
+            pageElement.setAttribute("label", page.getLabel());
+        }
+        for(FormText text : page.getTextElements()) {
+            pageElement.addNode(textToXML(text));
+        }
+        for (FormField field : page.getFields()) {
+            pageElement.addNode(fieldRefToXML(field.getName()));
+            fields_.add(field);
+        }
+        for(FormReportedRef reportedRef : page.getReportedRefs()) {
+            pageElement.addNode(new XMLElement("reportedref"));
+        }
+        for(FormSection section : page.getChildSections()) {
+            pageElement.addNode(sectionToXML(section));
+        }
+        return pageElement;
+    }
+
+    private XMLElement sectionToXML(FormSection section) {
+        XMLElement sectionElement = new XMLElement("section");
+        if (!section.getLabel().isEmpty()) {
+            sectionElement.setAttribute("label", section.getLabel());
+        }
+        for(FormText text : section.getTextElements()) {
+            sectionElement.addNode(textToXML(text));
+        }
+        for(FormField field : section.getFields()) {
+            sectionElement.addNode(fieldRefToXML(field.getName()));
+            fields_.add(field);
+        }
+        for(FormReportedRef reportedRef : section.getReportedRefs()) {
+            sectionElement.addNode(new XMLElement("reportedref"));
+        }
+        for(FormSection childSection : section.getChildSections()) {
+            sectionElement.addNode(sectionToXML(childSection));
+        }
+        return sectionElement;
     }
 
     private void multiLineify(String text, String elementName,

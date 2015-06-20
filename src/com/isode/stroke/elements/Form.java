@@ -108,6 +108,10 @@ public class Form extends Payload {
         }
     }
 
+    private List<FormReportedRef> reportedRefs_ = new ArrayList<FormReportedRef>();
+    private List<FormText> textElements_ = new ArrayList<FormText>();
+    private List<FormPage> pages_ = new ArrayList<FormPage>();
+    private FormReportedRef reportedRef_;
     private List<FormField> fields_ = new ArrayList<FormField>();
     private List<FormField> reportedFields_ = new ArrayList<FormField>();
     private List<FormItem> items_ = new ArrayList<FormItem>();
@@ -132,6 +136,51 @@ public class Form extends Payload {
     }
 
     /**
+    * @param reportedRef, Not Null.
+    */
+    public void addReportedRef(FormReportedRef reportedRef) {
+        assert(reportedRef != null);
+        reportedRefs_.add(reportedRef);
+    }
+
+    /**
+    * @return reportedRef, Not Null.
+    */
+    public List<FormReportedRef> getReportedRefs() {
+        return reportedRefs_;
+    }
+
+    /**
+    * @param text, Not Null.
+    */
+    public void addTextElement(FormText text) {
+        assert(text != null);
+        textElements_.add(text);
+    }
+
+    /**
+    * @return text, Not Null.
+    */
+    public List<FormText> getTextElements() {
+        return textElements_;
+    }
+
+    /**
+    * @return page, Not Null.
+    */
+    public void addPage(FormPage page) {
+        assert(page != null);
+        pages_.add(page);
+    }
+
+    /**
+    * @return pages, Not Null.
+    */
+    public List<FormPage> getPages() {
+        return pages_;
+    }
+
+    /**
      * Add to the list of fields for the form.
      *
      * @param field Field to add, must not be null. The instance of the form
@@ -153,7 +202,11 @@ public class Form extends Payload {
     public List<FormField> getFields() {
         return new ArrayList<FormField>(fields_);
     }
-    
+
+    public void clearFields() {
+        fields_.clear();
+    }
+
     /**
      * Add a reported element to this Form.
      * @param reportedField should not be null
@@ -183,7 +236,11 @@ public class Form extends Payload {
     	}
     	items_.add(item);
     }
-    
+
+    public void clearItems() { 
+        items_.clear(); 
+    }
+
     /**
      * Get the list of FormItem elements for the form.
      * @return itemsCopy ArrayList<List<FormItem>>, list of items for the Form,
@@ -293,6 +350,26 @@ public class Form extends Payload {
         }
 
         return null;
+    }
+
+    public void clearEmptyTextFields() {
+        List<FormField> populatedFields = new ArrayList<FormField>();
+        for (FormField field : fields_) {
+            if (field.getType() == FormField.Type.TEXT_SINGLE_TYPE) {
+                if (!field.getTextSingleValue().isEmpty()) {
+                    populatedFields.add(field);
+                }
+            }
+            else if (field.getType() == FormField.Type.TEXT_MULTI_TYPE) {
+                if (!field.getTextMultiValue().isEmpty()) {
+                    populatedFields.add(field);
+                }
+            }
+            else {
+                populatedFields.add(field);
+            }
+        }
+        fields_ = populatedFields;
     }
 
     @Override

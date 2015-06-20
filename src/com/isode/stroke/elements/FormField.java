@@ -88,9 +88,6 @@ public class FormField {
     public FormField(Type type) {
     	type_ = type;
     	required_ = false;
-    	if (type == Type.BOOLEAN_TYPE) {
-    		setBoolValue(false);
-    	}
     }
     
     /**

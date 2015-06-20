@@ -13,6 +13,8 @@ import com.isode.stroke.elements.SearchPayload;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.parser.AttributeMap;
 import com.isode.stroke.parser.GenericPayloadParser;
+import com.isode.stroke.parser.payloadparsers.FormParserFactory;
+import com.isode.stroke.parser.payloadparsers.FormParser;
 
 public class SearchPayloadParser extends GenericPayloadParser<SearchPayload> {
 
@@ -22,60 +24,60 @@ public class SearchPayloadParser extends GenericPayloadParser<SearchPayload> {
 
     private int level = 0;
     private String currentText = "";
-    //private FormParserFactory formParserFactory = new FormParserFactory(); /* Not ported yet*/
-    //private FormParser formParser;
-    SearchPayload.Item currentItem;
+    private FormParserFactory formParserFactory = new FormParserFactory();
+    private FormParser formParser;
+    private SearchPayload.Item currentItem;
 
     public SearchPayloadParser() {
         super(new SearchPayload());
+        formParserFactory = new FormParserFactory();
     }
 
     public void handleStartElement(String element, String ns, AttributeMap attributes) {
         if (level == TopLevel) {
-	}
-	else if (level == PayloadLevel) {
-		//if (element.equals("x") && ns.equals("jabber:x:data")) {
-		//	assert formParser == null;
-		//	formParser = dynamic_cast<FormParser*>(formParserFactory->createPayloadParser());
-		//} /* Not ported yet */
-		//else
-            if (element.equals("item")) {
-			assert currentItem == null;
-			currentItem = new SearchPayload.Item();
-			currentItem.jid = JID.fromString(attributes.getAttribute("jid"));
+
 		}
-		else {
+		else if (level == PayloadLevel) {
+			if (element.equals("x") && ns.equals("jabber:x:data")) {
+				assert (formParser == null);
+				formParser = (FormParser)(formParserFactory.createPayloadParser());
+			}
+			else
+            	if (element.equals("item")) {
+				assert currentItem == null;
+				currentItem = new SearchPayload.Item();
+				currentItem.jid = JID.fromString(attributes.getAttribute("jid"));
+			}
+			else {
+				currentText = "";
+			}
+		}
+		else if (level == ItemLevel && currentItem != null) {
 			currentText = "";
 		}
-	}
-	else if (level == ItemLevel && currentItem != null) {
-		currentText = "";
-	}
 
-	//if (formParser) {
-	//	formParser->handleStartElement(element, ns, attributes);
-	//} /* Not ported yet */
+		if (formParser != null) {
+			formParser.handleStartElement(element, ns, attributes);
+		} 
 
-	++level;
+		++level;
     }
 
     public void handleEndElement(String element, String ns) {
         --level;
 
-	//if (formParser) {
-	//	formParser->handleEndElement(element, ns);
-	//} /*Not Ported yet*/
+	if (formParser != null) {
+		formParser.handleEndElement(element, ns);
+	}
 
 	if (level == TopLevel) {
 	}
 	else if (level == PayloadLevel) {
-		//if (formParser) {
-		//	getPayloadInternal()->setForm(formParser->getPayloadInternal());
-		//	delete formParser;
-		//	formParser = NULL;
-		//}
-		//else /*Not ported yet*/
-                    if (element.equals("item")) {
+		if (formParser != null) {
+			getPayloadInternal().setForm(formParser.getPayloadInternal());
+			formParser = null;
+		}
+		else if (element.equals("item")) {
 			assert currentItem != null;
 			getPayloadInternal().addItem(currentItem);
 			currentItem = null;
@@ -113,12 +115,12 @@ public class SearchPayloadParser extends GenericPayloadParser<SearchPayload> {
     }
 
     public void handleCharacterData(String data) {
-        //if (formParser) {
-	//	formParser->handleCharacterData(data);
-	//}
-	//else { /*Not ported yet*/
+        if (formParser != null) {
+		formParser.handleCharacterData(data);
+	}
+	else {
 		currentText += data;
-	//}
+	}
     }
 
 }

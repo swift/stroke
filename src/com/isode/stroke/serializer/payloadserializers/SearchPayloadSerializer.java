@@ -7,6 +7,8 @@ package com.isode.stroke.serializer.payloadserializers;
 import com.isode.stroke.elements.SearchPayload;
 import com.isode.stroke.serializer.GenericPayloadSerializer;
 import com.isode.stroke.serializer.xml.XMLElement;
+import com.isode.stroke.serializer.xml.XMLRawTextNode;
+import com.isode.stroke.elements.Form;
 
 /**
  * SearchPayload to String.
@@ -52,9 +54,10 @@ public class SearchPayloadSerializer extends GenericPayloadSerializer<SearchPayl
 		searchElement.addNode(itemElement);
 	}
 
-	//if (Form::ref form = searchPayload->getForm()) {
-	//	searchElement.addNode(boost::shared_ptr<XMLRawTextNode>(new XMLRawTextNode(FormSerializer().serialize(form))));
-	//} /* Not ported yet. When the time comes, look at Swiften to check if it's changed. It will have. */
+	if (searchPayload.getForm() != null) {
+		Form form = searchPayload.getForm();
+		searchElement.addNode(new XMLRawTextNode(new FormSerializer().serialize(form)));
+	}
 
 	return searchElement.serialize();
     }

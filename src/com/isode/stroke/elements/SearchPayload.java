@@ -9,6 +9,7 @@
 package com.isode.stroke.elements;
 
 import com.isode.stroke.jid.JID;
+import com.isode.stroke.elements.Form;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,8 +27,20 @@ public class SearchPayload extends Payload {
     public SearchPayload() {
     }
 
-    //Form::ref getForm() const { return form; } /* Not ported yet */
-    //void setForm(Form::ref f) { form = f; } /* Not ported yet */
+    /**
+     * @return Can be null
+     */
+    public Form getForm() { 
+        return form; 
+    }
+
+    /**
+     * @param v Null means no value.
+     */
+    public void setForm(Form f) { 
+        form = f; 
+    }
+
     /**
      * @return Can be null
      */
@@ -121,4 +134,5 @@ public class SearchPayload extends Payload {
     private String last;
     private String email;
     private ArrayList<Item> items = new ArrayList<Item>();
+    private Form form;
 }

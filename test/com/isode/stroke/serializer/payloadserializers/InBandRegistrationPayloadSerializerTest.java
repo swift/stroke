@@ -56,15 +56,15 @@ public class InBandRegistrationPayloadSerializerTest {
 		registration.setForm(form);
 
 		String expectedResult = 
-			"<query xmlns=\"jabber:iq:register\">" +
-				"<instructions>Use the enclosed form to register.</instructions>" +
-				"<x type=\"form\" xmlns=\"jabber:x:data\">" +
-					"<title>Contest Registration</title>" +
-					"<field type=\"hidden\" var=\"FORM_TYPE\">" +
-						"<value>jabber:iq:register</value>" +
-					"</field>" +
-				"</x>" +
-			"</query>";
+			"<query xmlns=\"jabber:iq:register\">"
+			+		"<instructions>Use the enclosed form to register.</instructions>"
+			+		"<x type=\"form\" xmlns=\"jabber:x:data\">"
+			+			"<title>Contest Registration</title>"
+			+			"<field type=\"hidden\" var=\"FORM_TYPE\">"
+			+				"<value>jabber:iq:register</value>"
+			+			"</field>"
+			+		"</x>"
+			+	"</query>";
 
 		assertEquals(expectedResult, testling.serialize(registration));
 	}

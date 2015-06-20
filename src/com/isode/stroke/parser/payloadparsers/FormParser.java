@@ -17,6 +17,10 @@ import com.isode.stroke.elements.Form.Type;
 import com.isode.stroke.elements.FormField;
 import com.isode.stroke.elements.FormField.Option;
 import com.isode.stroke.elements.FormItem;
+import com.isode.stroke.elements.FormText;
+import com.isode.stroke.elements.FormReportedRef;
+import com.isode.stroke.elements.FormPage;
+import com.isode.stroke.elements.FormSection;
 import com.isode.stroke.parser.AttributeMap;
 import com.isode.stroke.parser.GenericPayloadParser;
 
@@ -32,7 +36,17 @@ public class FormParser extends GenericPayloadParser<Form> {
     private boolean parsingOption_ = false;
     private String currentOptionValue_ = "";
     private String currentText_ = "";
-	
+    private String currentFieldRef_ = "";
+    private boolean parsingItem_ = false;
+    private boolean parseStarted_ = false;
+    private boolean hasReportedRef_ = false;
+    private FormText currentTextElement_;
+    private FormReportedRef currentReportedRef_;
+    private FormPage currentPage_;
+    private FormSection currentSection_;
+    private List<FormPage> currentPages_ = new ArrayList<FormPage>();
+    private List<FormSection> sectionStack_ = new ArrayList<FormSection>();
+    private List<FormSection> currentSections_ = new ArrayList<FormSection>();
     private static final int TopLevel = 0; 
     private static final int PayloadLevel = 1;
     private static final int FieldLevel = 2;
@@ -81,12 +95,16 @@ public class FormParser extends GenericPayloadParser<Form> {
             }
             
             else if (element.equals(Form.FORM_ELEMENT_ITEM)) {
+                parsingItem_ = true;
             	currentItem_ = new FormItem();
             }
-            
+            else if (element == "page") {
+                currentPage_ = new FormPage();
+                currentPage_.setLabel(attributes.getAttribute("label"));
+            }
         } 
         
-        if (level_ == FieldLevel && currentField_ != null) {
+        else if (level_ == FieldLevel && currentField_ != null) {
     		currentText_ = "";
             if (element.equals(FormField.FORM_FIELD_ELEMENT_OPTION)) {
                 currentOptionLabel_ = attributes
@@ -115,7 +133,30 @@ public class FormParser extends GenericPayloadParser<Form> {
             	currentText_ = "";
             }
         }
-        
+        if (level_ > PayloadLevel) {
+            if (element.equals("section")) {
+                currentSection_ = new FormSection();
+                currentSection_.setLabel(attributes.getAttribute("label"));
+                sectionStack_.add(currentSection_);
+                currentSections_.add(currentSection_);
+            }
+            if (element.equals("reportedref")) {
+                currentReportedRef_ = new FormReportedRef();
+            }
+            if (element.equals("fieldref")) {
+                currentText_ = "";
+                currentFieldRef_ = attributes.getAttribute("var");
+                if (sectionStack_.size() > 0) {
+                    sectionStack_.get(sectionStack_.size()-1).addFieldRef(currentFieldRef_);
+                } else if (currentPage_ != null) {
+                    currentPage_.addFieldRef(currentFieldRef_);
+                }
+            }
+            if (element.equals("text")) {
+                currentText_ = "";
+                currentTextElement_ = new FormText();
+            }
+        }
         ++level_;
     }
     
@@ -156,44 +197,104 @@ public class FormParser extends GenericPayloadParser<Form> {
             }
             
             else if (element.equals(Form.FORM_ELEMENT_ITEM)) {
+                parsingItem_ = false;                
             	currentItem_.addItemFields(currentFields_);
             	form.addItem(currentItem_);
             	currentFields_.clear();
             	currentItem_ = null;
             }
+            else if (element.equals("page")) {
+                getPayloadInternal().addPage(currentPage_);
+                currentPages_.add(currentPage_);
+            }
         }
-        	
-        if (element.equals(FormField.FORM_FIELD_ELEMENT_REQUIRED)) {
-        	currentField_.setRequired(true);
-        } 
-        else if (element.equals(FormField.FORM_FIELD_ELEMENT_DESC)) {
-        	currentField_.setDescription(currentText_);
-        } 
-        else if (element.equals(FormField.FORM_FIELD_ELEMENT_OPTION)) {
-        	currentField_.addOption(
-                    new Option(currentOptionLabel_, currentOptionValue_));
-        	parsingOption_ = false;
-        }
-        else if (element.equals(FormField.FORM_FIELD_ELEMENT_VALUE)) {
-        	if (parsingOption_) {
-        		currentOptionValue_ = currentText_;
-        	}
-        	else {
-        		currentField_.addValue(currentText_);
-        	}
+
+        else if (currentField_ != null) {
+            if (element.equals(FormField.FORM_FIELD_ELEMENT_REQUIRED)) {
+            	currentField_.setRequired(true);
+            } 
+            else if (element.equals(FormField.FORM_FIELD_ELEMENT_DESC)) {
+            	currentField_.setDescription(currentText_);
+            } 
+            else if (element.equals(FormField.FORM_FIELD_ELEMENT_OPTION)) {
+            	currentField_.addOption(
+                        new Option(currentOptionLabel_, currentOptionValue_));
+            	parsingOption_ = false;
+            }
+            else if (element.equals(FormField.FORM_FIELD_ELEMENT_VALUE)) {
+            	if (parsingOption_) {
+            		currentOptionValue_ = currentText_;
+            	}
+            	else {
+            		currentField_.addValue(currentText_);
+            	}
+            }
         }
         
         if (level_ >= PayloadLevel && currentField_ != null) {
-        	if (element.equals("field")) {
-            	if (parsingReported_) {
-            		form.addReportedField(currentField_);
-            	} else if (currentItem_ != null) {
-            		currentFields_.add(currentField_);
-            	} else {
-                    form.addField(currentField_);
+            if (element.equals("field")) {
+                if (parsingReported_) {
+                    getPayloadInternal().addReportedField(currentField_);
+                } 
+                else if (parsingItem_) {
+                    currentFields_.add(currentField_);
+                } 
+                else {
+                    if (currentPages_.size() > 0) {
+                        for (FormPage page : currentPages_) {
+                            for (String pRef : page.getFieldRefs()) {
+                                if (pRef.equals(currentField_.getName())) {
+                                    page.addField(currentField_);
+                                }
+                            }
+                        }
+                        for (FormSection section : currentSections_) {
+                            for (String sRef : section.getFieldRefs()) {
+                                if (sRef.equals(currentField_.getName())) {
+                                    section.addField(currentField_);
+                                }
+                            }
+                        }
+                    } else {
+                        form.addField(currentField_);
+                    }
                 }
                 currentField_ = null;
-        	}
+            }
+        }
+        if (level_ > PayloadLevel) {
+            if (element.equals("section")) {
+                if (sectionStack_.size() > 1) {
+                    // Add the section at the top of the stack to the level below
+                    sectionStack_.get(sectionStack_.size()-2).addChildSection(sectionStack_.get(sectionStack_.size()-1));
+                    sectionStack_.remove(sectionStack_.size()-1);
+                }
+                else if (sectionStack_.size() == 1) {
+                    // Add the remaining section on the stack to it's parent page
+                    currentPage_.addChildSection(sectionStack_.get(sectionStack_.size()-1));
+                    sectionStack_.remove(sectionStack_.size()-1);
+                }
+            }
+            if (currentReportedRef_ != null && !hasReportedRef_) {
+                if (sectionStack_.size() > 0) {
+                    sectionStack_.get(sectionStack_.size()-1).addReportedRef(currentReportedRef_);
+                } else if (currentPage_ != null) {
+                    currentPage_.addReportedRef(currentReportedRef_);
+                }
+                hasReportedRef_ = true;
+                currentReportedRef_ = null;
+            }
+            if (currentTextElement_ != null) {
+                if (element.equals("text")) {
+                    currentTextElement_.setTextString(currentText_);
+                }
+                if (sectionStack_.size() > 0) {
+                    sectionStack_.get(sectionStack_.size()-1).addTextElement(currentTextElement_);
+                } else if (currentPage_ != null) {
+                    currentPage_.addTextElement(currentTextElement_);
+                }
+                currentTextElement_ = null;
+            }
         }
     }
     
