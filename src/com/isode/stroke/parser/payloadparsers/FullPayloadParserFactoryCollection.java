@@ -34,7 +34,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
 	addFactory(new GenericPayloadParserFactory<JingleIBBTransportMethodPayloadParser>("transport", "urn:xmpp:jingle:transports:ibb:1", JingleIBBTransportMethodPayloadParser.class));
 	addFactory(new GenericPayloadParserFactory<JingleS5BTransportMethodPayloadParser>("transport", "urn:xmpp:jingle:transports:s5b:1", JingleS5BTransportMethodPayloadParser.class));
 	addFactory(new JingleContentPayloadParserFactory(this));
-	//addFactory(new GenericPayloadParserFactory<PriorityParser>("priority", PriorityParser.class));
+	addFactory(new GenericPayloadParserFactory<PriorityParser>("priority", PriorityParser.class));
 	addFactory(new ErrorParserFactory(this));
 	addFactory(new SoftwareVersionParserFactory());
 	addFactory(new GenericPayloadParserFactory<IsodeIQDelegationParser>("delegate", "http://isode.com/iq_delegation", IsodeIQDelegationParser.class));
