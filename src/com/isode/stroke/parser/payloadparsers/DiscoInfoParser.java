@@ -19,6 +19,11 @@ public class DiscoInfoParser extends GenericPayloadParser<DiscoInfo> {
     }
 
     public void handleStartElement(String element, String ns, AttributeMap attributes) {
+    	if (level_ == TopLevel) {
+			if (attributes.getAttributeValue("node") != null) {
+				getPayloadInternal().setNode(attributes.getAttributeValue("node"));
+			}
+		}
         if (level_ == PayloadLevel) {
 		if (element .equals("identity")) {
 			getPayloadInternal().addIdentity(new DiscoInfo.Identity(attributes.getAttribute("name"), attributes.getAttribute("category"), attributes.getAttribute("type"), attributes.getAttribute("lang", "http://www.w3.org/XML/1998/namespace")));

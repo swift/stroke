@@ -26,6 +26,11 @@ public class DiscoItemsParser extends GenericPayloadParser<DiscoItems> {
                 getPayloadInternal().addItem(item);
             }
         }
+        else if (level_ == TopLevel) {
+            if (element.equals("query")) {
+                getPayloadInternal().setNode(attributes.getAttribute("node"));
+            }
+        }
         ++level_;
     }
 

@@ -26,16 +26,16 @@ public class VCard extends Payload implements Serializable {
     private String nick_ = "";
     private Date birthday_;
     private String unknownContent_ = "";
-    private List<EMailAddress> emailAddresses_;
-    private List<Telephone> telephones_;
-    private List<Address> addresses_;
-    private List<AddressLabel> addressLabels_;
-    private List<JID> jids_;
+    private List<EMailAddress> emailAddresses_ = new ArrayList<EMailAddress>();
+    private List<Telephone> telephones_ = new ArrayList<Telephone>();
+    private List<Address> addresses_ = new ArrayList<Address>();
+    private List<AddressLabel> addressLabels_ = new ArrayList<AddressLabel>();
+    private List<JID> jids_ = new ArrayList<JID>();
     private String description_ = "";
-    private List<Organization> organizations_;
-    private List<String> titles_;
-    private List<String> roles_;
-    private List<String> urls_;
+    private List<Organization> organizations_ = new ArrayList<Organization>();
+    private List<String> titles_ = new ArrayList<String>();
+    private List<String> roles_ = new ArrayList<String>();
+    private List<String> urls_ = new ArrayList<String>();
 
     public static class EMailAddress {
         public boolean isHome;
@@ -43,7 +43,7 @@ public class VCard extends Payload implements Serializable {
         public boolean isInternet;
         public boolean isPreferred;
         public boolean isX400;
-        public String address;
+        public String address = "";
     };
 
     public static class Telephone {
@@ -60,7 +60,7 @@ public class VCard extends Payload implements Serializable {
         public boolean isISDN;
         public boolean isPCS;
         public boolean isPreferred;
-        public String number;
+        public String number = "";
     };
 
     public static enum DeliveryType {
@@ -77,13 +77,13 @@ public class VCard extends Payload implements Serializable {
         public DeliveryType deliveryType;
         public boolean isPreferred;
 
-        public String poBox;
-        public String addressExtension;
-        public String street;
-        public String locality;
-        public String region;
-        public String postalCode;
-        public String country;
+        public String poBox = "";
+        public String addressExtension = "";
+        public String street = "";
+        public String locality = "";
+        public String region = "";
+        public String postalCode = "";
+        public String country = "";
     };
 
     public static class AddressLabel {
@@ -97,7 +97,7 @@ public class VCard extends Payload implements Serializable {
     };
 
     public static class Organization {
-        public String name;
+        public String name = "";
         public List<String> units = new ArrayList<String>();
     };
 
