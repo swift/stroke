@@ -12,11 +12,16 @@ package com.isode.stroke.serializer.payloadserializers;
 import com.isode.stroke.elements.ErrorPayload;
 import com.isode.stroke.serializer.GenericPayloadSerializer;
 import com.isode.stroke.serializer.xml.XMLTextNode;
+import com.isode.stroke.serializer.PayloadSerializerCollection;
+import com.isode.stroke.serializer.PayloadSerializer;
 
 class ErrorSerializer extends GenericPayloadSerializer<ErrorPayload> {
 
-    public ErrorSerializer() {
+	private PayloadSerializerCollection serializers;
+
+    public ErrorSerializer(PayloadSerializerCollection serializers) {
         super(ErrorPayload.class);
+        this.serializers = serializers;
     }
 
     @Override
@@ -61,6 +66,13 @@ class ErrorSerializer extends GenericPayloadSerializer<ErrorPayload> {
 	if (error.getText().length() != 0) {
 		XMLTextNode textNode = new XMLTextNode(error.getText());
 		result += "<text xmlns=\"urn:ietf:params:xml:ns:xmpp-stanzas\">" + textNode.serialize() + "</text>";
+	}
+
+	if (error.getPayload() != null) {
+		PayloadSerializer serializer = serializers.getPayloadSerializer(error.getPayload());
+		if (serializer != null) {
+			result += serializer.serialize(error.getPayload());
+		}
 	}
 
 	result += "</error>";

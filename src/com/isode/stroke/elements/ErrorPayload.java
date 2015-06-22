@@ -15,7 +15,7 @@ package com.isode.stroke.elements;
 public class ErrorPayload extends Payload {
     private Condition condition_;
     private Type type_;
-    private String text_;
+    private String text_ = "";
     private Payload payload_;
     
     public enum Type { Cancel, Continue, Modify, Auth, Wait };

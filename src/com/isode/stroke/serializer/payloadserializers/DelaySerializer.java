@@ -25,7 +25,8 @@ public class DelaySerializer extends GenericPayloadSerializer<Delay> {
         if (delay.getFrom() != null && delay.getFrom().isValid()) {
             delayElement.setAttribute("from", delay.getFrom().toString());
         }
-        delayElement.setAttribute("stamp", DateTime.dateToString(delay.getStamp()));
+        if(delay.getStamp() != null)
+            delayElement.setAttribute("stamp", DateTime.dateToString(delay.getStamp()));
         return delayElement.serialize();
     }
 }

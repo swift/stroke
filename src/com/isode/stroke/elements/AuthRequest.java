@@ -41,6 +41,6 @@ public class AuthRequest implements Element {
     public void setMechanism(String mechanism) {
         mechanism_ = mechanism;
     }
-    private String mechanism_;
-    private ByteArray message_ = new ByteArray();
+    private String mechanism_ = "";
+    private ByteArray message_;
 }

@@ -23,7 +23,7 @@ import com.isode.stroke.base.NotNull;
 
 public class JingleFileTransferHash extends Payload {
 
-	private JingleFileTransferFileInfo fileInfo_;
+	private JingleFileTransferFileInfo fileInfo_ = new JingleFileTransferFileInfo();
 
 	/**
 	* Default Constructor.

@@ -26,7 +26,7 @@ public class FullPayloadSerializerCollection extends PayloadSerializerCollection
 	addSerializer(new CarbonsReceivedSerializer(this));
 	addSerializer(new CarbonsSentSerializer(this));
 	addSerializer(new PrioritySerializer());
-	addSerializer(new ErrorSerializer());
+	addSerializer(new ErrorSerializer(this));
 	addSerializer(new InBandRegistrationPayloadSerializer());
 	addSerializer(new IBBSerializer());
 	addSerializer(new JingleIBBTransportPayloadSerializer());

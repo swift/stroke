@@ -31,6 +31,8 @@ class StreamFeaturesParser extends GenericElementParser<StreamFeatures> {
                 inMechanisms_ = true;
             } else if (element.equals("compression") && ns.equals("http://jabber.org/features/compress")) {
                 inCompression_ = true;
+            } else if (element.equals("ver") && ns.equals("urn:xmpp:features:rosterver")) {
+                getElementGeneric().setHasRosterVersioning();
             }
         } else if (currentDepth_ == 2) {
             if (inCompression_ && element.equals("method")) {
@@ -38,6 +40,9 @@ class StreamFeaturesParser extends GenericElementParser<StreamFeatures> {
                 currentText_ = "";
             } else if (inMechanisms_ && element.equals("mechanism")) {
                 inMechanism_ = true;
+                currentText_ = "";
+            } else if (inMechanisms_ && element.equals("hostname") && ns.equals("urn:xmpp:domain-based-name:1")) {
+                inAuthenticationHostname_ = true;
                 currentText_ = "";
             }
         }
@@ -57,6 +62,9 @@ class StreamFeaturesParser extends GenericElementParser<StreamFeatures> {
             } else if (inMechanism_) {
                 getElementGeneric().addAuthenticationMechanism(currentText_);
                 inMechanism_ = false;
+            } else if (inAuthenticationHostname_) {
+                getElementGeneric().setAuthenticationHostname(currentText_);
+                inAuthenticationHostname_ = false;
             }
         }
     }
@@ -71,4 +79,5 @@ class StreamFeaturesParser extends GenericElementParser<StreamFeatures> {
     private boolean inMechanism_ = false;
     private boolean inCompression_ = false;
     private boolean inCompressionMethod_ = false;
+    private boolean inAuthenticationHostname_ = false;
 }

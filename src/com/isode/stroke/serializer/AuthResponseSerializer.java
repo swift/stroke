@@ -25,7 +25,7 @@ class AuthResponseSerializer extends GenericElementSerializer<AuthResponse> {
         ByteArray message = authResponse.getValue();
         if (message != null) {
             if (message.isEmpty()) {
-                value = "=";
+                value = "";
             } else {
                 value = Base64.encode(message);
             }

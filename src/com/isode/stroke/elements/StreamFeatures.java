@@ -73,6 +73,14 @@ public class StreamFeatures implements Element {
         return !authenticationMechanisms_.isEmpty();
     }
 
+    public String getAuthenticationHostname() {
+        return authenticationHostname_;
+    }
+
+    public void setAuthenticationHostname(String authenticationHostname) {
+        authenticationHostname_ = authenticationHostname;
+    }
+
     public boolean hasStreamManagement() {
         return hasStreamManagement_;
     }
@@ -106,4 +114,5 @@ public class StreamFeatures implements Element {
     private boolean hasSession_;
     private boolean hasStreamManagement_;
     private boolean hasRosterVersioning_;
+    private String authenticationHostname_;
 }

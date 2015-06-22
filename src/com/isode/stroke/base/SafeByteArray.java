@@ -12,6 +12,10 @@ import com.isode.stroke.base.ByteArray;
 */
 public class SafeByteArray extends ByteArray {
 
+	public SafeByteArray() {
+
+	}
+
 	public SafeByteArray(String s) {
 		super(s);
 	}

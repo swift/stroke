@@ -13,7 +13,7 @@ import com.isode.stroke.base.ByteArray;
 public class AuthChallenge implements Element {
     //FIXME: parser/serialiser
     public AuthChallenge() {
-        value_ = new ByteArray();
+
     }
 
     public AuthChallenge(ByteArray value) {
