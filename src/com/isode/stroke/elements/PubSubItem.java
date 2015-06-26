@@ -37,7 +37,7 @@ public void setID(String id) {
 	id_ = id;
 }
 
-ArrayList<Payload> data_ = new ArrayList<Payload>();
-String id_;
+private ArrayList<Payload> data_ = new ArrayList<Payload>();
+private String id_;
 
 }

@@ -24,6 +24,6 @@ public void setURI(String uri) {
 	uri_ = uri;
 }
 
-String uri_;
+private String uri_ = "";
 
 }

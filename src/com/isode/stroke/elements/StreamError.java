@@ -71,5 +71,5 @@ public class StreamError implements Element {
         return text_;
     }
     private Type type_;
-    private String text_;
+    private String text_ = "";
 };

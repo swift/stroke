@@ -13,9 +13,9 @@ import com.isode.stroke.jid.JID;
 public class MUCInvitationPayload extends Payload {
     private boolean continuation_;
     private JID jid_;
-    private String password_;
-    private String reason_;
-    private String thread_;
+    private String password_ = "";
+    private String reason_ = "";
+    private String thread_ = "";
     private boolean impromptu_;
 
 

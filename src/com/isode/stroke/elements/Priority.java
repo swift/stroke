@@ -13,7 +13,7 @@ package com.isode.stroke.elements;
  * Resource priority from presence stanzas.
  */
 public class Priority extends Payload {
-    int priority_ = 0;
+    private int priority_ = 0;
 
     public Priority(){
 

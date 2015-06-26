@@ -45,8 +45,8 @@ public void setNotify(boolean notify) {
 	notify_ = notify;
 }
 
-ArrayList<PubSubItem> items_ = new ArrayList<PubSubItem>();
-String node_;
-boolean notify_;
+private ArrayList<PubSubItem> items_ = new ArrayList<PubSubItem>();
+private String node_ = "";
+private boolean notify_;
 
 }

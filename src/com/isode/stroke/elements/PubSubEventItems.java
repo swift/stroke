@@ -49,8 +49,8 @@ public void addRetract(PubSubEventRetract value) {
 	retracts_.add(value);
 }
 
-ArrayList<PubSubEventItem> items_ = new ArrayList<PubSubEventItem>();
-String node_;
-ArrayList<PubSubEventRetract> retracts_ = new ArrayList<PubSubEventRetract>();
+private ArrayList<PubSubEventItem> items_ = new ArrayList<PubSubEventItem>();
+private String node_ = "";
+private ArrayList<PubSubEventRetract> retracts_ = new ArrayList<PubSubEventRetract>();
 
 }

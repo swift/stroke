@@ -24,6 +24,6 @@ public void setRequired(boolean required) {
 	required_ = required;
 }
 
-boolean required_;
+private boolean required_;
 
 }

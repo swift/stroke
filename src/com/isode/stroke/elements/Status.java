@@ -10,7 +10,7 @@ package com.isode.stroke.elements;
 
 public class Status extends Payload {
 
-    String text_ = "";
+    private String text_ = "";
 
     public Status() {
     }

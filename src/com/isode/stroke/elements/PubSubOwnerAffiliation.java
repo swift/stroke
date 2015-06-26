@@ -42,7 +42,7 @@ public void setType(Type type) {
 	type_ = type;
 }
 
-JID jid_;
-Type type_;
+private JID jid_;
+private Type type_;
 
 }

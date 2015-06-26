@@ -27,6 +27,6 @@ public class MAMResult extends ContainerPayload<Forwarded> {
         return queryID_;
     }
 
-    private String id_;
+    private String id_ = "";
     private String queryID_;
 }

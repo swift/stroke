@@ -10,7 +10,7 @@
 package com.isode.stroke.elements;
 
 public class Replace extends Payload {
-	private String replaceID_;
+	private String replaceID_ = "";
 	
 	public Replace() {
 		this("");

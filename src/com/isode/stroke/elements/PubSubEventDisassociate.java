@@ -24,6 +24,6 @@ public void setNode(String node) {
 	node_ = node;
 }
 
-String node_;
+private String node_ = "";
 
 }

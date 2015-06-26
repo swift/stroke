@@ -38,7 +38,7 @@ public void setType(Type type) {
 	type_ = type;
 }
 
-String node_;
-Type type_;
+private String node_;
+private Type type_;
 
 }

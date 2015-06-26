@@ -41,8 +41,8 @@ public void setJID(JID jid) {
 	jid_ = jid;
 }
 
-String subscriptionID_;
-String node_;
-JID jid_;
+private String subscriptionID_;
+private String node_;
+private JID jid_;
 
 }

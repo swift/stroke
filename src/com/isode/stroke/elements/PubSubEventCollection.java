@@ -40,8 +40,8 @@ public void setDisassociate(PubSubEventDisassociate disassociate) {
 	disassociate_ = disassociate;
 }
 
-PubSubEventAssociate associate_;
-String node_;
-PubSubEventDisassociate disassociate_;
+private PubSubEventAssociate associate_;
+private String node_;
+private PubSubEventDisassociate disassociate_;
 
 }

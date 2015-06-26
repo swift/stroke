@@ -103,6 +103,6 @@ public class PubSubError extends Payload {
         unsupportedType_ = unsupportedType;
     }
     
-    Type type_;
-    UnsupportedFeatureType unsupportedType_;
+    private Type type_;
+    private UnsupportedFeatureType unsupportedType_;
 }

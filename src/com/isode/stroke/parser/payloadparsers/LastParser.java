@@ -23,10 +23,10 @@ public class LastParser extends GenericPayloadParser<Last> {
 
     public void handleStartElement(String element, String ns, AttributeMap attributes) {
         if (level_ == 0) {
-            Long seconds = null;
+            int seconds = 0;
 
 		try {
-			seconds = Long.parseLong(attributes.getAttribute("seconds"));
+			seconds = Integer.parseInt(attributes.getAttribute("seconds"));
 		}
 		catch (NumberFormatException ex) {
 		}

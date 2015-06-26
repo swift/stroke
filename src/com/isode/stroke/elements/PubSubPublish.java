@@ -37,7 +37,7 @@ public void setNode(String node) {
 	node_ = node;
 }
 
-ArrayList<PubSubItem> items_ = new ArrayList<PubSubItem>();
-String node_;
+private ArrayList<PubSubItem> items_ = new ArrayList<PubSubItem>();
+private String node_ = "";
 
 }

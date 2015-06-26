@@ -32,7 +32,7 @@ public void setConfigure(PubSubConfigure configure) {
 	configure_ = configure;
 }
 
-String node_;
-PubSubConfigure configure_;
+private String node_ = "";
+private PubSubConfigure configure_;
 
 }

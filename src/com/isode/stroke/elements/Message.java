@@ -6,7 +6,7 @@ package com.isode.stroke.elements;
 
 public class Message extends Stanza {
 
-    Type type_ = Type.Chat;
+    private Type type_ = Type.Chat;
 
     public enum Type {
 

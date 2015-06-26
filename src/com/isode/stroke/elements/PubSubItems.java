@@ -53,9 +53,9 @@ public void setNode(String node) {
 	node_ = node;
 }
 
-Long maximumItems_;
-ArrayList<PubSubItem> items_ = new ArrayList<PubSubItem>();
-String subscriptionID_;
-String node_;
+private Long maximumItems_;
+private ArrayList<PubSubItem> items_ = new ArrayList<PubSubItem>();
+private String subscriptionID_;
+private String node_;
 
 }

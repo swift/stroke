@@ -32,7 +32,7 @@ public void setNode(String node) {
 	node_ = node;
 }
 
-PubSubEventRedirect redirects_;
-String node_;
+private PubSubEventRedirect redirects_;
+private String node_ = "";
 
 }

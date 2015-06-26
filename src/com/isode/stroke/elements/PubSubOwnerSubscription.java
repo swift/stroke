@@ -40,7 +40,7 @@ public void setJID(JID jid) {
 	jid_ = jid;
 }
 
-SubscriptionType subscription_;
-JID jid_;
+private SubscriptionType subscription_;
+private JID jid_;
 
 }

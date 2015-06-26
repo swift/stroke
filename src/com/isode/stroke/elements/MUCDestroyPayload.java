@@ -16,7 +16,7 @@ import com.isode.stroke.jid.JID;
  */
 public class MUCDestroyPayload extends Payload{
     private JID newVenue_;
-    private String reason_;
+    private String reason_ = "";
 
     /**
      * Create the Destroy payload 

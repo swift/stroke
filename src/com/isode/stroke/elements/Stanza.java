@@ -14,9 +14,9 @@ import java.util.Vector;
  * Base class for all types of XMPP stanza.
  */
 public abstract class Stanza implements Element {
-    private String id_;
-    private JID from_;
-    private JID to_;
+    private String id_ = "";
+    private JID from_ = new JID();
+    private JID to_ = new JID();
     private Vector<Payload> payloads_ = new Vector<Payload>();
 
     /**

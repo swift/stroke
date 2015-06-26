@@ -25,6 +25,6 @@ public void setData(Form data) {
 	data_ = data;
 }
 
-Form data_;
+private Form data_;
 
 }

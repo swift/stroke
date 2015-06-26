@@ -37,7 +37,7 @@ public void setNode(String node) {
 	node_ = node;
 }
 
-ArrayList<PubSubSubscription> subscriptions_ = new ArrayList<PubSubSubscription>();
-String node_;
+private ArrayList<PubSubSubscription> subscriptions_ = new ArrayList<PubSubSubscription>();
+private String node_;
 
 }

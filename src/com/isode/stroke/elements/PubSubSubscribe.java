@@ -41,8 +41,8 @@ public void setOptions(PubSubOptions options) {
 	options_ = options;
 }
 
-String node_;
-JID jid_;
-PubSubOptions options_;
+private String node_;
+private JID jid_;
+private PubSubOptions options_;
 
 }

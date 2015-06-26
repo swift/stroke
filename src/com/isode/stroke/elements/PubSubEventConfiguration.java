@@ -33,7 +33,7 @@ public void setNode(String node) {
 	node_ = node;
 }
 
-Form data_;
-String node_;
+private Form data_;
+private String node_ = "";
 
 }

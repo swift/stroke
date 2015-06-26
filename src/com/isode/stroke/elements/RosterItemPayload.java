@@ -96,7 +96,7 @@ public class RosterItemPayload {
     }
 
     private JID jid_;
-    private String name_;
+    private String name_ = "";
     private Subscription subscription_;
     private Collection<String> groups_;
     private boolean ask_;

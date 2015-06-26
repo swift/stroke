@@ -13,7 +13,7 @@ package com.isode.stroke.elements;
  * Unparsed content.
  */
 public class RawXMLPayload extends Payload {
-    private String rawXML_;
+    private String rawXML_ = "";
 
     public void setRawXML(String data) {
         rawXML_ = data;

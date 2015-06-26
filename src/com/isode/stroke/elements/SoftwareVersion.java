@@ -11,9 +11,9 @@ package com.isode.stroke.elements;
 
 
 public class SoftwareVersion extends Payload {
-    private String name_;
-    private String version_;
-    private String os_;
+    private String name_ = "";
+    private String version_ = "";
+    private String os_ = "";
 
     public SoftwareVersion(final String name, final String version, final String os) {
         name_ = name;

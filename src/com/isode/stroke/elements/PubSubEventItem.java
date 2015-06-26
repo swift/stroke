@@ -53,9 +53,9 @@ public void setID(String id) {
 	id_ = id;
 }
 
-String publisher_;
-ArrayList<Payload> data_ = new ArrayList<Payload>();
-String node_;
-String id_;
+private String publisher_;
+private ArrayList<Payload> data_ = new ArrayList<Payload>();
+private String node_;
+private String id_;
 
 }

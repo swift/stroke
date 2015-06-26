@@ -65,10 +65,10 @@ public void setExpiry(Date expiry) {
 	expiry_ = expiry;
 }
 
-SubscriptionType subscription_;
-String subscriptionID_;
-String node_;
-JID jid_;
-Date expiry_;
+private SubscriptionType subscription_;
+private String subscriptionID_;
+private String node_ = "";
+private JID jid_;
+private Date expiry_;
 
 }

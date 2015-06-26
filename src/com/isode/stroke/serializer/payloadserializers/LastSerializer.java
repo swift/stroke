@@ -19,9 +19,6 @@ public class LastSerializer extends GenericPayloadSerializer<Last> {
 
     @Override
     protected String serializePayload(Last last) {
-        if(last.getSeconds() == null) {
-            return  "<query xmlns='jabber:iq:last'/>";
-        }
-        return "<query xmlns='jabber:iq:last' seconds='" + Long.toString(last.getSeconds()) + "'/>";
+        return "<query xmlns='jabber:iq:last' seconds='" + Integer.toString(last.getSeconds()) + "'/>";
     }
 }

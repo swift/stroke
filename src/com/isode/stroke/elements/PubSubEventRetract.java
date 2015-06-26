@@ -24,6 +24,6 @@ public void setID(String id) {
 	id_ = id;
 }
 
-String id_;
+private String id_ = "";
 
 }

@@ -32,7 +32,7 @@ public void setNode(String node) {
 	node_ = node;
 }
 
-PubSubOwnerRedirect redirect_;
-String node_;
+private PubSubOwnerRedirect redirect_;
+private String node_ = "";
 
 }

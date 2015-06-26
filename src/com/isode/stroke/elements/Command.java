@@ -261,8 +261,8 @@ public class Command extends Payload {
         public final Type type;
     };
 
-    private String node_;
-    private String sessionID_;
+    private String node_ = "";
+    private String sessionID_ = "";
     private Action action_;
     private Status status_;
     private Action executeAction_;

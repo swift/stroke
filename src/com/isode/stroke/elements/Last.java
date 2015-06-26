@@ -10,19 +10,19 @@
 package com.isode.stroke.elements;
 
 public class Last extends Payload {
-    Long seconds_;
+    private int seconds_ = 0;
 
     public Last() {}
 
-    public Last(final Long seconds) {
+    public Last(final int seconds) {
         setSeconds(seconds);
     }
 
-    public void setSeconds(final Long seconds) {
+    public void setSeconds(final int seconds) {
         seconds_ = seconds;
     }
 
-    public Long getSeconds() {
+    public int getSeconds() {
         return seconds_;
     }
 }

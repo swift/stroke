@@ -37,7 +37,7 @@ public void addAffiliation(PubSubOwnerAffiliation value) {
 	affiliations_.add(value);
 }
 
-String node_;
-ArrayList<PubSubOwnerAffiliation> affiliations_ = new ArrayList<PubSubOwnerAffiliation>();
+private String node_ = "";
+private ArrayList<PubSubOwnerAffiliation> affiliations_ = new ArrayList<PubSubOwnerAffiliation>();
 
 }

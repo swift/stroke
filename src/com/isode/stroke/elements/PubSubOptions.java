@@ -50,9 +50,9 @@ public void setJID(JID jid) {
 	jid_ = jid;
 }
 
-Form data_;
-String subscriptionID_;
-String node_;
-JID jid_;
+private Form data_;
+private String subscriptionID_;
+private String node_ = "";
+private JID jid_;
 
 }

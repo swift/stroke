@@ -64,10 +64,10 @@ public void setOptions(PubSubSubscribeOptions options) {
 	options_ = options;
 }
 
-SubscriptionType subscription_;
-String subscriptionID_;
-String node_;
-JID jid_;
-PubSubSubscribeOptions options_;
+private SubscriptionType subscription_;
+private String subscriptionID_;
+private String node_;
+private JID jid_;
+private PubSubSubscribeOptions options_;
 
 }

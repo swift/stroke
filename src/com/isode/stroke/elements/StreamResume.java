@@ -25,6 +25,6 @@ public class StreamResume implements Element {
     public void setHandledStanzasCount(long i) {
         handledStanzasCount = i;
     }
-    private String resumeID;
+    private String resumeID = "";
     private Long handledStanzasCount;
 }
