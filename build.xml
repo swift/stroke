@@ -104,6 +104,7 @@
         <classpath>
             <pathelement location="${jar}"/>
             <pathelement location="${JUNIT_JAR}"/>
+            <pathelement location="${icu4j-jar}"/>            
         </classpath>
     </javac>
   </target>

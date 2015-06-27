@@ -18,7 +18,7 @@ dist/lib/stroke.jar: third-party/jzlib/jzlib.jar third-party/icu4j.jar third-par
 
 .PHONY : test
 test: dist/lib/stroke.jar third-party/cobertura/cobertura.jar third-party/findbugs/lib/findbugs.jar third-party/pmd/lib/pmd-5.0.0.jar
-	ant ${DEFINES} -DJUNIT_JAR=${JUNIT} -Dcobertura-jar=third-party/cobertura/cobertura.jar -Djakarta-oro-jar=third-party/cobertura/lib/jakarta-oro-2.0.8.jar -Dlog4j-jar=third-party/cobertura/lib/log4j-1.2.9.jar -Dasm-jar=third-party/cobertura/lib/asm-3.0.jar -Dasm-tree-jar=third-party/cobertura/lib/asm-tree-3.0.jar -Dfindbugs.home=third-party/findbugs -Dpmd.home=third-party/pmd test
+	ant ${DEFINES} -DJUNIT_JAR=${JUNIT} -Dcobertura-jar=third-party/cobertura/cobertura.jar -Djakarta-oro-jar=third-party/cobertura/lib/jakarta-oro-2.0.8.jar -Dlog4j-jar=third-party/cobertura/lib/log4j-1.2.9.jar -Dasm-jar=third-party/cobertura/lib/asm-3.0.jar -Dasm-tree-jar=third-party/cobertura/lib/asm-tree-3.0.jar -Dicu4j-jar=third-party/icu4j.jar -Dfindbugs.home=third-party/findbugs -Dpmd.home=third-party/pmd test
 
 third-party/aalto/aalto-xml.jar:
 	mkdir -p third-party/aalto

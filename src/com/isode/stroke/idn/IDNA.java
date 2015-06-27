@@ -13,6 +13,11 @@ import java.net.IDN;
 
 public class IDNA {
     public static String getEncoded(String s) {
-        return IDN.toASCII(s);
+    	try {
+        	return IDN.toASCII(s, IDN.USE_STD3_ASCII_RULES);
+        }
+    	catch (IllegalArgumentException e) {
+    		return null;
+    	}
     }
 }
