@@ -307,8 +307,8 @@ public class VCard extends Payload implements Serializable {
     }
 
     public void addJID(JID jid) {
-        jids_.add(jid);
-        
+    	if (jids_ == null) jids_ = new ArrayList<JID>();
+    	jids_.add(jid);
     }
 
     public List<Telephone> getTelephones() {
