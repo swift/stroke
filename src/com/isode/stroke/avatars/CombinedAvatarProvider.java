@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Isode Limited.
+ * Copyright (c) 2010-2015 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -15,34 +15,39 @@ import com.isode.stroke.avatars.AvatarProvider;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.jid.JID;
+
 import java.util.logging.Logger;
 import java.util.*;
 
-public class CombinedAvatarProvider implements AvatarProvider {
+public class CombinedAvatarProvider extends AvatarProvider {
 
-	private Vector<AvatarProvider> providers = new Vector<AvatarProvider>();
+	private final Vector<AvatarProvider> providers = new Vector<AvatarProvider>();
 	private Map<JID, String> avatars = new HashMap<JID, String>();
-	private SignalConnection onAvatarChangedConnection_;
+	private final Map<AvatarProvider, SignalConnection> onAvatarChangedConnections_ = new HashMap<AvatarProvider, SignalConnection>();
 	private Logger logger_ = Logger.getLogger(this.getClass().getName());
 
+	@Override
 	public String getAvatarHash(JID jid) {
 		return getCombinedAvatarAndCache(jid);
 	}
 
+	private final Slot1<JID> onAvatarChangedSlot = new Slot1<JID>() {
+		@Override public void call(JID p1) {handleAvatarChanged(p1);}
+	};
+	
 	public void addProvider(AvatarProvider provider) {
-		onAvatarChangedConnection_ = provider.onAvatarChanged.connect(new Slot1<JID>() {
-
-			public void call(JID p1) {
-				handleAvatarChanged(p1);
-			}
-		});
+		if (!onAvatarChangedConnections_.containsKey(provider)) {
+			onAvatarChangedConnections_.put(provider, provider.onAvatarChanged.connect(onAvatarChangedSlot));
+		}
 		providers.add(provider);
 	}
 
-	public void removeProvider(AvatarProvider provider) {
-		while(providers.contains(provider)) {
-			providers.remove(provider);
-			onAvatarChangedConnection_.disconnect();
+	public void delete() {
+		for (SignalConnection connection : onAvatarChangedConnections_.values()) {
+			connection.disconnect();
+		}
+		for (AvatarProvider provider : providers) {
+			provider.delete();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Isode Limited.
+ * Copyright (c) 2010-2015 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -11,14 +11,11 @@
 
 package com.isode.stroke.avatars;
 
-import java.nio.file.Path;
 import com.isode.stroke.jid.JID;
-import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.signals.Signal1;
 
-public interface AvatarManager {
+public abstract class AvatarManager {
 
-	public ByteArray getAvatar(JID jid);
-	public Path getAvatarPath(JID jid);
+	public abstract String getAvatar(JID jid);
 	public Signal1<JID> onAvatarChanged = new Signal1<JID>();
 }

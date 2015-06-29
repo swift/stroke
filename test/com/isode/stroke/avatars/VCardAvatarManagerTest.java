@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Isode Limited.
+ * Copyright (c) 2010-2015 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -30,7 +30,6 @@ import com.isode.stroke.client.DummyStanzaChannel;
 import com.isode.stroke.crypto.JavaCryptoProvider;
 import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.stringcodecs.Hexify;
-import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.elements.IQ;
 
@@ -59,9 +58,7 @@ public class VCardAvatarManagerTest {
 	private String avatar1Hash;
 	private Vector<JID> changes;
 	private JID user1;
-	private JID user2;
 	private CryptoProvider crypto;
-	private SignalConnection onAvatarChangedConnection;
 
 	@Before
 	public void setUp() {
@@ -78,12 +75,11 @@ public class VCardAvatarManagerTest {
 		avatar1Hash = Hexify.hexify(crypto.getSHA1Hash(avatar1));
 		changes = new Vector<JID>();
 		user1 = new JID("user1@bar.com/bla");
-		user2 = new JID("user2@foo.com/baz");
 	}
 
 	private VCardAvatarManager createManager() {
 		VCardAvatarManager result = new VCardAvatarManager(vcardManager, avatarStorage, crypto, mucRegistry);
-		onAvatarChangedConnection = result.onAvatarChanged.connect(new Slot1<JID>() {
+		result.onAvatarChanged.connect(new Slot1<JID>() {
 
 			public void call(JID j1) {
 				handleAvatarChanged(j1);
@@ -143,7 +139,7 @@ public class VCardAvatarManagerTest {
 		assertNotNull(result);
 		assertEquals(avatar1Hash, result);
 		assertTrue(avatarStorage.hasAvatar(avatar1Hash));
-		assertEquals(avatar1, avatarStorage.getAvatar(avatar1Hash));
+		assertEquals(avatar1, avatarStorage.getAvatarBytes(avatar1Hash));
 	}
 
 	@Test

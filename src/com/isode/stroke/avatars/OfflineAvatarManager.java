@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Isode Limited.
+ * Copyright (c) 2010-2015 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -15,7 +15,7 @@ import com.isode.stroke.avatars.AvatarProvider;
 import com.isode.stroke.avatars.AvatarStorage;
 import com.isode.stroke.jid.JID;
 
-public class OfflineAvatarManager implements AvatarProvider {
+public class OfflineAvatarManager extends AvatarProvider {
 
 	private AvatarStorage avatarStorage;
 
@@ -23,12 +23,17 @@ public class OfflineAvatarManager implements AvatarProvider {
 		this.avatarStorage = avatarStorage;
 	}
 
+	@Override
+	public void delete() {
+	}
+
+	@Override
 	public String getAvatarHash(JID jid) {
 		return avatarStorage.getAvatarForJID(jid);
 	}
 
 	public void setAvatar(JID jid, String hash) {
-		if (!getAvatarHash(jid).equals(hash)) {
+		if (!hash.equals(getAvatarHash(jid))) {
 			avatarStorage.setAvatarForJID(jid, hash);
 			onAvatarChanged.emit(jid);
 		}

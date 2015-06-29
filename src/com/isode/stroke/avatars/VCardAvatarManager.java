@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Isode Limited.
+ * Copyright (c) 2010-2015 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -20,17 +20,19 @@ import com.isode.stroke.avatars.AvatarStorage;
 import com.isode.stroke.muc.MUCRegistry;
 import com.isode.stroke.vcards.VCardManager;
 import com.isode.stroke.signals.Slot2;
+
 import java.util.logging.Logger;
+
 import com.isode.stroke.signals.SignalConnection;
 
-public class VCardAvatarManager implements AvatarProvider {
+public class VCardAvatarManager extends AvatarProvider {
 
 	private VCardManager vcardManager_;
 	private AvatarStorage avatarStorage_;
 	private CryptoProvider crypto_;
 	private MUCRegistry mucRegistry_;
-	private SignalConnection onVCardChangedConnection_;
-	private Logger logger_ = Logger.getLogger(this.getClass().getName());
+	private final SignalConnection onVCardChangedConnection_;
+	private final Logger logger_ = Logger.getLogger(this.getClass().getName());
 
 	public VCardAvatarManager(VCardManager vcardManager, AvatarStorage avatarStorage, CryptoProvider crypto) {
 		this(vcardManager, avatarStorage, crypto, null);
@@ -42,13 +44,19 @@ public class VCardAvatarManager implements AvatarProvider {
 		this.crypto_ = crypto;
 		this.mucRegistry_ = mucRegistry;
 		onVCardChangedConnection_ = vcardManager.onVCardChanged.connect(new Slot2<JID, VCard>() {
-
+			@Override
 			public void call(JID p1, VCard vcard) {
 				handleVCardChanged(p1);
 			}	
 		});
 	}
 
+	@Override
+	public void delete() {
+		onVCardChangedConnection_.disconnect();
+	}
+
+	@Override
 	public String getAvatarHash(JID jid) {
 		JID avatarJID = getAvatarJID(jid);
 		String hash = vcardManager_.getPhotoHash(avatarJID);

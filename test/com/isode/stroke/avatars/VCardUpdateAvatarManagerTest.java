@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Isode Limited.
+ * Copyright (c) 2010-2015 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -23,7 +23,6 @@ import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.IQ;
 import com.isode.stroke.elements.VCard;
 import com.isode.stroke.avatars.VCardUpdateAvatarManager;
-import com.isode.stroke.avatars.VCardAvatarManager;
 import com.isode.stroke.avatars.AvatarMemoryStorage;
 import com.isode.stroke.vcards.VCardMemoryStorage;
 import com.isode.stroke.vcards.VCardManager;
@@ -35,7 +34,6 @@ import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.stringcodecs.Hexify;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.base.ByteArray;
-import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot1;
 
 public class VCardUpdateAvatarManagerTest {
@@ -62,7 +60,6 @@ public class VCardUpdateAvatarManagerTest {
 	private JID user1;
 	private JID user2;
 	private CryptoProvider crypto;
-	private SignalConnection onAvatarChangedConnection;
 
 	@Before
 	public void setUp() {
@@ -84,7 +81,7 @@ public class VCardUpdateAvatarManagerTest {
 
 	private VCardUpdateAvatarManager createManager() {
 		VCardUpdateAvatarManager result = new VCardUpdateAvatarManager(vcardManager, stanzaChannel, avatarStorage, crypto, mucRegistry);
-		onAvatarChangedConnection = result.onAvatarChanged.connect(new Slot1<JID>() {
+		result.onAvatarChanged.connect(new Slot1<JID>() {
 
 			public void call(JID j1) {
 				handleAvatarChanged(j1);
@@ -133,7 +130,7 @@ public class VCardUpdateAvatarManagerTest {
 		assertNotNull(hash);
 		assertEquals(avatar1Hash, hash);
 		assertTrue(avatarStorage.hasAvatar(avatar1Hash));
-		assertEquals(avatar1, avatarStorage.getAvatar(avatar1Hash));
+		assertEquals(avatar1, avatarStorage.getAvatarBytes(avatar1Hash));
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Isode Limited.
+ * Copyright (c) 2014-2015 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -11,31 +11,30 @@
 
 package com.isode.stroke.avatars;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Vector;
+
 import org.junit.Before;
 import org.junit.Test;
-import java.util.Vector;
-import com.isode.stroke.elements.VCardUpdate;
-import com.isode.stroke.elements.Presence;
+
+import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.client.DummyStanzaChannel;
+import com.isode.stroke.crypto.CryptoProvider;
+import com.isode.stroke.crypto.JavaCryptoProvider;
 import com.isode.stroke.elements.IQ;
+import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.VCard;
-import com.isode.stroke.avatars.VCardUpdateAvatarManager;
-import com.isode.stroke.avatars.VCardAvatarManager;
-import com.isode.stroke.avatars.AvatarMemoryStorage;
-import com.isode.stroke.vcards.VCardMemoryStorage;
-import com.isode.stroke.vcards.VCardManager;
+import com.isode.stroke.elements.VCardUpdate;
+import com.isode.stroke.jid.JID;
 import com.isode.stroke.muc.MUCRegistry;
 import com.isode.stroke.queries.IQRouter;
-import com.isode.stroke.client.DummyStanzaChannel;
-import com.isode.stroke.crypto.JavaCryptoProvider;
-import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.stringcodecs.Hexify;
-import com.isode.stroke.jid.JID;
-import com.isode.stroke.base.ByteArray;
-import com.isode.stroke.signals.SignalConnection;
-import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.vcards.VCardManager;
+import com.isode.stroke.vcards.VCardMemoryStorage;
 
 public class AvatarManagerImplTest {
 
@@ -75,8 +74,8 @@ public class AvatarManagerImplTest {
 	public void testGetSetAvatar() {
 		/* initially we have no knowledge of the user or their avatar */
 		JID personJID = new JID("person@domain.com/theperson");
-		ByteArray avatar = avatarManager.getAvatar(personJID.toBare());
-		assertTrue(avatar.getSize() == 0);
+		String avatar = avatarManager.getAvatar(personJID.toBare());
+		assertTrue(avatar == null);
 
 		/* notify the 'owner' JID that our avatar has changed */
 
@@ -109,8 +108,8 @@ public class AvatarManagerImplTest {
 
 		/* check hash through avatarManager that it received the correct photo */
 
-		ByteArray reportedAvatar = avatarManager.getAvatar(personJID.toBare());
-		assertEquals(fullAvatar.toString(), reportedAvatar.toString());
+		String reportedAvatar = avatarManager.getAvatar(personJID.toBare());
+		assertEquals(fullAvatar.toString(), avatarStorage.getAvatarBytes(reportedAvatar).toString());
 
 		/* send new presence to notify of blank avatar */
 
@@ -143,6 +142,6 @@ public class AvatarManagerImplTest {
 		/* check hash through avatarManager that it received the correct photo */
 
 		reportedAvatar = avatarManager.getAvatar(personJID.toBare());
-		assertEquals(blankAvatar.toString(), reportedAvatar.toString());
+		assertNull(reportedAvatar);	// Empty photo => empty hash => null Avatar
 	}
 }
