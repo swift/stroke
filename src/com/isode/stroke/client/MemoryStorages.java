@@ -4,6 +4,8 @@
  */
 package com.isode.stroke.client;
 
+import com.isode.stroke.avatars.AvatarMemoryStorage;
+import com.isode.stroke.avatars.AvatarStorage;
 import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.disco.CapsMemoryStorage;
 import com.isode.stroke.disco.CapsStorage;
@@ -14,7 +16,7 @@ import com.isode.stroke.vcards.VCardStorage;
 
 public class MemoryStorages implements Storages {
 	private VCardStorage vcardStorage;
-//	private AvatarStorage avatarStorage;
+	private AvatarStorage avatarStorage;
 	private CapsStorage capsStorage;
 	private RosterStorage rosterStorage;
 //	private HistoryStorage historyStorage;
@@ -22,7 +24,7 @@ public class MemoryStorages implements Storages {
 	public MemoryStorages(CryptoProvider crypto) {
 		vcardStorage = new VCardMemoryStorage(crypto);
 		capsStorage = new CapsMemoryStorage();
-//		avatarStorage = new AvatarMemoryStorage();
+		avatarStorage = new AvatarMemoryStorage();
 		rosterStorage = new RosterMemoryStorage();
 //	#ifdef SWIFT_EXPERIMENTAL_HISTORY
 //		historyStorage = new SQLiteHistoryStorage(":memory:");
@@ -45,5 +47,10 @@ public class MemoryStorages implements Storages {
     public CapsStorage getCapsStorage() {
         return capsStorage;
     }
+
+	@Override
+	public AvatarStorage getAvatarStorage() {
+		return avatarStorage;
+	}
 
 }

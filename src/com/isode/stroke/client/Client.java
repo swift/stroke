@@ -4,6 +4,8 @@
  */
 package com.isode.stroke.client;
 
+import com.isode.stroke.avatars.AvatarManager;
+import com.isode.stroke.avatars.AvatarManagerImpl;
 import com.isode.stroke.disco.CapsManager;
 import com.isode.stroke.disco.ClientDiscoManager;
 import com.isode.stroke.disco.EntityCapsManager;
@@ -54,6 +56,7 @@ public class Client extends CoreClient {
     private final NickResolver nickResolver;
     private final SubscriptionManager subscriptionManager;
     private final ClientDiscoManager discoManager;
+    private final AvatarManager avatarManager;
 
     final Signal1<Presence> onPresenceChange = new Signal1<Presence>();
 
@@ -98,6 +101,7 @@ public class Client extends CoreClient {
         mucManager = new MUCManager(getStanzaChannel(), getIQRouter(), directedPresenceSender, mucRegistry);
 
         vcardManager = new VCardManager(jid, getIQRouter(), getStorages().getVCardStorage());
+    	avatarManager = new AvatarManagerImpl(vcardManager, getStanzaChannel(), getStorages().getAvatarStorage(), networkFactories.getCryptoProvider(), mucRegistry);
         capsManager = new CapsManager(getStorages().getCapsStorage(), getStanzaChannel(), getIQRouter(), networkFactories.getCryptoProvider());
         entityCapsManager = new EntityCapsManager(capsManager, getStanzaChannel());
 
@@ -188,6 +192,10 @@ public class Client extends CoreClient {
     
     public VCardManager getVCardManager() {
     	return vcardManager;
+    }
+    
+    public AvatarManager getAvatarManager() {
+    	return avatarManager;
     }
     
     private Storages getStorages()  {
