@@ -39,7 +39,7 @@ public class JingleFileTransferFileInfo extends Payload {
 	* Default Constructor.
 	*/
 	public JingleFileTransferFileInfo() {
-		this("", "", 0, new Date(0L));
+		this("", "", 0, null);
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class JingleFileTransferFileInfo extends Payload {
 	* @param name, NotNull.
 	*/
 	public JingleFileTransferFileInfo(String name) {
-		this(name, "", 0, new Date(0L));
+		this(name, "", 0, null);
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class JingleFileTransferFileInfo extends Payload {
 	* @param description, NotNull.
 	*/
 	public JingleFileTransferFileInfo(String name, String description) {
-		this(name, description, 0, new Date(0L));
+		this(name, description, 0, null);
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class JingleFileTransferFileInfo extends Payload {
 	* @param size.
 	*/
 	public JingleFileTransferFileInfo(String name, String description, long size) {
-		this(name, description, size, new Date(0L));
+		this(name, description, size, null);
 	}
 
 	/**
@@ -74,19 +74,18 @@ public class JingleFileTransferFileInfo extends Payload {
 	* @param name, NotNull.
 	* @param description, NotNull.
 	* @param size.
-	* @param date, NotNull.
+	* @param date. Null means invalid date.
 	*/
 	public JingleFileTransferFileInfo(String name, String description, long size, Date date) {
 		NotNull.exceptIfNull(name, "name");
 		NotNull.exceptIfNull(description, "description");
-		NotNull.exceptIfNull(date, "date");
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 		this.name_ = name;
 		this.description_ = description;
 		this.size_ = size;
 		this.date_ = date;
 		this.supportsRangeRequests_ = false;
 		this.rangeOffset_ = 0;
-		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 	}
 
 	/**
@@ -149,15 +148,14 @@ public class JingleFileTransferFileInfo extends Payload {
 	}
 
 	/**
-	* @param date, NotNull.
+	* @param date. Null means invalid date.
 	*/
 	public void setDate(Date date) {
-		NotNull.exceptIfNull(date, "date");
 		date_ = date;
 	}
 
 	/**
-	* @return date, NotNull.
+	* @return date, which may be null for an invalid date.
 	*/
 	public Date getDate() {
 		return date_;

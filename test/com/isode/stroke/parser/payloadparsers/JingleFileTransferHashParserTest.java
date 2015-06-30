@@ -70,7 +70,7 @@ public class JingleFileTransferHashParserTest {
 		assertEquals("It is good.", fileInfo.getDescription());
 		assertEquals("MediaAAC", fileInfo.getMediaType());
 		assertEquals(0L, fileInfo.getSize());
-		assertEquals(DateTime.dateToString(new Date(0L)), DateTime.dateToString(fileInfo.getDate()));
+		assertNull(fileInfo.getDate());
 		assertEquals(false, fileInfo.getSupportsRangeRequests());
 		assertEquals(0L, fileInfo.getRangeOffset());
 		assertEquals(new ByteArray(), fileInfo.getHash("MD5"));

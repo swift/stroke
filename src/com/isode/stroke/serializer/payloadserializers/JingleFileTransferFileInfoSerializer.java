@@ -32,7 +32,7 @@ public class JingleFileTransferFileInfoSerializer extends GenericPayloadSerializ
 	public String serializePayload(JingleFileTransferFileInfo fileInfo) {
 		XMLElement fileElement = new XMLElement("file", "");
 
-		if (fileInfo.getDate().getTime() != 0L) {
+		if (fileInfo.getDate() != null) {
 			fileElement.addNode(new XMLElement("date", "", DateTime.dateToString(fileInfo.getDate())));
 		}
 

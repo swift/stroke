@@ -162,10 +162,16 @@ public class VCard extends Payload implements Serializable {
         if (emailAddresses_ != null) emailAddresses_.clear();
     }
 
+    /**
+    * @param date, null indicates invalid date.
+    */
     public void setBirthday(final Date birthday) {
         birthday_ = birthday;
     }
 
+    /**
+    * @return date, may be null which indicates invalid date.
+    */
     public final Date getBirthday() {
         return birthday_;
     }
