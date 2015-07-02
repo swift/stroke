@@ -15,7 +15,7 @@ public class ClientDiscoManager {
     private PayloadAddingPresenceSender presenceSender;
     private CryptoProvider crypto;
     private DiscoInfoResponder discoInfoResponder;
-    private String capsNode;
+    private String capsNode = "";
     private CapsInfo capsInfo;
 
     /**

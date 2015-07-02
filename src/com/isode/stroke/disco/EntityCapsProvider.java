@@ -8,6 +8,11 @@ import com.isode.stroke.elements.DiscoInfo;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.signals.Signal1;
 
+/**
+ * This class provides information about capabilities of entities on the network.
+ * This information is provided in the form of service discovery
+ * information.
+ */
 public abstract class EntityCapsProvider {
 	/**
 	 * Returns the service discovery information of the given JID.

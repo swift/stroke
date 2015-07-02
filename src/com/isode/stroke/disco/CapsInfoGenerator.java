@@ -17,7 +17,7 @@ import com.isode.stroke.elements.FormField;
 import com.isode.stroke.stringcodecs.Base64;
 
 public class CapsInfoGenerator {
-    private String node_;
+    private String node_ = "";
     private CryptoProvider crypto_;
 
     private final static Comparator<FormField> compareFields = new Comparator<FormField>() {
