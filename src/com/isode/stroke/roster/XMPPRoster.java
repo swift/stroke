@@ -13,6 +13,12 @@ import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.Signal3;
 
+/**
+ * This class represents the roster of an account, as stored on the XMPP server.
+ *
+ * Changes to the roster (either due to subscription requests or by going online/offline) are
+ * emitted through signals.
+ */
 public abstract class XMPPRoster {
 	/**
 	 * Checks whether the bare jid of the given jid is in the roster.

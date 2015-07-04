@@ -13,7 +13,7 @@ import com.isode.stroke.signals.Signal1;
 
 public class RosterPushResponder extends SetResponder<RosterPayload> {
 
-	final Signal1<RosterPayload> onRosterReceived = new Signal1<RosterPayload>();
+	public final Signal1<RosterPayload> onRosterReceived = new Signal1<RosterPayload>();
 
 	public RosterPushResponder(IQRouter router) {
 		super(new RosterPayload(), router);

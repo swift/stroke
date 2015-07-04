@@ -70,7 +70,7 @@ public class XMPPRosterController {
 		rosterRequest.send();
 	}
 
-	void handleRosterReceived(RosterPayload rosterPayload, boolean initial, RosterPayload previousRoster) {
+	private void handleRosterReceived(RosterPayload rosterPayload, boolean initial, RosterPayload previousRoster) {
 		if (rosterPayload != null) {
 			for (final RosterItemPayload item : rosterPayload.getItems()) {
 				//Don't worry about the updated case, the XMPPRoster sorts that out.
@@ -100,7 +100,7 @@ public class XMPPRosterController {
 		}
 	}
 
-	void saveRoster(final String version) {
+	private void saveRoster(final String version) {
 		Collection<XMPPRosterItem> items = xmppRoster_.getItems();
 		RosterPayload roster = new RosterPayload();
 		roster.setVersion(version);

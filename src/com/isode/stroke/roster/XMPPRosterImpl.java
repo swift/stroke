@@ -19,7 +19,7 @@ public class XMPPRosterImpl extends XMPPRoster {
 	
 	private Map<JID, XMPPRosterItem> entries_ = new HashMap<JID, XMPPRosterItem>();
 
-	void addContact(final JID jid, final String name, final Collection<String> groups, RosterItemPayload.Subscription subscription) {
+	public void addContact(final JID jid, final String name, final Collection<String> groups, RosterItemPayload.Subscription subscription) {
 		JID bareJID = jid.toBare();
 		XMPPRosterItem item = entries_.get(bareJID);
 
@@ -35,19 +35,19 @@ public class XMPPRosterImpl extends XMPPRoster {
 		}
 	}
 
-	void removeContact(final JID jid) {
+	public void removeContact(final JID jid) {
 		entries_.remove(jid.toBare());
 		onJIDRemoved.emit(jid);
 	}
 
-	void clear() {
+	public void clear() {
 		entries_.clear();
 		onRosterCleared.emit();
 	}
 
 	@Override
 	public boolean containsJID(JID jid) {
-		return entries_.containsKey(jid);
+		return entries_.containsKey(jid.toBare());
 	}
 
 	@Override
