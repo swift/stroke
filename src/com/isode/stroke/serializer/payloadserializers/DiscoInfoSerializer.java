@@ -15,7 +15,7 @@ import com.isode.stroke.serializer.GenericPayloadSerializer;
 import com.isode.stroke.serializer.xml.XMLElement;
 import com.isode.stroke.serializer.xml.XMLRawTextNode;
 
-class DiscoInfoSerializer extends GenericPayloadSerializer<DiscoInfo>{
+public class DiscoInfoSerializer extends GenericPayloadSerializer<DiscoInfo>{
 
     public DiscoInfoSerializer() {
         super(DiscoInfo.class);

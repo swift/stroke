@@ -13,7 +13,7 @@ import com.isode.stroke.serializer.xml.XMLElement;
 import com.isode.stroke.serializer.xml.XMLRawTextNode;
 import com.isode.stroke.stringcodecs.Base64;
 
-class VCardSerializer extends GenericPayloadSerializer<VCard>{
+public class VCardSerializer extends GenericPayloadSerializer<VCard>{
     
     public VCardSerializer() {
         super(VCard.class);
