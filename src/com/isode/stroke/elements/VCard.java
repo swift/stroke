@@ -131,14 +131,17 @@ public class VCard extends Payload implements Serializable {
     public void setNickname(final String nick) { nick_ = nick; }
     public final String getNickname() { return nick_; }
 
-    public void setPhoto(final ByteArray photo) { photo_ = photo; }
+    /**
+     * Set the photo, but store null if the photo is empty.
+     */
+    public void setPhoto(final ByteArray photo) { photo_ = photo != null && !photo.isEmpty() ? photo : null; }
+    /**
+     * Get the photo.
+     * Unlike Swiften, this will return null for empty photos,
+     * instead of an empty ByteArray.
+     */
     public final ByteArray getPhoto() {
-    	if(this.photo_ != null) {
-    		return photo_;
-    	}
-    	else {
-    		return new ByteArray();
-    	}
+        return photo_;
     }
 
     public void setPhotoType(final String photoType) { photoType_ = photoType; }

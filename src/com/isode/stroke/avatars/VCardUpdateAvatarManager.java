@@ -24,12 +24,14 @@ import com.isode.stroke.client.StanzaChannel;
 import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.stringcodecs.Hexify;
 import com.isode.stroke.avatars.AvatarStorage;
+import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.muc.MUCRegistry;
 import com.isode.stroke.vcards.VCardManager;
 import com.isode.stroke.signals.Slot2;
 import com.isode.stroke.signals.Slot1;
 
 import java.util.logging.Logger;
+
 import com.isode.stroke.signals.SignalConnection;
 
 public class VCardUpdateAvatarManager extends AvatarProvider {
@@ -124,13 +126,14 @@ public class VCardUpdateAvatarManager extends AvatarProvider {
 			return;
 		}
 
-		if (vCard.getPhoto().isEmpty()) {
+		final ByteArray photo = vCard.getPhoto();
+		if (photo == null) {
 			setAvatarHash(from, "");
 		}
 		else {
-			String hash = Hexify.hexify(crypto_.getSHA1Hash(vCard.getPhoto()));
+			String hash = Hexify.hexify(crypto_.getSHA1Hash(photo));
 			if (!avatarStorage_.hasAvatar(hash)) {
-				avatarStorage_.addAvatar(hash, vCard.getPhoto());
+				avatarStorage_.addAvatar(hash, photo);
 			}
 			setAvatarHash(from, hash);
 		}

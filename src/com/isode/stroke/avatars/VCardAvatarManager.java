@@ -17,6 +17,7 @@ import com.isode.stroke.elements.VCard;
 import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.stringcodecs.Hexify;
 import com.isode.stroke.avatars.AvatarStorage;
+import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.muc.MUCRegistry;
 import com.isode.stroke.vcards.VCardManager;
 import com.isode.stroke.signals.Slot2;
@@ -62,16 +63,17 @@ public class VCardAvatarManager extends AvatarProvider {
 		String hash = vcardManager_.getPhotoHash(avatarJID);
 		if(hash.length() != 0) {
 			if (!avatarStorage_.hasAvatar(hash)) {
-				VCard vCard = vcardManager_.getVCard(avatarJID);
-				if (vCard != null) {
-					String newHash = Hexify.hexify(crypto_.getSHA1Hash(vCard.getPhoto()));
+				final VCard vCard = vcardManager_.getVCard(avatarJID);
+				final ByteArray photo = vCard != null ? vCard.getPhoto() : null;
+				if (photo != null) {
+					String newHash = Hexify.hexify(crypto_.getSHA1Hash(photo));
 					if (!newHash.equals(hash)) {
 						// Shouldn't happen, but sometimes seem to. Might be fixed if we
 						// move to a safer backend.
 						logger_.warning("Inconsistent vCard photo hash cache");
 						hash = newHash;
 					}
-					avatarStorage_.addAvatar(hash, vCard.getPhoto());
+					avatarStorage_.addAvatar(hash, photo);
 				}
 				else {
 					// Can happen if the cache is inconsistent.

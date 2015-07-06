@@ -4,6 +4,7 @@
  */
 package com.isode.stroke.vcards;
 
+import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.elements.VCard;
 import com.isode.stroke.jid.JID;
@@ -24,12 +25,13 @@ public abstract class VCardStorage {
 	public void delete() {};
 
 	public String getPhotoHash(final JID jid) {
-		VCard vCard = getVCard(jid);
-		if (vCard != null && vCard.getPhoto().getSize() != 0) {
-			return Hexify.hexify(crypto.getSHA1Hash(vCard.getPhoto()));
+		final VCard vCard = getVCard(jid);
+		if (vCard != null) {
+			final ByteArray photo = vCard.getPhoto();
+			if (photo != null) {
+				return Hexify.hexify(crypto.getSHA1Hash(photo));
+			}
 		}
-		else {
-			return "";
-		}
+		return "";
 	}
 }

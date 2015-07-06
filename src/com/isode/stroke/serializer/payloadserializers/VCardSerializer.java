@@ -74,12 +74,12 @@ public class VCardSerializer extends GenericPayloadSerializer<VCard>{
         if (vcard.getNickname() != null && !vcard.getNickname().isEmpty()) {
             queryElement.addNode(new XMLElement("NICKNAME", "", vcard.getNickname()));
         }
-        if (vcard.getPhoto() != null && !vcard.getPhoto().isEmpty() || vcard.getPhotoType() != null && !vcard.getPhotoType().isEmpty()) {
+        if (vcard.getPhoto() != null || vcard.getPhotoType() != null && !vcard.getPhotoType().isEmpty()) {
             XMLElement photoElement = new XMLElement("PHOTO");
             if (vcard.getPhotoType() != null && !vcard.getPhotoType().isEmpty()) {
                 photoElement.addNode(new XMLElement("TYPE", "", vcard.getPhotoType()));
             }
-            if (vcard.getPhoto() != null && !vcard.getPhoto().isEmpty()) {
+            if (vcard.getPhoto() != null) {
                 photoElement.addNode(new XMLElement("BINVAL", "", Base64.encode(vcard.getPhoto())));
             }
             queryElement.addNode(photoElement);
