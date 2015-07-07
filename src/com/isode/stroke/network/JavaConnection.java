@@ -79,7 +79,8 @@ public class JavaConnection extends Connection implements EventOwner {
                 while (!disconnecting_ || isWriteNeeded()) {
                     /* Something(s) happened.  See what needs doing */
                     boolean writeNeeded = isWriteNeeded();
-                    boolean readNeeded = selectionKey_.isReadable();
+                    boolean readNeeded = (selectionKey_.interestOps() & SelectionKey.OP_READ) != 0
+                            && selectionKey_.isReadable();
                     
                     { /* Handle any writing */
                         if (writeNeeded) {
@@ -299,21 +300,46 @@ public class JavaConnection extends Connection implements EventOwner {
         }
 
         private void handleDataRead(final ByteArray data) {
+            if (synchroniseReads_) {
+                selectionKey_.interestOps(0);
+            }
             eventLoop_.postEvent(new Callback() {
                 public void run() {
                     onDataRead.emit(data);
+                    // Check "isOpen" to Avoid Android crash see
+                    //   https://code.google.com/p/android/issues/detail?id=80785
+                    if (synchroniseReads_ && selector_ != null) {
+                        synchronized (selectorLock_) {
+                            selectionKey_.interestOps(SelectionKey.OP_READ);
+                            if (selector_.isOpen()) {
+                                selector_.wakeup();
+                            }
+                        }
+                    }
                 }
             });
         }
 
     }
 
-    private JavaConnection(EventLoop eventLoop) {
+    private JavaConnection(EventLoop eventLoop, boolean synchroniseReads) {
         eventLoop_ = eventLoop;
+        synchroniseReads_ = synchroniseReads;
     }
 
     public static JavaConnection create(EventLoop eventLoop) {
-        return new JavaConnection(eventLoop);
+        return new JavaConnection(eventLoop, false);
+    }
+
+    /**
+     * Creates a new JavaConnection
+     * @param eventLoop the EventLoop for read and write events to be posted to
+     * @param synchroniseReads if true then data will not be read from the connection
+     * until the previous read has been processed by the EventLoop
+     * @return a new JavaConnection
+     */
+    public static JavaConnection create(EventLoop eventLoop, boolean synchroniseReads) {
+        return new JavaConnection(eventLoop, synchroniseReads);
     }
 
     @Override
@@ -386,5 +412,6 @@ public class JavaConnection extends Connection implements EventOwner {
     private Selector selector_;
     private final Object selectorLock_ = new Object(); // use private lock object that is not visible elsewhere
     private Worker worker_;
+    private final boolean synchroniseReads_;
 
 }
