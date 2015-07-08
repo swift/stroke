@@ -6,7 +6,6 @@ package com.isode.stroke.base;
 
 import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.base.ByteArray;
-import java.io.UnsupportedEncodingException;
 
 /**
 * It's currently not actually secure,
@@ -23,7 +22,7 @@ public class SafeByteArray extends ByteArray {
 	}
 
 	public SafeByteArray(ByteArray b) {
-		this.append(b.getData());
+		super(b);
 	}
 
 	/**
@@ -46,7 +45,7 @@ public class SafeByteArray extends ByteArray {
 	 * followed by all the elements of <em>b</em>.
 	 */  
 	public static SafeByteArray plus(SafeByteArray a, SafeByteArray b) {
-		SafeByteArray x = new SafeByteArray().append(a.getData());
+		SafeByteArray x = new SafeByteArray(a);
 		x.append(b);
 		return x;
 	}
@@ -58,7 +57,7 @@ public class SafeByteArray extends ByteArray {
 	 * @return a reference to the updated object 
 	 */
 	public SafeByteArray append(ByteArray b) {
-		append(b.getData());
+		super.append(b);
 		return this;
 	}
 
@@ -72,14 +71,13 @@ public class SafeByteArray extends ByteArray {
 	 * @return a reference to the updated object
 	 */
 	public SafeByteArray append(byte[] b) {
-		return append(b, b.length);
+		super.append(b);
+		return this;
 	}
 
 	/** Mutable add */
 	public SafeByteArray append(byte[] b, int len) {
-		for (int i = 0; i < len; i++) {
-			append(b[i]);
-		}
+		super.append(b, len);
 		return this;
 	}
 
@@ -90,8 +88,7 @@ public class SafeByteArray extends ByteArray {
 	 * @return a reference to the updated object
 	 */
 	public SafeByteArray append(byte b) {
-		dataCopy_ = null; /* Invalidate cache */
-		data_.add(Byte.valueOf(b));
+		super.append(b);
 		return this;
 	}
 
@@ -102,13 +99,7 @@ public class SafeByteArray extends ByteArray {
 	 * @return a reference to the updated object.
 	 */ 
 	public SafeByteArray append(String s) {
-		byte[] bytes;
-		try {
-			bytes = s.getBytes("UTF-8");
-		} catch (UnsupportedEncodingException ex) {
-			throw new IllegalStateException("JVM has no 'UTF-8' encoding");
-		}
-		append(bytes);
+		super.append(s);
 		return this;
 	}
 }

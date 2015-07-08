@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.base;
@@ -13,7 +13,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Maintains an arbitrarily long array of bytes.
@@ -36,7 +37,7 @@ public class ByteArray {
      */
     public ByteArray(String s) {
         try {
-            fromBytes(s.getBytes("UTF-8"));
+            appendInternal(s.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException ex) {
             throw new IllegalStateException("JVM has no 'UTF-8' encoding");
         }
@@ -49,7 +50,7 @@ public class ByteArray {
      * zero elements.
      */
     public ByteArray(byte[] c) {
-        fromBytes(c);
+        append(c);
     }
 
     /**
@@ -58,11 +59,6 @@ public class ByteArray {
      * @param b another ByteArray; must not be null
      */
     public ByteArray(ByteArray b) {
-        fromBytes(b.getData());
-    }
-
-    private void fromBytes(final byte[] b) {
-        clear();
         append(b);
     }
 
@@ -77,11 +73,17 @@ public class ByteArray {
      * @return array copy of internal data, will never be null, but may
      * contain zero elements.
      */
-    public byte[] getData() {
+    public synchronized byte[] getData() {
         if (dataCopy_ == null) {
-            dataCopy_ = new byte[getSize()];
-            for (int i = 0; i < data_.size(); i++) {
-                dataCopy_[i] = data_.get(i).byteValue();
+            if (data_.size() == 1) {
+                dataCopy_ = data_.get(0);
+            } else {
+                dataCopy_ = new byte[getSize()];
+                int pos = 0;
+                for (byte[] chunk : data_) {
+                    System.arraycopy(chunk, 0, dataCopy_, pos, chunk.length);
+                    pos += chunk.length;
+                }
             }
         }
         return dataCopy_;
@@ -92,7 +94,7 @@ public class ByteArray {
      * @return number of bytes
      */
     public int getSize() {
-        return data_.size();
+        return dataSize_;
     }
 
     /**
@@ -117,7 +119,7 @@ public class ByteArray {
      * followed by all the elements of <em>b</em>.
      */  
     public static ByteArray plus(ByteArray a, ByteArray b) {
-        ByteArray x = new ByteArray(a.getData());
+        ByteArray x = new ByteArray(a);
         x.append(b);
         return x;
     }
@@ -135,8 +137,10 @@ public class ByteArray {
      * @param b an existing ByteArray. Must not be null, but may be empty
      * @return a reference to the updated object 
      */
-    public ByteArray append(ByteArray b) {
-        append(b.getData());
+    public synchronized ByteArray append(ByteArray b) {
+        dataCopy_ = null; /* Invalidate cache */
+        data_.addAll(b.data_);
+        dataSize_ += b.getSize();
         return this;
     }
 
@@ -155,9 +159,14 @@ public class ByteArray {
 
     /** Mutable add */
     public ByteArray append(byte[] b, int len) {
-        for (int i = 0; i < len; i++) {
-            append(b[i]);
-        }
+        return appendInternal(Arrays.copyOf(b, len));
+    }
+
+    /* Does not copy data - all calls must provide a copy as necessary */
+    private synchronized ByteArray appendInternal(byte[] b) {
+        dataCopy_ = null; /* Invalidate cache */
+        data_.add(b);
+        dataSize_ += b.length;
         return this;
     }
 
@@ -168,9 +177,7 @@ public class ByteArray {
      * @return a reference to the updated object
      */
     public ByteArray append(byte b) {
-        dataCopy_ = null; /* Invalidate cache */
-        data_.add(Byte.valueOf(b));
-        return this;
+        return appendInternal(new byte[]{b});
     }
 
     /**
@@ -180,26 +187,21 @@ public class ByteArray {
      * @return a reference to the updated object.
      */ 
     public ByteArray append(String s) {
-        byte[] bytes;
         try {
-            bytes = s.getBytes("UTF-8");
+            return appendInternal(s.getBytes("UTF-8"));
         } catch (UnsupportedEncodingException ex) {
             throw new IllegalStateException("JVM has no 'UTF-8' encoding");
         }
-        append(bytes);
-        return this;
     }
 
     @Override
     public synchronized int hashCode() {
-        int hash = 3;
-        hash = 97 * hash + (this.data_ != null ? this.data_.hashCode() : 0);
-        return hash;
+        return Arrays.hashCode(getData());
     }
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof ByteArray && toString().equals(other.toString());
+        return other instanceof ByteArray && Arrays.equals(getData(), ((ByteArray)other).getData());
     }
 
     /*public char charAt(int i) {
@@ -250,7 +252,7 @@ public class ByteArray {
                 bos.write(fis.read());
             }
             byte[] bytes = bos.toByteArray();
-            append(bytes);
+            appendInternal(bytes);
         }
         catch (FileNotFoundException e) {
             // Leave things as they were
@@ -272,16 +274,19 @@ public class ByteArray {
             catch (IOException e) {
                 // Needs a catch clause
             }
-        }        
+        }
     }
 
     /**
      * Clears the contents of this ByteArray, leaving it with zero elements.
      */
-    public void clear() {
-        data_ = new Vector<Byte>();
+    public synchronized void clear() {
+        data_.clear();
+        dataSize_ = 0;
         dataCopy_ = null;
     }
-    Vector<Byte> data_ = new Vector<Byte>();
-    byte[] dataCopy_ = null;
+    
+    private final ArrayList<byte[]> data_ = new ArrayList<byte[]>(1);
+    private int dataSize_ = 0;
+    private byte[] dataCopy_ = null;
 }
