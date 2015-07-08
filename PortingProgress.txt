@@ -1,17 +1,23 @@
 Porting Progress from Swiften to Stroke.
 This file indicates the porting progress from Swiften Library to Stroke. It indicates, upto which HEAD changes are ported to Stroke. Also indicates any remarks associated with it.
+To Be Ported: history, linklocal, WhiteBoard.
+
+-----
+Adhoc:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 
 -----
 Avatars:
 
-All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01 except for:
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
 CombinedAvatarProviderTest -- Not Yet Ported!
 
 -----
 Base:
 
-All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01 except for:
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
  Algorithm, API, Atomic, boost_bsignals, BoostFilesystemVersion,
  BoostRandomGenerator, Concat, Debug, Error, foreach, format,
@@ -20,21 +26,38 @@ All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01 except for:
 
 SafeAllocator -- Not Yet Ported!
 DateTimeTest -- Not Yet Ported!
-Listenable -- Not Yet Ported!
 
 Individual Comments:
-SafeByteArray  --  Just Extends ByteArray as of now.
 StartStopper  --  StartStoppable interface added.
+
+-----
+Chat:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+Client:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
+
+Client -- Some code commented. WhiteBoard needed.
+CoreClient -- Some code commented. BOSH Session Stream needed.
+MemoryStorages/Storages -- Some code commented. History Port needed.
 
 -----
 Component:
 
-Only Component Hand Shake Generator Ported!
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+Compress:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 
 -----
 Crypto:
 
-All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01.
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 
 Individual Comments:
 Java's inbuilt Crypto Provider used.
@@ -42,28 +65,45 @@ Java's inbuilt Crypto Provider used.
 -----
 Disco
 
-All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01 except for:
-
-FeatureOracle -- Needs File Transfer for completion, which is not yet ported.
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 
 -----
 Elements:
 
-All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01 except for:
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
 IQTest  --  Not Yet Ported!
-S5BProxyRequest -- Not Yet Ported!
 WhiteBoard Functionalities -- Not Yet Ported!
 
 Individual Comments:
 ToplevelElement -- Not Required in Stroke.Element does the work!
-AuthResponse -- Needs SafeByteArray support.
-AuthRequest -- Needs SafeByteArray support.
+
+-----
+Entity:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
+
+PayloadPersister -- Not Yet Ported!
+GenericPayloadPersister -- Not Yet Ported!
+
+-----
+EventLoop:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+FileTransfer:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
+
+Tests not yet ported.
+Incoming and Outgoing Jingle File Transfer unimplemented due to multiple inheritance.
+S5BTransportSession -- Incomplete.
 
 -----
 IDN
 
-All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01.
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 
 Individual Comments:
 Third Party Library ICU used i.e. only ICUConverter supported.
@@ -71,32 +111,115 @@ Third Party Library ICU used i.e. only ICUConverter supported.
 -----
 JID
 
-All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01.
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+Jingle
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
+
+NotifyListeners (used in many classes) are not in line with Swiften.
+
+-----
+MUC
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+Network:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
+
+BOSHConnection, BOSHConnectionPool, BOSHConnectionPoolTest, BOSHConnectionTest -- Not Yet Ported!
+DomainNameServiceQuery -- sortResults not Implemented.
+DomainNameServiceQueryTest -- Not Yet Ported!
+GConfProxyProvider, UnixProxyProvider, WindowsProxyProvider, MacOSXProxyProvider -- Not Yet Ported!
+NetworkEnvironment, SolarisNetworkEnvironment, UnixNetworkEnvironment, WindowsNetworkEnvironment -- Not Yet Ported!
+HTTPConnectProxiedConnectionTest -- Not Yet Ported!
+HostNameOrAddress -- Not Yet Ported!
+PlatformNATTraversalWorker, MiniUPnPInterface, NATPMPInterface -- Not Yet Ported!
+PlatformDomainNameAddressQuery -- Not Yet Ported!
+PlatformDomainNameServiceQuery -- Constructor needs change.
+UnboundDomainNameResolver -- Not Yet Ported!
 
 -----
 Parser:
 
-All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01 except for:
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
 BOSHBodyExtractor, BOSHBodyExtractorTest, ExpatParser, 
 IdleParserTest, LibXMLParser, S5BProxyRequestParser, 
-WhiteboardParser, XMLParserFactory -- Not Yet Ported!
+WhiteboardParser -- Not Yet Ported!
+
+-----
+Presence:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+PubSub:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+Queries
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
+
+PubSubParser -- Not Yet Ported!
 
 -----
 Roster:
 
-All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01.
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+SASL:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+Individual Comments:
+Windows Authenticator not needed!
 
 -----
 Serializer:
 
-All files ported to d65daf31d58ad432dadb1639f05a0d7f7f367d01 except for:
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
 WhiteboardSerializer, S5BProxyRequestSerializer, XMPPSerializerTest, BlockSerializerTest,
 BlockSerializer, IdleSerializerTest -- Not Yet Ported!
 
-Individual Comments:
-All NON payload Serializers still returns a String on calling serialize against returning the ByteArray in Swiften.
+-----
+Session:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
+
+BOSHSessionStream -- Not Yet Ported!!
 
 -----
+StreamManagement:
 
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+StreamStack:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+StringCodecs:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+TLS:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
+
+PlatformTLSFactories -- Still needs implementing a CertificateFactory.
+TLSContextFactory -- Two methods unimplemented and will also affect JSSEContextFactory.
+
+-----
+VCards:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
