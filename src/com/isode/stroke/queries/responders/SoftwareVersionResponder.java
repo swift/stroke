@@ -20,6 +20,10 @@ public class SoftwareVersionResponder extends GetResponder<SoftwareVersion> {
         super(new SoftwareVersion(), router);
     }
 
+    public void setVersion(final String client, final String version) {
+        setVersion(client, version, "");
+    }
+
     public void setVersion(final String client, final String version, final String os) {
         this.client = client;
         this.version = version;
@@ -31,7 +35,7 @@ public class SoftwareVersionResponder extends GetResponder<SoftwareVersion> {
         sendResponse(from, id, new SoftwareVersion(client, version, os));
         return true;
     }
-    private String client;
-    private String version;
-    private String os;
+    private String client = "";
+    private String version = "";
+    private String os = "";
 }

@@ -22,7 +22,15 @@ public class SoftwareVersion extends Payload {
     }
 
     public SoftwareVersion() {
-        
+        this("","","");
+    }
+
+    public SoftwareVersion(final String name) {
+        this(name, "", "");
+    }
+
+    public SoftwareVersion(final String name, final String version) {
+        this(name, version, "");
     }
 
     public String getName() {

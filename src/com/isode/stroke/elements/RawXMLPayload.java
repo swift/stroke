@@ -15,6 +15,14 @@ package com.isode.stroke.elements;
 public class RawXMLPayload extends Payload {
     private String rawXML_ = "";
 
+    public RawXMLPayload() {
+        this("");
+    }
+
+    public RawXMLPayload(String data) {
+        this.rawXML_ = data;
+    }
+
     public void setRawXML(String data) {
         rawXML_ = data;
     }

@@ -13,6 +13,7 @@ import com.isode.stroke.elements.ErrorPayload;
 import com.isode.stroke.elements.IQ;
 import com.isode.stroke.elements.IQ.Type;
 import com.isode.stroke.elements.Payload;
+import com.isode.stroke.elements.RawXMLPayload;
 import com.isode.stroke.jid.JID;
 import java.util.logging.Logger;
 
@@ -20,13 +21,13 @@ import java.util.logging.Logger;
  * Base class for IQ requests.
  */
 public abstract class Request implements IQHandler {
-    protected final Type type_;
-    protected final IQRouter router_;
-    protected final JID receiver_;
-	protected final JID sender_;    
+    protected Type type_;
+    protected IQRouter router_;
+    protected JID receiver_ = new JID();
+	protected JID sender_ = new JID();
     private boolean sent_;
     private Payload payload_;
-    private String id_;
+    private String id_ = "";
 	private Logger logger_ = Logger.getLogger(this.getClass().getName());
 
 	/**
@@ -99,11 +100,15 @@ public abstract class Request implements IQHandler {
 		    	if (isCorrectSender(iq.getFrom())) {
 			
 					if (iq.getType().equals(IQ.Type.Result)) {
-			    		handleResponse(iq.getPayload(payload_), null);
+						Payload payload = iq.getPayload(payload_);
+						if (payload == null && (payload_ instanceof RawXMLPayload) && !iq.getPayloads().isEmpty()) {
+							payload = iq.getPayloads().firstElement();
+						}
+			    		handleResponse(payload, null);
 					} else {
 			    		ErrorPayload errorPayload = iq.getPayload(new ErrorPayload());
 			    		if (errorPayload != null) {
-						handleResponse(null, errorPayload);
+							handleResponse(null, errorPayload);
 			    		} else {
 							handleResponse(null, new ErrorPayload(ErrorPayload.Condition.UndefinedCondition));
 			    		}
@@ -117,20 +122,17 @@ public abstract class Request implements IQHandler {
     }
 
     private boolean isCorrectSender(final JID jid) {
-		if (isAccountJID(receiver_)) {
-	    	return isAccountJID(jid);
+    	if (router_.isAccountJID(receiver_)) {
+			if (jid.isValid() && jid.compare(router_.getJID(), JID.CompareType.WithResource) == 0) {
+				// This unspecified behavior seems to happen in ejabberd versions (e.g. 2.0.5)
+				logger_.warning("Server responded to an account request with a full JID, which is not allowed. Handling it anyway.");
+				return true;
+			}
+			return router_.isAccountJID(jid);
 		}
-		return (jid.compare(receiver_, JID.CompareType.WithResource) == 0);
-    }
-
-    private boolean isAccountJID(final JID jid) {
-		// If the router's JID is not set, we don't check anything
-		if (!router_.getJID().isValid()) {
-		    return true;
+		else {
+			return jid.compare(receiver_, JID.CompareType.WithResource) == 0;
 		}
-
-		return jid.isValid() ?
-		    router_.getJID().compare(jid, JID.CompareType.WithoutResource) == 0 : true;
     }
 	       
 	public JID getReceiver() {

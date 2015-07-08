@@ -15,7 +15,7 @@ import com.isode.stroke.serializer.xml.XMLTextNode;
 import com.isode.stroke.serializer.PayloadSerializerCollection;
 import com.isode.stroke.serializer.PayloadSerializer;
 
-class ErrorSerializer extends GenericPayloadSerializer<ErrorPayload> {
+public class ErrorSerializer extends GenericPayloadSerializer<ErrorPayload> {
 
 	private PayloadSerializerCollection serializers;
 
@@ -25,7 +25,7 @@ class ErrorSerializer extends GenericPayloadSerializer<ErrorPayload> {
     }
 
     @Override
-    protected String serializePayload(ErrorPayload error) {
+    public String serializePayload(ErrorPayload error) {
         String result = "<error type=\"";
 	switch (error.getType()) {
 		case Continue: result += "continue"; break;

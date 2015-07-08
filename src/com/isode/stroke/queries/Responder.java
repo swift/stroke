@@ -30,6 +30,7 @@ public abstract class Responder<PAYLOAD_TYPE extends Payload> implements IQHandl
     public Responder(final PAYLOAD_TYPE payloadType, IQRouter router) {
         payloadType_ = payloadType;
         router_ = router;
+        isFinalResonder_ = true;
     }
 
     /**
@@ -114,6 +115,10 @@ public abstract class Responder<PAYLOAD_TYPE extends Payload> implements IQHandl
         return router_;
     }
 
+    protected void setFinal(boolean isFinal) {
+        isFinalResonder_ = isFinal;
+    }
+
     @Override
     public boolean handleIQ(IQ iq) {
         if (IQ.Type.Set.equals(iq.getType()) || IQ.Type.Get.equals(iq.getType())) {
@@ -127,7 +132,11 @@ public abstract class Responder<PAYLOAD_TYPE extends Payload> implements IQHandl
                     result = handleGetRequest(iq.getFrom(), iq.getTo(), iq.getID(), payload);
                 }
                 if (!result) {
-                    router_.sendIQ(IQ.createError(iq.getFrom(), iq.getID(), ErrorPayload.Condition.NotAllowed, ErrorPayload.Type.Cancel));
+                    if(isFinalResonder_) {
+                        router_.sendIQ(IQ.createError(iq.getFrom(), iq.getID(), ErrorPayload.Condition.NotAllowed, ErrorPayload.Type.Cancel));
+                    } else {
+                        return false;
+                    }
                 }
                 return true;
             }
@@ -136,4 +145,5 @@ public abstract class Responder<PAYLOAD_TYPE extends Payload> implements IQHandl
     }
     private IQRouter router_;
     private PAYLOAD_TYPE payloadType_;
+    private boolean isFinalResonder_;
 };
