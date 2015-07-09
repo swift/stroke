@@ -8,11 +8,13 @@ import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.elements.VCard;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.stringcodecs.Hexify;
+import java.util.Date;
 
 public abstract class VCardStorage {
 	private CryptoProvider crypto;
 
 	public abstract VCard getVCard(JID jid);
+	public abstract Date getVCardWriteTime(JID jid);
 	public abstract void setVCard(JID jid, VCard vcard);
 
 	public VCardStorage(CryptoProvider crypto) {

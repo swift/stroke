@@ -14,12 +14,14 @@ import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.Signal2;
 import com.isode.stroke.signals.Slot2;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class VCardManager {
-    private final JID ownJID;
-    private final IQRouter iqRouter;
-    private final VCardStorage storage;
-    private final Set<JID> requestedVCards = new HashSet<JID>();
+    private JID ownJID = new JID();
+    private IQRouter iqRouter;
+    private VCardStorage storage;
+    private Set<JID> requestedVCards = new HashSet<JID>();
 
     /**
      * The JID will always be bare.
@@ -37,6 +39,7 @@ public class VCardManager {
         this.ownJID = ownJID;
         this.iqRouter = iqRouter;
         this.storage = vcardStorage;
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
     public void delete() {
@@ -47,8 +50,14 @@ public class VCardManager {
     }
 
     public VCard getVCardAndRequestWhenNeeded(final JID jid) {
+        return getVCardAndRequestWhenNeeded(jid, null);
+    }
+
+    public VCard getVCardAndRequestWhenNeeded(final JID jid, final Date allowedAge) {
         VCard vcard = storage.getVCard(jid);
-        if (vcard == null) {
+        Date vcardFetchedTime = storage.getVCardWriteTime(jid);
+        boolean vcardTooOld = (vcard != null) && (vcardFetchedTime == null || (allowedAge != null && ((new Date().getTime() - vcardFetchedTime.getTime()) > allowedAge.getTime())));
+        if (vcard == null || vcardTooOld) {
             requestVCard(jid);
         }
         return vcard;
