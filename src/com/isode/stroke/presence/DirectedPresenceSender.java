@@ -78,7 +78,7 @@ public class DirectedPresenceSender implements PresenceSender {
             return;
         }
         sender_.sendPresence(presence);
-        if (presence.getTo() == null || !presence.getTo().isValid()) {
+        if (!presence.getTo().isValid()) {
             Presence presenceCopy = new Presence(presence);
             for(JID jid : directedPresenceReceivers_) {
                 presenceCopy.setTo(jid);
@@ -96,7 +96,7 @@ public class DirectedPresenceSender implements PresenceSender {
      */
     public Presence getLastSentUndirectedPresence(){
         if(lastSentUndirectedPresence_ == null) {
-            return new Presence();
+            return null;
         }else {
             return new Presence(lastSentUndirectedPresence_);
         }

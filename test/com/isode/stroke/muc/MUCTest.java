@@ -26,10 +26,14 @@ import com.isode.stroke.elements.MUCOccupant;
 import com.isode.stroke.elements.MUCOwnerPayload;
 import com.isode.stroke.elements.MUCUserPayload;
 import com.isode.stroke.elements.Presence;
+import com.isode.stroke.elements.CapsInfo;
+import com.isode.stroke.elements.VCard;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.presence.DirectedPresenceSender;
 import com.isode.stroke.presence.StanzaChannelPresenceSender;
 import com.isode.stroke.queries.IQRouter;
+import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.signals.Slot2;
 
 /**
  * Unit tests for MUC
@@ -38,14 +42,15 @@ import com.isode.stroke.queries.IQRouter;
 public class MUCTest {
     private DummyStanzaChannel channel;
     private IQRouter router;
-    MUCRegistry mucRegistry;
-    StanzaChannelPresenceSender stanzaChannelPresenceSender;
-    DirectedPresenceSender presenceSender;
+    private MUCRegistry mucRegistry;
+    private StanzaChannelPresenceSender stanzaChannelPresenceSender;
+    private DirectedPresenceSender presenceSender;
     private static class JoinResult {
-        String nick;
+        String nick = "";
         ErrorPayload error;
     };
-    private Vector<JoinResult> joinResults;
+    private Vector<JoinResult> joinResults = new Vector<JoinResult>();
+    private int nickChanges;
 
     @Before
     public void setUp() {
@@ -54,6 +59,7 @@ public class MUCTest {
         mucRegistry = new MUCRegistry();
         stanzaChannelPresenceSender = new StanzaChannelPresenceSender(channel);
         presenceSender = new DirectedPresenceSender(stanzaChannelPresenceSender);
+        nickChanges = 0;
     }
 
     @Test
@@ -92,6 +98,20 @@ public class MUCTest {
     }
 
     @Test
+    public void testJoin_NoPresenceChangeDuringJoinDoesNotResendAfterJoinSuccess() {
+        MUC testling = createMUC(new JID("foo@bar.com"));
+        testling.joinAs("Alice");
+
+        receivePresence(new JID("foo@bar.com/Rabbit"), "Here");
+
+        assertEquals(1, channel.sentStanzas.size());
+        Presence p = channel.getStanzaAtIndex(new Presence(), 0);
+        assertTrue(p != null);
+        assertEquals(new JID("foo@bar.com/Alice"), p.getTo());
+        assertEquals("", p.getStatus());
+    }
+
+    @Test
     public void testCreateInstant() {
         MUC testling = createMUC(new JID("rabbithole@wonderland.lit"));
         testling.joinAs("Alice");
@@ -120,14 +140,13 @@ public class MUCTest {
         Presence initialPresence = new Presence();
         initialPresence.setStatus("");
         
-        //TODO: after vcard is ported this can be uncommented
-        /*VCard vcard = new VCard();
-        vcard.setPhoto(createByteArray("15c30080ae98ec48be94bf0e191d43edd06e500a"));
+        VCard vcard = new VCard();
+        vcard.setPhoto(new ByteArray("15c30080ae98ec48be94bf0e191d43edd06e500a"));
         initialPresence.addPayload(vcard);
-        CapsInfo caps = boost::make_shared<CapsInfo>();
+        CapsInfo caps = new CapsInfo();
         caps.setNode("http://swift.im");
         caps.setVersion("p2UP0DrcVgKM6jJqYN/B92DKK0o=");
-        initialPresence.addPayload(caps);*/
+        initialPresence.addPayload(caps);
         
         channel.sendPresence(initialPresence);
 
@@ -136,8 +155,8 @@ public class MUCTest {
         Presence serverRespondsLocked = new Presence();
         serverRespondsLocked.setFrom(new JID("test@rooms.swift.im/Test"));
         serverRespondsLocked.setTo(new JID("test@swift.im/6913d576d55f0b67"));        
-        //serverRespondsLocked.addPayload(vcard);
-        //serverRespondsLocked.addPayload(caps);
+        serverRespondsLocked.addPayload(vcard);
+        serverRespondsLocked.addPayload(caps);
         serverRespondsLocked.setStatus("");
         MUCUserPayload mucPayload = new MUCUserPayload();
         MUCItem myItem = new MUCItem();
@@ -153,11 +172,94 @@ public class MUCTest {
         assertTrue(iq.getPayload(new MUCOwnerPayload()) != null);
         assertTrue(iq.getPayload(new MUCOwnerPayload()).getForm() != null);
         assertEquals(Form.Type.SUBMIT_TYPE, iq.getPayload(new MUCOwnerPayload()).getForm().getType());
-}
+    }
 
+    @Test
+    public void testNicknameChange() {
+        MUC testling = createMUC(new JID("foo@bar.com"));
+        // Join as Rabbit
+        testling.joinAs("Rabbit");
+
+        // Rabbit joins
+        Presence rabbitJoins = new Presence();
+        rabbitJoins.setTo(new JID("test@swift.im/6913d576d55f0b67"));
+        rabbitJoins.setFrom(new JID(testling.getJID().toString() + "/Rabbit"));
+        channel.onPresenceReceived.emit(rabbitJoins);
+        assertEquals(true, testling.hasOccupant("Rabbit"));
+
+        // Alice joins
+        Presence aliceJoins = new Presence();
+        aliceJoins.setTo(new JID("test@swift.im/6913d576d55f0b67"));
+        aliceJoins.setFrom(new JID(testling.getJID().toString() + "/Alice"));
+        channel.onPresenceReceived.emit(aliceJoins);
+        assertEquals(true, testling.hasOccupant("Alice"));
+
+        // Change nick to Dodo
+        testling.changeNickname("Dodo");
+        Presence stanza = channel.getStanzaAtIndex(new Presence(), 1);
+        assertNotNull(stanza);
+        assertEquals("Dodo", stanza.getTo().getResource());
+
+        // Alice changes nick to Alice2
+        stanza = new Presence();
+        stanza.setFrom(new JID("foo@bar.com/Alice"));
+        stanza.setTo(router.getJID());
+        stanza.setType(Presence.Type.Unavailable);
+        MUCUserPayload mucPayload = new MUCUserPayload();
+        MUCItem myItem = new MUCItem();
+        myItem.affiliation = MUCOccupant.Affiliation.Member;
+        myItem.nick = "Alice2";
+        myItem.role = MUCOccupant.Role.Participant;
+        mucPayload.addItem(myItem);
+        mucPayload.addStatusCode(new MUCUserPayload.StatusCode(303));
+        stanza.addPayload(mucPayload);
+        channel.onPresenceReceived.emit(stanza);
+        assertEquals(1, nickChanges);
+        assertEquals(false, testling.hasOccupant("Alice"));
+        assertEquals(true, testling.hasOccupant("Alice2"));
+
+        // We (Rabbit) change nick to Robot
+        stanza = new Presence();
+        stanza.setFrom(new JID("foo@bar.com/Rabbit"));
+        stanza.setTo(router.getJID());
+        stanza.setType(Presence.Type.Unavailable);
+        mucPayload = new MUCUserPayload();
+        myItem.affiliation = MUCOccupant.Affiliation.Member;
+        myItem.nick = "Robot";
+        myItem.role = MUCOccupant.Role.Participant;
+        mucPayload.addItem(myItem);
+        mucPayload.addStatusCode(new MUCUserPayload.StatusCode(303));
+        stanza.addPayload(mucPayload);
+        channel.onPresenceReceived.emit(stanza);
+        assertEquals(2, nickChanges);
+        assertEquals(false, testling.hasOccupant("Rabbit"));
+        assertEquals(true, testling.hasOccupant("Robot"));
+    }
+
+    /*void testJoin_Success() {
+        MUC::ref testling = createMUC(JID("foo@bar.com"));
+        testling.onJoinFinished.connect(boost::bind(&MUCTest::handleJoinFinished, this, _1, _2));
+        testling.joinAs("Alice");
+        receivePresence(JID("foo@bar.com/Rabbit"), "Here");
+
+        CPPUNIT_ASSERT_EQUAL(1, static_cast<int>(joinResults.size()));
+        CPPUNIT_ASSERT_EQUAL(std::string("Alice"), joinResults[0].nick);
+        CPPUNIT_ASSERT(joinResults[0].error);
+    }
+
+    void testJoin_Fail() {
+        //CPPUNIT_ASSERT(!mucRegistry.isMUC(JID("foo@bar.com")));
+    }*/
 
     private MUC createMUC(JID jid) {
-        return new MUC(channel, router, presenceSender, jid, mucRegistry);
+        MUC muc = new MUCImpl(channel, router, presenceSender, jid, mucRegistry);
+        muc.onOccupantNicknameChanged.connect(new Slot2<String, String>() {
+            @Override
+            public void call(String s1, String s2) {
+                handleOccupantNicknameChanged(s1, s2);
+            }
+        });
+        return muc;        
     }
 
     private void handleJoinFinished(String nick, ErrorPayload error) {
@@ -170,6 +272,13 @@ public class MUCTest {
     private void receivePresence(JID jid, String status) {        
         Presence p = new Presence(status);
         p.setFrom(jid);
+        //MUCUserPayload mucUserPayload = new MUCUserPayload();
+        //mucUserPayload.addItem(item);
+        //p.addPayload(mucUserPayload);        
         channel.onPresenceReceived.emit(p);
+    }
+
+    private void handleOccupantNicknameChanged(final String s1, final String s2) {
+        nickChanges++;
     }
 }

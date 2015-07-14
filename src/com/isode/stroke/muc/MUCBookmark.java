@@ -16,7 +16,7 @@ import com.isode.stroke.jid.JID;
  */
 public class MUCBookmark {
     private JID room_;
-    private String name_;
+    private String name_ = "";
     private String nick_;
     private String password_;
     private boolean autojoin_;   
@@ -136,7 +136,7 @@ public class MUCBookmark {
         if(!checkEqualsWhenNull(rhs.room_,room_)) return false;
         if(!checkEqualsWhenNull(rhs.name_,name_)) return false;
         if(!checkEqualsWhenNull(rhs.nick_,nick_)) return false;
-        if(!checkEqualsWhenNull(rhs.password_,password_)) return false;
+        //if(!checkEqualsWhenNull(rhs.password_,password_)) return false;
         if(!rhs.autojoin_ != autojoin_) return false;
         return true;
     }

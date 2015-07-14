@@ -44,6 +44,6 @@ public class MUCManager {
      * @return MUC room, not null
      */
     public MUC createMUC(JID jid) {
-        return new MUC(stanzaChannel_, iqRouter_, presenceSender_, jid, mucRegistry_);
+        return new MUCImpl(stanzaChannel_, iqRouter_, presenceSender_, jid, mucRegistry_);
     }
 }
