@@ -5,6 +5,7 @@
 package com.isode.stroke.client;
 
 import com.isode.stroke.base.NotNull;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.elements.Message;
 import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.Stanza;
@@ -58,13 +59,13 @@ public class CoreClient {
      * The user may add a listener to this signal, which will be called when
      * data are received from the server. Useful for observing protocol exchange.
      */
-    public final Signal1<String> onDataRead = new Signal1<String>();
+    public final Signal1<SafeByteArray> onDataRead = new Signal1<SafeByteArray>();
 
     /**
      * The user may add a listener to this signal, which will be called when
      * data are sent to the server. Useful for observing protocol exchange.
      */
-    public final Signal1<String> onDataWritten = new Signal1<String>();
+    public final Signal1<SafeByteArray> onDataWritten = new Signal1<SafeByteArray>();
 
     /**
      * Called when a message stanza is received.
@@ -249,16 +250,16 @@ public class CoreClient {
             if (certificate_ != null && !certificate_.isNull()) {
                 sessionStream_.setTLSCertificate(certificate_);
             }
-            sessionStreamDataReadConnection_ = sessionStream_.onDataRead.connect(new Slot1<String>() {
+            sessionStreamDataReadConnection_ = sessionStream_.onDataRead.connect(new Slot1<SafeByteArray>() {
 
-                public void call(String p1) {
+                public void call(SafeByteArray p1) {
                     handleDataRead(p1);
                 }
             });
 
-            sessionStreamDataWrittenConnection_ = sessionStream_.onDataWritten.connect(new Slot1<String>() {
+            sessionStreamDataWrittenConnection_ = sessionStream_.onDataWritten.connect(new Slot1<SafeByteArray>() {
 
-                public void call(String p1) {
+                public void call(SafeByteArray p1) {
                     handleDataWritten(p1);
                 }
             });
@@ -421,11 +422,11 @@ public class CoreClient {
         session_.sendCredentials(password_);
     }
 
-    private void handleDataRead(final String data) {
+    private void handleDataRead(final SafeByteArray data) {
         onDataRead.emit(data);
     }
 
-    private void handleDataWritten(final String data) {
+    private void handleDataWritten(final SafeByteArray data) {
         onDataWritten.emit(data);
     }
 

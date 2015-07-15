@@ -23,6 +23,7 @@ import com.isode.stroke.queries.GenericRequest;
 import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.Slot2;
+import com.isode.stroke.signals.SignalConnection;
 
 /**
  * This class maintains the session between the client and the server for an
@@ -71,6 +72,7 @@ public class OutgoingAdHocCommandSession {
     private boolean isMultiStage_;
     private String sessionID_;
     private HashMap<Action, ActionState> actionStates_ = new HashMap<Action, ActionState>();
+	private SignalConnection connection_;
 
     /**
      * Create an Ad-Hoc command session. The initial command will be sent to the
@@ -99,6 +101,13 @@ public class OutgoingAdHocCommandSession {
         commandNode_ = commandNode;
         iqRouter_ = iqRouter;
         isMultiStage_ = false;
+    }
+
+    /**
+    * This method needs to be called for the object to be eligible for garbage collection.
+    */
+    public void delete() {
+    	connection_.disconnect();
     }
 
     private void handleResponse(Command payload, ErrorPayload error) {
@@ -156,7 +165,7 @@ public class OutgoingAdHocCommandSession {
     public void start() {
         GenericRequest<Command> commandRequest = new GenericRequest<Command>(
                 IQ.Type.Set, to_, new Command(commandNode_), iqRouter_);
-        commandRequest.onResponse.connect(new Slot2<Command, ErrorPayload>() {
+        connection_ = commandRequest.onResponse.connect(new Slot2<Command, ErrorPayload>() {
             public void call(Command payload, ErrorPayload error) {
                 handleResponse(payload, error);
             }
@@ -206,7 +215,8 @@ public class OutgoingAdHocCommandSession {
 
         GenericRequest<Command> commandRequest = new GenericRequest<Command>(
                 IQ.Type.Set, to_, command, iqRouter_);
-        commandRequest.onResponse.connect(new Slot2<Command, ErrorPayload>() {
+		connection_.disconnect();        
+        connection_ = commandRequest.onResponse.connect(new Slot2<Command, ErrorPayload>() {
             public void call(Command payload, ErrorPayload error) {
                 handleResponse(payload, error);
             }

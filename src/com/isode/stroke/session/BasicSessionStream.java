@@ -175,6 +175,10 @@ public class BasicSessionStream extends SessionStream {
         return tlsLayer.getContext().getFinishMessage();
     }
 
+    public boolean supportsZLibCompression() {
+        return true;
+    }
+
     public void addZLibCompression() {
         compressionLayer = new CompressionLayer();
         streamStack.addLayer(compressionLayer);
@@ -232,12 +236,12 @@ public class BasicSessionStream extends SessionStream {
         }
     }
 
-    private void handleDataRead(ByteArray data) {
-        onDataRead.emit(data.toString());
+    private void handleDataRead(SafeByteArray data) {
+        onDataRead.emit(data);
     }
 
-    private void handleDataWritten(ByteArray data) {
-        onDataWritten.emit(data.toString());
+    private void handleDataWritten(SafeByteArray data) {
+        onDataWritten.emit(data);
     }
     @Override
     public String toString() {

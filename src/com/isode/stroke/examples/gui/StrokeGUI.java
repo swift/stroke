@@ -11,6 +11,7 @@
 
 package com.isode.stroke.examples.gui;
 
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.client.ClientError;
 import com.isode.stroke.client.ClientOptions;
 import com.isode.stroke.client.CoreClient;
@@ -179,15 +180,15 @@ public class StrokeGUI extends javax.swing.JFrame {
                 thisObject.handleClientError(p1);
             }
         });
-        client_.onDataRead.connect(new Slot1<String>() {
+        client_.onDataRead.connect(new Slot1<SafeByteArray>() {
 
-            public void call(String p1) {
+            public void call(SafeByteArray p1) {
                 xmlText_.append(">>> " + p1 + "\n");
             }
         });
-        client_.onDataWritten.connect(new Slot1<String>() {
+        client_.onDataWritten.connect(new Slot1<SafeByteArray>() {
 
-            public void call(String p1) {
+            public void call(SafeByteArray p1) {
                 xmlText_.append("<<< " + p1 + "\n");
             }
         });

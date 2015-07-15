@@ -10,6 +10,7 @@ package com.isode.stroke.session;
 
 import java.util.List;
 
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.ProtocolHeader;
@@ -50,6 +51,8 @@ public abstract class SessionStream {
 
     public abstract void writeData(String data);
 
+    public abstract boolean supportsZLibCompression();
+
     public abstract void addZLibCompression();
 
     public abstract boolean supportsTLSEncryption();
@@ -81,8 +84,8 @@ public abstract class SessionStream {
     public final Signal1<Element> onElementReceived = new Signal1<Element>();
     public final Signal1<Error> onClosed = new Signal1<Error>();
     public final Signal onTLSEncrypted = new Signal();
-    public final Signal1<String> onDataRead = new Signal1<String>();
-    public final Signal1<String> onDataWritten = new Signal1<String>();
+    public final Signal1<SafeByteArray> onDataRead = new Signal1<SafeByteArray>();
+    public final Signal1<SafeByteArray> onDataWritten = new Signal1<SafeByteArray>();
     protected CertificateWithKey getTLSCertificate() {
         return certificate;
     }

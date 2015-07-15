@@ -15,6 +15,7 @@ import com.isode.stroke.network.JavaNetworkFactories;
 import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.base.SafeByteArray;
 
 public class Client {
     
@@ -49,8 +50,8 @@ public class Client {
             }
         });
         
-        client_.onDataRead.connect(new Slot1<String>() {
-            public void call(String xml) {
+        client_.onDataRead.connect(new Slot1<SafeByteArray>() {
+            public void call(SafeByteArray xml) {
                 if (!connecting_ && !disconnecting_) {
                     if (debugInfoXml) {
                         System.out.println("[" + name_ + "] Client.Read:");
@@ -60,8 +61,8 @@ public class Client {
             }
         });
         
-        client_.onDataWritten.connect(new Slot1<String>() {
-            public void call(String xml) {
+        client_.onDataWritten.connect(new Slot1<SafeByteArray>() {
+            public void call(SafeByteArray xml) {
                 if (!connecting_ && !disconnecting_) {
                     if (debugInfoXml) {
                         System.out.println("[" + name_ + "] Client.Write:");

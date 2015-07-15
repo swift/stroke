@@ -24,6 +24,12 @@ public class PayloadParserFactoryCollection {
         }
     }
 
+    public void removeFactory(PayloadParserFactory factory) {
+        while(factories_.contains(factory)) {
+            factories_.remove(factory);
+        }
+    }
+
     public void setDefaultFactory(PayloadParserFactory factory) {
         defaultFactory_ = factory;
     }

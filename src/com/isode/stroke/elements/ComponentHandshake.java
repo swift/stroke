@@ -12,9 +12,9 @@
 package com.isode.stroke.elements;
 
 import com.isode.stroke.base.NotNull;
-import com.isode.stroke.elements.TopLevelElement;
+import com.isode.stroke.elements.Element;
 
-public class ComponentHandshake implements TopLevelElement {
+public class ComponentHandshake implements Element {
 
 	private String data = "";
 
