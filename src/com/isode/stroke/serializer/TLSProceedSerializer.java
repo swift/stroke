@@ -12,6 +12,7 @@ package com.isode.stroke.serializer;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.TLSProceed;
 import com.isode.stroke.serializer.xml.XMLElement;
+import com.isode.stroke.base.SafeByteArray;
 
 class TLSProceedSerializer extends GenericElementSerializer<TLSProceed>{
 
@@ -19,8 +20,8 @@ class TLSProceedSerializer extends GenericElementSerializer<TLSProceed>{
         super(TLSProceed.class);
     }
 
-    public String serialize(Element element) {
-        return new XMLElement("proceed", "urn:ietf:params:xml:ns:xmpp-tls").serialize();
+    public SafeByteArray serialize(Element element) {
+        return new SafeByteArray(new XMLElement("proceed", "urn:ietf:params:xml:ns:xmpp-tls").serialize());
     }
 
 }

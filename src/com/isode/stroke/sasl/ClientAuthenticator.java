@@ -9,6 +9,7 @@
 package com.isode.stroke.sasl;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 
 public abstract class ClientAuthenticator {
 
@@ -30,7 +31,7 @@ public abstract class ClientAuthenticator {
         this.authzid = authzid;
     }
 
-    public abstract ByteArray getResponse();
+    public abstract SafeByteArray getResponse();
 
     public abstract boolean setChallenge(ByteArray challenge);
 

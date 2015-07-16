@@ -35,18 +35,27 @@ public class XMPPLayer implements HighLayer, XMPPParserClient {
     private XMPPSerializer xmppSerializer_;
     private boolean resetParserAfterParse_;
     private boolean inParser_;
+    private boolean setExplictNSonTopLevelElements_;
 
-    
     public XMPPLayer(
             PayloadParserFactoryCollection payloadParserFactories,
             PayloadSerializerCollection payloadSerializers,
             StreamType streamType) {
+        this(payloadParserFactories, payloadSerializers, streamType, false);
+    }
+
+    public XMPPLayer(
+            PayloadParserFactoryCollection payloadParserFactories,
+            PayloadSerializerCollection payloadSerializers,
+            StreamType streamType,
+            boolean setExplictNSonTopLevelElements) {
         payloadParserFactories_ = payloadParserFactories;
         payloadSerializers_ = payloadSerializers;
+        setExplictNSonTopLevelElements_ = setExplictNSonTopLevelElements;
         resetParserAfterParse_ = false;
         inParser_ = false;
         xmppParser_ = new XMPPParser(this, payloadParserFactories_);
-        xmppSerializer_ = new XMPPSerializer(payloadSerializers_, streamType);
+        xmppSerializer_ = new XMPPSerializer(payloadSerializers_, streamType, setExplictNSonTopLevelElements);
     }
 
     public void writeHeader(ProtocolHeader header) {

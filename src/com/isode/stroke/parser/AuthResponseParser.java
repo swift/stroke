@@ -11,6 +11,7 @@ package com.isode.stroke.parser;
 
 import com.isode.stroke.elements.AuthResponse;
 import com.isode.stroke.stringcodecs.Base64;
+import com.isode.stroke.base.SafeByteArray;
 
 class AuthResponseParser extends GenericElementParser<AuthResponse> {
 
@@ -27,7 +28,7 @@ class AuthResponseParser extends GenericElementParser<AuthResponse> {
     public void handleEndElement(String unused1, String unused2) {
         --depth;
         if (depth == 0) {
-            getElementGeneric().setValue(Base64.decode(text));
+            getElementGeneric().setValue(new SafeByteArray(Base64.decode(text)));
         }
     }
 

@@ -16,8 +16,12 @@ public abstract class GenericStanzaSerializer<T extends Stanza> extends StanzaSe
 
     private final Class stanzaClass_;
 
-    GenericStanzaSerializer(Class stanzaClass, String tag, PayloadSerializerCollection payloadSerializers) {
-        super(tag, payloadSerializers);
+    public GenericStanzaSerializer(Class stanzaClass, String tag, PayloadSerializerCollection payloadSerializers) {
+        this(stanzaClass, tag, payloadSerializers, null);
+    }
+
+    public GenericStanzaSerializer(Class stanzaClass, String tag, PayloadSerializerCollection payloadSerializers, String explicitNS) {
+        super(tag, payloadSerializers, explicitNS);
         stanzaClass_ = stanzaClass;
     }
 

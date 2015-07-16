@@ -15,8 +15,6 @@ import com.isode.stroke.serializer.PayloadSerializerCollection;
 public class FullPayloadSerializerCollection extends PayloadSerializerCollection {
 
     public FullPayloadSerializerCollection() {
-        /*FIXME: Implement what's needed. */
-        //addSerializer(new IBBSerializer());
 	addSerializer(new BodySerializer());
 	addSerializer(new SubjectSerializer());
 	addSerializer(new ChatStateSerializer());

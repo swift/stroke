@@ -15,6 +15,7 @@ import com.isode.stroke.serializer.GenericElementSerializer;
 import com.isode.stroke.serializer.xml.XMLElement;
 import com.isode.stroke.elements.StreamError;
 import com.isode.stroke.elements.Element;
+import com.isode.stroke.base.SafeByteArray;
 
 public class StreamErrorSerializer extends GenericElementSerializer<StreamError> {
 
@@ -22,7 +23,7 @@ public class StreamErrorSerializer extends GenericElementSerializer<StreamError>
 		super(StreamError.class);
 	}
 
-	public String serialize(Element element) {
+	public SafeByteArray serialize(Element element) {
 		StreamError error = (StreamError)element;
 		XMLElement errorElement = new XMLElement("error", "http://etherx.jabber.org/streams");
 
@@ -60,6 +61,6 @@ public class StreamErrorSerializer extends GenericElementSerializer<StreamError>
 			errorElement.addNode(new XMLElement("text", "urn:ietf:params:xml:ns:xmpp-streams", error.getText()));
 		}
 
-		return errorElement.serialize();
+		return new SafeByteArray(errorElement.serialize());
 	}
 }

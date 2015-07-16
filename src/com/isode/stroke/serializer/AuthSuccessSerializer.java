@@ -9,18 +9,19 @@
 package com.isode.stroke.serializer;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.elements.AuthSuccess;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.stringcodecs.Base64;
 
 
-class AuthSuccessSerializer extends GenericElementSerializer<AuthSuccess> {
+public class AuthSuccessSerializer extends GenericElementSerializer<AuthSuccess> {
 
     public AuthSuccessSerializer() {
         super(AuthSuccess.class);
     }
 
-    public String serialize(Element element) {
+    public SafeByteArray serialize(Element element) {
         AuthSuccess authSuccess = (AuthSuccess)element;
 	String value = "";
 	ByteArray message = authSuccess.getValue();
@@ -32,7 +33,7 @@ class AuthSuccessSerializer extends GenericElementSerializer<AuthSuccess> {
 			value = Base64.encode(message);
 		}
 	}
-	return "<success xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" + value + "</success>";
+	return new SafeByteArray("<success xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" + value + "</success>");
     }
 
 }

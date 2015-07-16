@@ -10,6 +10,7 @@ package com.isode.stroke.parser;
 
 import com.isode.stroke.elements.AuthRequest;
 import com.isode.stroke.stringcodecs.Base64;
+import com.isode.stroke.base.SafeByteArray;
 
 class AuthRequestParser extends GenericElementParser<AuthRequest> {
 
@@ -29,7 +30,7 @@ class AuthRequestParser extends GenericElementParser<AuthRequest> {
     public void handleEndElement(String a, String b) {
         --depth_;
         if (depth_ == 0) {
-            getElementGeneric().setMessage(Base64.decode(text_));
+            getElementGeneric().setMessage(new SafeByteArray(Base64.decode(text_)));
         }
     }
 

@@ -16,6 +16,7 @@ import org.junit.Test;
 import com.isode.stroke.serializer.AuthRequestSerializer;
 import com.isode.stroke.elements.AuthRequest;
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 
 public class AuthRequestSerializerTest {
 
@@ -30,12 +31,12 @@ public class AuthRequestSerializerTest {
 	public void testSerialize() {
 		AuthRequestSerializer testling = new AuthRequestSerializer();
 		AuthRequest authRequest = new AuthRequest("PLAIN");
-		authRequest.setMessage(new ByteArray("foo"));
+		authRequest.setMessage(new SafeByteArray("foo"));
 
 		assertEquals(
-			"<auth xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\" mechanism=\"PLAIN\">" +
+			new SafeByteArray("<auth xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\" mechanism=\"PLAIN\">" +
 				"Zm9v" +
-			"</auth>", testling.serialize(authRequest));
+			"</auth>"), testling.serialize(authRequest));
 	}
 
 	@Test
@@ -44,19 +45,19 @@ public class AuthRequestSerializerTest {
 		AuthRequest authRequest = new AuthRequest("PLAIN");
 
 		assertEquals(
-			"<auth xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\" mechanism=\"PLAIN\">" +
-			"</auth>", testling.serialize(authRequest));
+			new SafeByteArray("<auth xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\" mechanism=\"PLAIN\">" +
+			"</auth>"), testling.serialize(authRequest));
 	}
 
 	@Test
 	public void testSerialize_EmptyMessage() {
 		AuthRequestSerializer testling = new AuthRequestSerializer();
 		AuthRequest authRequest = new AuthRequest("PLAIN");
-		authRequest.setMessage(new ByteArray());
+		authRequest.setMessage(new SafeByteArray());
 
 		assertEquals(
-			"<auth xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\" mechanism=\"PLAIN\">" +
+			new SafeByteArray("<auth xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\" mechanism=\"PLAIN\">" +
 				"=" +
-			"</auth>", testling.serialize(authRequest));
+			"</auth>"), testling.serialize(authRequest));
 	}
 }

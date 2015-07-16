@@ -16,6 +16,7 @@ import org.junit.Test;
 import com.isode.stroke.serializer.AuthChallengeSerializer;
 import com.isode.stroke.elements.AuthChallenge;
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 
 public class AuthChallengeSerializerTest {
 
@@ -33,9 +34,9 @@ public class AuthChallengeSerializerTest {
 		authChallenge.setValue(new ByteArray("foo"));
 
 		assertEquals(
-			"<challenge xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
+			new SafeByteArray("<challenge xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
 				"Zm9v" +
-			"</challenge>", testling.serialize(authChallenge));
+			"</challenge>"), testling.serialize(authChallenge));
 	}
 
 	@Test
@@ -44,7 +45,7 @@ public class AuthChallengeSerializerTest {
 		AuthChallenge authChallenge = new AuthChallenge();
 
 		assertEquals(
-			"<challenge xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\"></challenge>", testling.serialize(authChallenge));
+			new SafeByteArray("<challenge xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\"></challenge>"), testling.serialize(authChallenge));
 	}
 
 	@Test
@@ -54,8 +55,8 @@ public class AuthChallengeSerializerTest {
 		authChallenge.setValue(new ByteArray());
 
 		assertEquals(
-			"<challenge xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
+			new SafeByteArray("<challenge xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
 				"=" +
-			"</challenge>", testling.serialize(authChallenge));
+			"</challenge>"), testling.serialize(authChallenge));
 	}
 }

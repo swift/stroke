@@ -10,8 +10,9 @@
 package com.isode.stroke.serializer;
 
 import com.isode.stroke.elements.Element;
+import com.isode.stroke.base.SafeByteArray;
 
 public interface ElementSerializer {
-    String serialize(Element element);
+    SafeByteArray serialize(Element element);
     boolean canSerialize(Element element);
 }

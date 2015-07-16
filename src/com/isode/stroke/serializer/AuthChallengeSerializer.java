@@ -13,14 +13,15 @@ import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.elements.AuthChallenge;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.stringcodecs.Base64;
+import com.isode.stroke.base.SafeByteArray;
 
-class AuthChallengeSerializer extends GenericElementSerializer<AuthChallenge> {
+public class AuthChallengeSerializer extends GenericElementSerializer<AuthChallenge> {
 
     public AuthChallengeSerializer() {
         super(AuthChallenge.class);
     }
 
-    public String serialize(Element element) {
+    public SafeByteArray serialize(Element element) {
         AuthChallenge authChallenge = (AuthChallenge)element;
         String value = "";
 	ByteArray message = authChallenge.getValue();
@@ -32,7 +33,7 @@ class AuthChallengeSerializer extends GenericElementSerializer<AuthChallenge> {
 			value = Base64.encode(message);
 		}
 	}
-	return "<challenge xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" + value + "</challenge>";
+	return new SafeByteArray("<challenge xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" + value + "</challenge>");
     }
 
 }

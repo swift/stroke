@@ -9,27 +9,28 @@
 package com.isode.stroke.serializer;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.elements.AuthResponse;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.stringcodecs.Base64;
 
-class AuthResponseSerializer extends GenericElementSerializer<AuthResponse> {
+public class AuthResponseSerializer extends GenericElementSerializer<AuthResponse> {
 
     public AuthResponseSerializer() {
         super(AuthResponse.class);
     }
 
-    public String serialize(Element element) {
+    public SafeByteArray serialize(Element element) {
         AuthResponse authResponse = (AuthResponse) element;
-        String value = "";
-        ByteArray message = authResponse.getValue();
+        SafeByteArray value = new SafeByteArray();
+        SafeByteArray message = authResponse.getValue();
         if (message != null) {
             if (message.isEmpty()) {
-                value = "";
+                value = new SafeByteArray("");
             } else {
                 value = Base64.encode(message);
             }
         }
-        return "<response xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" + value + "</response>";
+        return new SafeByteArray("<response xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">").append(value).append("</response>");
     }
 }

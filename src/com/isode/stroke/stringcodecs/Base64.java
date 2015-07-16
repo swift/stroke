@@ -5,6 +5,7 @@
 package com.isode.stroke.stringcodecs;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 
 public class Base64 {
     /* FIXME: Check license is ok (it is, it's BSD) */
@@ -14,6 +15,10 @@ public class Base64 {
 
     public static String encode(ByteArray input) {
         return Base64BSD.encodeToString(input.getData(), false);
+    }
+
+    public static SafeByteArray encode(SafeByteArray input) {
+        return new SafeByteArray(Base64BSD.encodeToString(input.getData(), false));
     }
 
     public static String encode(byte[] input) {

@@ -12,15 +12,16 @@ package com.isode.stroke.serializer;
 import com.isode.stroke.elements.CompressFailure;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.serializer.xml.XMLElement;
+import com.isode.stroke.base.SafeByteArray;
 
-class CompressFailureSerializer extends GenericElementSerializer<CompressFailure> {
+public class CompressFailureSerializer extends GenericElementSerializer<CompressFailure> {
 
     public CompressFailureSerializer() {
         super(CompressFailure.class);
     }
 
-    public String serialize(Element element) {
-        return new XMLElement("failure", "http://jabber.org/protocol/compress").serialize();
+    public SafeByteArray serialize(Element element) {
+        return new SafeByteArray(new XMLElement("failure", "http://jabber.org/protocol/compress").serialize());
     }
 
 }

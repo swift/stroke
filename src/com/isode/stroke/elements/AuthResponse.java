@@ -9,7 +9,7 @@
  */
 package com.isode.stroke.elements;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 
 public class AuthResponse implements Element {
     //FIXME: parser/serialiser
@@ -18,16 +18,16 @@ public class AuthResponse implements Element {
         value = null;
     }
 
-    public AuthResponse(ByteArray value) {
+    public AuthResponse(SafeByteArray value) {
         this.value = value;
     }
 
-    public ByteArray getValue() {
+    public SafeByteArray getValue() {
         return value;
     }
 
-    public void setValue(ByteArray value) {
+    public void setValue(SafeByteArray value) {
         this.value = value;
     }
-    private ByteArray value;
+    private SafeByteArray value;
 }

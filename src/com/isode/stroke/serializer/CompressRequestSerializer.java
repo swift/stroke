@@ -10,15 +10,16 @@ package com.isode.stroke.serializer;
 
 import com.isode.stroke.elements.CompressRequest;
 import com.isode.stroke.elements.Element;
+import com.isode.stroke.base.SafeByteArray;
 
-class CompressRequestSerializer implements ElementSerializer {
+public class CompressRequestSerializer implements ElementSerializer {
 
     public CompressRequestSerializer() {
     }
 
-    public String serialize(Element element) {
+    public SafeByteArray serialize(Element element) {
         CompressRequest compressRequest = (CompressRequest) element;
-        return "<compress xmlns='http://jabber.org/protocol/compress'><method>" + compressRequest.getMethod() + "</method></compress>";
+        return new SafeByteArray("<compress xmlns='http://jabber.org/protocol/compress'><method>" + compressRequest.getMethod() + "</method></compress>");
     }
 
     public boolean canSerialize(Element element) {

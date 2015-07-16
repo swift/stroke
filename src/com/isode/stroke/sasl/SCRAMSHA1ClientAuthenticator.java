@@ -9,6 +9,7 @@
 package com.isode.stroke.sasl;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.stringcodecs.Base64;
 import com.isode.stroke.stringcodecs.HMACSHA1;
 import com.isode.stroke.stringcodecs.PBKDF2;
@@ -48,9 +49,9 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
         tlsChannelBindingData = channelBindingData;
     }
 
-    public ByteArray getResponse() {
+    public SafeByteArray getResponse() {
         if (step.equals(Step.Initial)) {
-            return ByteArray.plus(getGS2Header(), getInitialBareClientMessage());
+            return new SafeByteArray(getGS2Header().append(getInitialBareClientMessage()));
         } else if (step.equals(Step.Proof)) {
             ByteArray clientKey = HMACSHA1.getResult(saltedPassword, new ByteArray("Client Key"));
             ByteArray storedKey = SHA1.getHash(clientKey);
@@ -62,7 +63,7 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
             }
             clientProof = new ByteArray(clientProofData);
             ByteArray result = getFinalMessageWithoutProof().append(",p=").append(Base64.encode(clientProof));
-            return result;
+            return new SafeByteArray(result);
         } else {
             return null;
         }

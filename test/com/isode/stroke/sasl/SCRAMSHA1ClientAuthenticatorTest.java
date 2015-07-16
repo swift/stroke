@@ -9,6 +9,7 @@
 package com.isode.stroke.sasl;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +26,7 @@ public class SCRAMSHA1ClientAuthenticatorTest {
         SCRAMSHA1ClientAuthenticator testling = new SCRAMSHA1ClientAuthenticator("abcdefghABCDEFGH");
         testling.setCredentials("user", "pass", "");
 
-        ByteArray response = testling.getResponse();
+        SafeByteArray response = testling.getResponse();
 
         assertEquals(new ByteArray("n,,n=user,r=abcdefghABCDEFGH"), response);
     }
@@ -35,7 +36,7 @@ public class SCRAMSHA1ClientAuthenticatorTest {
         SCRAMSHA1ClientAuthenticator testling = new SCRAMSHA1ClientAuthenticator("abcdefghABCDEFGH");
         testling.setCredentials(",us=,er=", "pass", "");
 
-        ByteArray response = testling.getResponse();
+        SafeByteArray response = testling.getResponse();
 
         assertEquals(new ByteArray("n,,n==2Cus=3D=2Cer=3D,r=abcdefghABCDEFGH"), response);
     }
@@ -45,7 +46,7 @@ public class SCRAMSHA1ClientAuthenticatorTest {
         SCRAMSHA1ClientAuthenticator testling = new SCRAMSHA1ClientAuthenticator("abcdefghABCDEFGH");
         testling.setCredentials("user", "pass", "auth");
 
-        ByteArray response = testling.getResponse();
+        SafeByteArray response = testling.getResponse();
 
         assertEquals(new ByteArray("n,a=auth,n=user,r=abcdefghABCDEFGH"), response);
     }
@@ -55,7 +56,7 @@ public class SCRAMSHA1ClientAuthenticatorTest {
         SCRAMSHA1ClientAuthenticator testling = new SCRAMSHA1ClientAuthenticator("abcdefghABCDEFGH");
         testling.setCredentials("user", "pass", "a=u,th");
 
-        ByteArray response = testling.getResponse();
+        SafeByteArray response = testling.getResponse();
 
         assertEquals(new ByteArray("n,a=a=3Du=2Cth,n=user,r=abcdefghABCDEFGH"), response);
     }
@@ -66,7 +67,7 @@ public class SCRAMSHA1ClientAuthenticatorTest {
         testling.setTLSChannelBindingData(new ByteArray("xyza"));
         testling.setCredentials("user", "pass", "");
 
-        ByteArray response = testling.getResponse();
+        SafeByteArray response = testling.getResponse();
 
         assertEquals(new ByteArray("y,,n=user,r=abcdefghABCDEFGH"), response);
     }
@@ -77,7 +78,7 @@ public class SCRAMSHA1ClientAuthenticatorTest {
         testling.setTLSChannelBindingData(new ByteArray("xyza"));
         testling.setCredentials("user", "pass", "");
 
-        ByteArray response = testling.getResponse();
+        SafeByteArray response = testling.getResponse();
 
         assertEquals(new ByteArray("p=tls-unique,,n=user,r=abcdefghABCDEFGH"), response);
     }
@@ -88,7 +89,7 @@ public class SCRAMSHA1ClientAuthenticatorTest {
         testling.setCredentials("user", "pass", "");
         assertTrue(testling.setChallenge(new ByteArray("r=abcdefghABCDEFGH,s=MTIzNDU2NzgK,i=4096")));
 
-        ByteArray response = testling.getResponse();
+        SafeByteArray response = testling.getResponse();
 
         assertEquals(new ByteArray("c=biws,r=abcdefghABCDEFGH,p=CZbjGDpIteIJwQNBgO0P8pKkMGY="), response);
     }
@@ -100,7 +101,7 @@ public class SCRAMSHA1ClientAuthenticatorTest {
         testling.setTLSChannelBindingData(new ByteArray("xyza"));
         testling.setChallenge(new ByteArray("r=abcdefghABCDEFGH,s=MTIzNDU2NzgK,i=4096"));
 
-        ByteArray response = testling.getResponse();
+        SafeByteArray response = testling.getResponse();
 
         assertEquals(new ByteArray("c=eSws,r=abcdefghABCDEFGH,p=JNpsiFEcxZvNZ1+FFBBqrYvYxMk="), response);
     }
@@ -112,7 +113,7 @@ public class SCRAMSHA1ClientAuthenticatorTest {
         testling.setTLSChannelBindingData(new ByteArray("xyza"));
         testling.setChallenge(new ByteArray("r=abcdefghABCDEFGH,s=MTIzNDU2NzgK,i=4096"));
 
-        ByteArray response = testling.getResponse();
+        SafeByteArray response = testling.getResponse();
 
         assertEquals(new ByteArray("c=cD10bHMtdW5pcXVlLCx4eXph,r=abcdefghABCDEFGH,p=i6Rghite81P1ype8XxaVAa5l7v0="), response);
     }

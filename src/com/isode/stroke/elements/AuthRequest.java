@@ -8,7 +8,7 @@
  */
 package com.isode.stroke.elements;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 
 public class AuthRequest implements Element {
 
@@ -21,16 +21,16 @@ public class AuthRequest implements Element {
         mechanism_ = mechanism;
     }
 
-    public AuthRequest(String mechanism, ByteArray message) {
+    public AuthRequest(String mechanism, SafeByteArray message) {
         mechanism_ = mechanism;
         message_ = message;
     }
 
-    public ByteArray getMessage() {
+    public SafeByteArray getMessage() {
         return message_;
     }
 
-    public void setMessage(ByteArray message) {
+    public void setMessage(SafeByteArray message) {
         message_ = message;
     }
 
@@ -42,5 +42,5 @@ public class AuthRequest implements Element {
         mechanism_ = mechanism;
     }
     private String mechanism_ = "";
-    private ByteArray message_;
+    private SafeByteArray message_;
 }

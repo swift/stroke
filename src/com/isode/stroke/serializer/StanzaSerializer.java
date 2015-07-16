@@ -10,23 +10,39 @@ import com.isode.stroke.elements.Stanza;
 import com.isode.stroke.serializer.xml.XMLElement;
 import com.isode.stroke.serializer.xml.XMLRawTextNode;
 import java.util.logging.Logger;
+import com.isode.stroke.base.SafeByteArray;
 
 public abstract class StanzaSerializer implements ElementSerializer {
 
     private final String tag_;
     private final PayloadSerializerCollection payloadSerializers_;
+    private String explicitDefaultNS_;
     private final Logger logger_ = Logger.getLogger(this.getClass().getName());
 
     public StanzaSerializer(String tag, PayloadSerializerCollection payloadSerializers) {
-        payloadSerializers_ = payloadSerializers;
-        tag_ = tag;
+        this(tag, payloadSerializers, null);
     }
 
-    public String serialize(Element element) {
+    public StanzaSerializer(String tag, PayloadSerializerCollection payloadSerializers, String explicitNS) {
+        payloadSerializers_ = payloadSerializers;
+        tag_ = tag;
+        explicitDefaultNS_ = explicitNS;
+    }
+
+    public SafeByteArray serialize(Element element) {
+        if (explicitDefaultNS_ != null) {
+            return serialize(element, explicitDefaultNS_);
+        }
+        else {
+            return serialize(element, "");
+        }
+    }
+
+    public SafeByteArray serialize(Element element, String xmlns) {
         assert element != null;
         assert payloadSerializers_ != null;
         Stanza stanza = (Stanza) element;
-        XMLElement stanzaElement = new XMLElement(tag_);
+        XMLElement stanzaElement = new XMLElement(tag_, (explicitDefaultNS_ != null) ? explicitDefaultNS_ : xmlns);
         if (stanza.getFrom() != null && stanza.getFrom().isValid()) {
             stanzaElement.setAttribute("from", stanza.getFrom().toString());
         }
@@ -53,7 +69,7 @@ public abstract class StanzaSerializer implements ElementSerializer {
         if (serializedPayloads.toString().length()!=0) {
             stanzaElement.addNode(new XMLRawTextNode(serializedPayloads.toString()));
         }
-        return stanzaElement.serialize();
+        return new SafeByteArray(stanzaElement.serialize());
     }
 
     public abstract void setStanzaSpecificAttributes(Element element, XMLElement xmlElement);

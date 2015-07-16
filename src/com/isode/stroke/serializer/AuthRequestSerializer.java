@@ -9,30 +9,30 @@
 
 package com.isode.stroke.serializer;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.elements.AuthRequest;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.stringcodecs.Base64;
 
-class AuthRequestSerializer extends GenericElementSerializer<AuthRequest> {
+public class AuthRequestSerializer extends GenericElementSerializer<AuthRequest> {
 
     public AuthRequestSerializer() {
         super(AuthRequest.class);
     }
 
-    public String serialize(Element element) {
+    public SafeByteArray serialize(Element element) {
         AuthRequest authRequest = (AuthRequest)element;
-	String value = "";
-	ByteArray message = authRequest.getMessage();
+	SafeByteArray value = new SafeByteArray();
+	SafeByteArray message = authRequest.getMessage();
 	if (message != null) {
 		if (message.isEmpty()) {
-			value = "=";
+			value = new SafeByteArray("=");
 		}
 		else {
 			value = Base64.encode(message);
 		}
 	}
-	return "<auth xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\" mechanism=\"" + authRequest.getMechanism() + "\">" + value + "</auth>";
+	return new SafeByteArray("<auth xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\" mechanism=\"" + authRequest.getMechanism() + "\">").append(value).append("</auth>");
     }
 
 }

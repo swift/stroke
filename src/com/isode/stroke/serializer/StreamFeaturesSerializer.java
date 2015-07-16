@@ -16,6 +16,7 @@ import com.isode.stroke.serializer.xml.XMLElement;
 import com.isode.stroke.serializer.xml.XMLTextNode;
 import com.isode.stroke.elements.StreamFeatures;
 import com.isode.stroke.elements.Element;
+import com.isode.stroke.base.SafeByteArray;
 
 public class StreamFeaturesSerializer extends GenericElementSerializer<StreamFeatures> {
 
@@ -23,7 +24,7 @@ public class StreamFeaturesSerializer extends GenericElementSerializer<StreamFea
 		super(StreamFeatures.class);
 	}
 
-	public String serialize(Element element) {
+	public SafeByteArray serialize(Element element) {
 		StreamFeatures streamFeatures = (StreamFeatures)(element);
 
 		XMLElement streamFeaturesElement = new XMLElement("stream:features");
@@ -60,6 +61,6 @@ public class StreamFeaturesSerializer extends GenericElementSerializer<StreamFea
 		if (streamFeatures.hasRosterVersioning()) {
 			streamFeaturesElement.addNode(new XMLElement("ver", "urn:xmpp:features:rosterver"));
 		}
-		return streamFeaturesElement.serialize();
+		return new SafeByteArray(streamFeaturesElement.serialize());
 	}
 }

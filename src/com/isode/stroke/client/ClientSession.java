@@ -9,6 +9,7 @@
 package com.isode.stroke.client;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.elements.AuthChallenge;
 import com.isode.stroke.elements.AuthFailure;
 import com.isode.stroke.elements.AuthRequest;
@@ -342,7 +343,7 @@ public class ClientSession {
                 if (stream.hasTLSCertificate()) {
                     if (streamFeatures.hasAuthenticationMechanism("EXTERNAL")) {
                         state = State.Authenticating;
-                        stream.writeElement(new AuthRequest("EXTERNAL",new ByteArray()));
+                        stream.writeElement(new AuthRequest("EXTERNAL",new SafeByteArray()));
                     }
                     else {
                         finishSession(Error.Type.TLSClientCertificateError);
@@ -350,7 +351,7 @@ public class ClientSession {
                 }
                 else if (streamFeatures.hasAuthenticationMechanism("EXTERNAL")) {
                     state = State.Authenticating;
-                    stream.writeElement(new AuthRequest("EXTERNAL",new ByteArray()));
+                    stream.writeElement(new AuthRequest("EXTERNAL",new SafeByteArray()));
                 }
                 else if (streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1") || streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS")) {
                     final SCRAMSHA1ClientAuthenticator scramAuthenticator = new SCRAMSHA1ClientAuthenticator(UUID.randomUUID().toString(), streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS"));

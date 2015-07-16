@@ -11,18 +11,19 @@ package com.isode.stroke.serializer;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.StanzaAck;
 import com.isode.stroke.serializer.xml.XMLElement;
+import com.isode.stroke.base.SafeByteArray;
 
-class StanzaAckSerializer extends GenericElementSerializer<StanzaAck> {
+public class StanzaAckSerializer extends GenericElementSerializer<StanzaAck> {
 
     public StanzaAckSerializer() {
         super(StanzaAck.class);
     }
 
-    public String serialize(Element element) {
+    public SafeByteArray serialize(Element element) {
         StanzaAck stanzaAck = (StanzaAck) element;
         assert stanzaAck.isValid();
         XMLElement result = new XMLElement("a", "urn:xmpp:sm:2");
         result.setAttribute("h", Long.toString(stanzaAck.getHandledStanzasCount()));
-        return result.serialize();
+        return new SafeByteArray(result.serialize());
     }
 }

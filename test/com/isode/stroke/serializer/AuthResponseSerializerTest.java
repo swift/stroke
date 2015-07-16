@@ -16,6 +16,7 @@ import org.junit.Test;
 import com.isode.stroke.serializer.AuthResponseSerializer;
 import com.isode.stroke.elements.AuthResponse;
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 
 public class AuthResponseSerializerTest {
 
@@ -30,12 +31,12 @@ public class AuthResponseSerializerTest {
 	public void testSerialize() {
 		AuthResponseSerializer testling = new AuthResponseSerializer();
 		AuthResponse authResponse = new AuthResponse();
-		authResponse.setValue(new ByteArray("foo"));
+		authResponse.setValue(new SafeByteArray("foo"));
 
 		assertEquals(
-			"<response xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
+			new SafeByteArray("<response xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
 				"Zm9v" +
-			"</response>", testling.serialize(authResponse));
+			"</response>"), testling.serialize(authResponse));
 	}
 
 	@Test
@@ -44,19 +45,19 @@ public class AuthResponseSerializerTest {
 		AuthResponse authResponse = new AuthResponse();
 
 		assertEquals(
-			"<response xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
-			"</response>", testling.serialize(authResponse));
+			new SafeByteArray("<response xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
+			"</response>"), testling.serialize(authResponse));
 	}
 
 	@Test
 	public void testSerialize_EmptyMessage() {
 		AuthResponseSerializer testling = new AuthResponseSerializer();
 		AuthResponse authResponse = new AuthResponse();
-		authResponse.setValue(new ByteArray());
+		authResponse.setValue(new SafeByteArray());
 
 		assertEquals(
-			"<response xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
+			new SafeByteArray("<response xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
 				"" +
-			"</response>", testling.serialize(authResponse));
+			"</response>"), testling.serialize(authResponse));
 	}
 }

@@ -9,8 +9,13 @@ import com.isode.stroke.elements.Presence;
 import com.isode.stroke.serializer.xml.XMLElement;
 
 public class PresenceSerializer extends GenericStanzaSerializer<Presence> {
+
 public PresenceSerializer(PayloadSerializerCollection payloadSerializers) {
-    super(Presence.class, "presence", payloadSerializers);
+    this(payloadSerializers, null);
+}
+
+public PresenceSerializer(PayloadSerializerCollection payloadSerializers, String explicitNS) {
+    super(Presence.class, "presence", payloadSerializers, explicitNS);
 }
 
     @Override

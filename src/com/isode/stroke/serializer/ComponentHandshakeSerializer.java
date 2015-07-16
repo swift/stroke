@@ -14,6 +14,7 @@ package com.isode.stroke.serializer;
 import com.isode.stroke.serializer.GenericElementSerializer;
 import com.isode.stroke.elements.ComponentHandshake;
 import com.isode.stroke.elements.Element;
+import com.isode.stroke.base.SafeByteArray;
 
 public class ComponentHandshakeSerializer extends GenericElementSerializer<ComponentHandshake> {
 
@@ -21,8 +22,8 @@ public class ComponentHandshakeSerializer extends GenericElementSerializer<Compo
 		super(ComponentHandshake.class);
 	}
 
-	public String serialize(Element element) {
+	public SafeByteArray serialize(Element element) {
 		ComponentHandshake handshake = (ComponentHandshake)(element);
-		return ("<handshake>" + handshake.getData() + "</handshake>");
+		return new SafeByteArray("<handshake>" + handshake.getData() + "</handshake>");
 	}
 }

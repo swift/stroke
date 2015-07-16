@@ -41,11 +41,11 @@ public class ForwardedSerializer extends GenericPayloadSerializer<Forwarded> {
     
         if (payload.getStanza() != null) { /* find out what type of stanza we are dealing with and branch into the correct serializer */
             if (payload.getStanza() instanceof IQ) {
-                element.addNode(new XMLRawTextNode((new IQSerializer(serializers_)).serialize((IQ)payload.getStanza())));
+                element.addNode(new XMLRawTextNode((new IQSerializer(serializers_)).serialize((IQ)payload.getStanza()).toString()));
             } else if (payload.getStanza() instanceof Message) {
-                element.addNode(new XMLRawTextNode((new MessageSerializer(serializers_)).serialize((Message)payload.getStanza())));
+                element.addNode(new XMLRawTextNode((new MessageSerializer(serializers_)).serialize((Message)payload.getStanza()).toString()));
             } else if (payload.getStanza() instanceof Presence) {
-                element.addNode(new XMLRawTextNode((new PresenceSerializer(serializers_)).serialize((Presence)payload.getStanza())));
+                element.addNode(new XMLRawTextNode((new PresenceSerializer(serializers_)).serialize((Presence)payload.getStanza()).toString()));
             }
         }
     

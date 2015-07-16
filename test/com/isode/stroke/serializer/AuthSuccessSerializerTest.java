@@ -16,6 +16,7 @@ import org.junit.Test;
 import com.isode.stroke.serializer.AuthSuccessSerializer;
 import com.isode.stroke.elements.AuthSuccess;
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 
 public class AuthSuccessSerializerTest {
 
@@ -33,9 +34,9 @@ public class AuthSuccessSerializerTest {
 		authSuccess.setValue(new ByteArray("foo"));
 
 		assertEquals(
-			"<success xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
+			new SafeByteArray("<success xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
 				"Zm9v" +
-			"</success>", testling.serialize(authSuccess));
+			"</success>"), testling.serialize(authSuccess));
 	}
 
 	@Test
@@ -44,8 +45,8 @@ public class AuthSuccessSerializerTest {
 		AuthSuccess authSuccess = new AuthSuccess();
 
 		assertEquals(
-			"<success xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
-			"</success>", testling.serialize(authSuccess));
+			new SafeByteArray("<success xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
+			"</success>"), testling.serialize(authSuccess));
 	}
 
 	@Test
@@ -55,8 +56,8 @@ public class AuthSuccessSerializerTest {
 		authSuccess.setValue(new ByteArray());
 
 		assertEquals(
-			"<success xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
+			new SafeByteArray("<success xmlns=\"urn:ietf:params:xml:ns:xmpp-sasl\">" +
 				"=" +
-			"</success>", testling.serialize(authSuccess));
+			"</success>"), testling.serialize(authSuccess));
 	}
 }

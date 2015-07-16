@@ -12,8 +12,6 @@ import com.isode.stroke.parser.payloadparsers.PubSubOwnerPubSubParser;
 
 public class FullPayloadParserFactoryCollection extends PayloadParserFactoryCollection {
     public FullPayloadParserFactoryCollection() {
-        /* TODO: Port more */
-        //addFactory(new GenericPayloadParserFactory<IBBParser>("", "http://jabber.org/protocol/ibb"));
 	addFactory(new GenericPayloadParserFactory<CarbonsDisableParser>("disable", "urn:xmpp:carbons:2", CarbonsDisableParser.class));
 	addFactory(new GenericPayloadParserFactory<CarbonsEnableParser>("enable", "urn:xmpp:carbons:2", CarbonsEnableParser.class));
 	addFactory(new GenericPayloadParserFactory<CarbonsPrivateParser>("private", "urn:xmpp:carbons:2", CarbonsPrivateParser.class));
@@ -62,7 +60,6 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
     addFactory(new GenericPayloadParserFactory<VCardParser>("vCard", "vcard-temp", VCardParser.class));
 	addFactory(new PrivateStorageParserFactory(this));
     addFactory(new ChatStateParserFactory());
-	//addFactory(new DelayParserFactory());
 	addFactory(new MUCUserPayloadParserFactory(this));
 	addFactory(new MUCOwnerPayloadParserFactory(this));
 	addFactory(new GenericPayloadParserFactory<MUCInvitationPayloadParser>("x", 

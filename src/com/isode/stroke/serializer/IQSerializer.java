@@ -14,7 +14,11 @@ import com.isode.stroke.serializer.xml.XMLElement;
 public class IQSerializer extends GenericStanzaSerializer<IQ> {
 
     public IQSerializer(PayloadSerializerCollection payloadSerializers) {
-        super(IQ.class, "iq", payloadSerializers);
+        this(payloadSerializers, null);
+    }
+
+    public IQSerializer(PayloadSerializerCollection payloadSerializers, String explicitNS) {
+        super(IQ.class, "iq", payloadSerializers, explicitNS);
     }
 
     @Override

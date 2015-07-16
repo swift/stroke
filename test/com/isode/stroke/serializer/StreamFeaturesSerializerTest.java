@@ -15,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import com.isode.stroke.serializer.StreamFeaturesSerializer;
 import com.isode.stroke.elements.StreamFeatures;
+import com.isode.stroke.base.SafeByteArray;
 
 public class StreamFeaturesSerializerTest {
 
@@ -40,7 +41,7 @@ public class StreamFeaturesSerializerTest {
 		streamFeatures.setHasRosterVersioning();
 
 		assertEquals(
-		"<stream:features>"
+		new SafeByteArray("<stream:features>"
 	+		"<starttls xmlns=\"urn:ietf:params:xml:ns:xmpp-tls\"/>"
 	+		"<compression xmlns=\"http://jabber.org/features/compress\">"
 	+			"<method>zlib</method>"
@@ -54,6 +55,6 @@ public class StreamFeaturesSerializerTest {
 	+		"<session xmlns=\"urn:ietf:params:xml:ns:xmpp-session\"/>"
 	+		"<sm xmlns=\"urn:xmpp:sm:2\"/>"
 	+		"<ver xmlns=\"urn:xmpp:features:rosterver\"/>"
-	+	"</stream:features>", testling.serialize(streamFeatures));
+	+	"</stream:features>"), testling.serialize(streamFeatures));
 	}
 }

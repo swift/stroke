@@ -12,17 +12,18 @@ import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.ProtocolHeader;
 import com.isode.stroke.elements.StreamType;
 import java.util.Vector;
+import com.isode.stroke.base.SafeByteArray;
 
 public class XMPPSerializer {
 
     private final Vector<ElementSerializer> serializers_ = new Vector<ElementSerializer>();
     private final StreamType type_;
 
-    public XMPPSerializer(PayloadSerializerCollection payloadSerializers, StreamType type) {
+    public XMPPSerializer(PayloadSerializerCollection payloadSerializers, StreamType type, boolean setExplictNSonTopLevelElements) {
         type_ = type;
-        serializers_.add(new PresenceSerializer(payloadSerializers));
-	serializers_.add(new IQSerializer(payloadSerializers));
-	serializers_.add(new MessageSerializer(payloadSerializers));
+        serializers_.add(new PresenceSerializer(payloadSerializers, setExplictNSonTopLevelElements ? getDefaultNamespace() : null));
+	serializers_.add(new IQSerializer(payloadSerializers, setExplictNSonTopLevelElements ? getDefaultNamespace() : null));
+	serializers_.add(new MessageSerializer(payloadSerializers, setExplictNSonTopLevelElements ? getDefaultNamespace() : null));
 	serializers_.add(new CompressRequestSerializer());
 	serializers_.add(new CompressFailureSerializer());
 	serializers_.add(new AuthRequestSerializer());
@@ -33,8 +34,8 @@ public class XMPPSerializer {
 	serializers_.add(new StartTLSRequestSerializer());
 	serializers_.add(new StartTLSFailureSerializer());
 	serializers_.add(new TLSProceedSerializer());
-	//serializers_.add(new StreamFeaturesSerializer()); //TODO: Port
-        //serializers_.add(new StreamErrorSerializer()); //FIXME!!!: Port
+	serializers_.add(new StreamFeaturesSerializer());
+    serializers_.add(new StreamErrorSerializer());
 	serializers_.add(new EnableStreamManagementSerializer());
 	serializers_.add(new StreamManagementEnabledSerializer());
 	serializers_.add(new StreamManagementFailedSerializer());
@@ -42,7 +43,7 @@ public class XMPPSerializer {
 	serializers_.add(new StreamResumedSerializer());
 	serializers_.add(new StanzaAckSerializer());
 	serializers_.add(new StanzaAckRequestSerializer());
-	//serializers_.add(new ComponentHandshakeSerializer());
+	serializers_.add(new ComponentHandshakeSerializer());
     }
 
     public String serializeHeader(ProtocolHeader header) {
@@ -80,7 +81,7 @@ public class XMPPSerializer {
         return "";
     }
 
-    public String serializeElement(Element element) {
+    public SafeByteArray serializeElement(Element element) {
         for (ElementSerializer serializer : serializers_) {
             if (serializer.canSerialize(element)) {
                 return serializer.serialize(element);

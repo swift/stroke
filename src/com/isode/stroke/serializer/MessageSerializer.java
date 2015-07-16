@@ -11,7 +11,11 @@ import com.isode.stroke.serializer.xml.XMLElement;
 public class MessageSerializer extends GenericStanzaSerializer<Message>{
 
     public MessageSerializer(PayloadSerializerCollection payloadSerializers) {
-        super(Message.class, "message", payloadSerializers);
+        this(payloadSerializers, null);
+    }
+
+    public MessageSerializer(PayloadSerializerCollection payloadSerializers, String explicitNS) {
+        super(Message.class, "message", payloadSerializers, explicitNS);
     }
 
     @Override

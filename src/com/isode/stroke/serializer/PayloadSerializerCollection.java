@@ -21,6 +21,12 @@ public class PayloadSerializerCollection {
         }
     }
 
+    public void removeSerializer(PayloadSerializer serializer) {
+        while(serializers_.contains(serializer)) {
+            serializers_.remove(serializer);
+        }
+    }
+
     public PayloadSerializer getPayloadSerializer(Payload payload) {
         synchronized (serializers_) {
             for (PayloadSerializer serializer : serializers_) {

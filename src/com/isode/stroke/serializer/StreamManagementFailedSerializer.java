@@ -12,15 +12,16 @@ package com.isode.stroke.serializer;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.StreamManagementFailed;
 import com.isode.stroke.serializer.xml.XMLElement;
+import com.isode.stroke.base.SafeByteArray;
 
-class StreamManagementFailedSerializer extends GenericElementSerializer<StreamManagementFailed> {
+public class StreamManagementFailedSerializer extends GenericElementSerializer<StreamManagementFailed> {
 
     public StreamManagementFailedSerializer() {
         super(StreamManagementFailed.class);
     }
 
-    public String serialize(Element element) {
-        return new XMLElement("failed", "urn:xmpp:sm:2").serialize();
+    public SafeByteArray serialize(Element element) {
+        return new SafeByteArray(new XMLElement("failed", "urn:xmpp:sm:2").serialize());
     }
 
 }
