@@ -1,5 +1,5 @@
 <!--
- * Copyright (c) 2010-2013, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  -->
 <project name="Stroke" default="dist" basedir=".">
@@ -199,7 +199,11 @@
     <delete dir="${doc}"/>
     <delete dir="${coveragereport.dir}"/>
     <delete dir="${cobertura.dir}"/>
-
+    <delete>
+         <fileset dir="${src.tests}">
+           <include name="**/*.class"/>
+         </fileset>
+    </delete>
   </target>
 
   <target name="javadoc" depends="init">
