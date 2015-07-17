@@ -49,6 +49,10 @@
   <target name="-compile-with-examples" depends="init"
         description="compile the source, including examples "
         unless="noexamples">
+        <depend
+                srcdir="${src}"
+                destdir="${build}"
+                closure="yes"/>
     <javac srcdir="${src}" destdir="${build}" classpathref="classpath"
 	   debug="${compile.debug}" 
            source="1.6" 
@@ -60,6 +64,10 @@
   <target name="-compile-without-examples" depends="init"
         description="compile the source, excluding examples "
         if="noexamples">
+        <depend
+                srcdir="${src}"
+                destdir="${build}"
+                closure="yes"/>
     <javac srcdir="${src}" destdir="${build}" classpathref="classpath"
 	   debug="${compile.debug}" 
            source="1.6" 
@@ -96,6 +104,11 @@
 
   <target name="compile-tests" depends="dist"
         description="compile the test sources " >
+    <depend
+            srcdir="${src.tests}"
+            classpath="${jar}"
+            destdir="${src.tests}"
+            closure="yes"/>
     <javac srcdir="${src.tests}" destdir="${src.tests}"
 	   debug="${compile.debug}"
            source="1.6" 
