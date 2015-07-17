@@ -4,7 +4,7 @@
  */
 package com.isode.stroke.streamstack;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.network.Connection;
 import com.isode.stroke.signals.Slot1;
 
@@ -12,15 +12,15 @@ public class ConnectionLayer implements LowLayer {
 
     public ConnectionLayer(Connection connection) {
         this.connection = connection;
-        connection.onDataRead.connect(new Slot1<ByteArray>() {
+        connection.onDataRead.connect(new Slot1<SafeByteArray>() {
 
-            public void call(ByteArray p1) {
+            public void call(SafeByteArray p1) {
                 writeDataToParentLayer(p1);
             }
         });
     }
 
-    public void writeData(ByteArray data) {
+    public void writeData(SafeByteArray data) {
         connection.write(data);
     }
 
@@ -29,11 +29,11 @@ public class ConnectionLayer implements LowLayer {
     /* Work around multiple inheritance workaround again */
     StreamLayer fakeStreamLayer_ = new StreamLayer() {
 
-        public void writeData(ByteArray data) {
+        public void writeData(SafeByteArray data) {
             connection.write(data);
         }
 
-        public void handleDataRead(ByteArray data) {
+        public void handleDataRead(SafeByteArray data) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     };
@@ -46,7 +46,7 @@ public class ConnectionLayer implements LowLayer {
         fakeStreamLayer_.setParentLayer(parentLayer);
     }
 
-    public void writeDataToParentLayer(ByteArray data) {
+    public void writeDataToParentLayer(SafeByteArray data) {
         fakeStreamLayer_.writeDataToParentLayer(data);
     }
 }

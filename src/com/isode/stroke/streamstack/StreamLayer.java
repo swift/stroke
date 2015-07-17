@@ -9,7 +9,7 @@
 
 package com.isode.stroke.streamstack;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 
 /**
  * Because of the lack of multiple inheritance in Java, this implements
@@ -26,7 +26,7 @@ public abstract class StreamLayer implements LowLayer, HighLayer {
         this.parentLayer = parentLayer;
     }
 
-    public void writeDataToParentLayer(final ByteArray data) {
+    public void writeDataToParentLayer(final SafeByteArray data) {
         assert parentLayer != null;
         parentLayer.handleDataRead(data);
     }
@@ -39,7 +39,7 @@ public abstract class StreamLayer implements LowLayer, HighLayer {
         this.childLayer = childLayer;
     }
 
-    public void writeDataToChildLayer(final ByteArray data) {
+    public void writeDataToChildLayer(final SafeByteArray data) {
         assert childLayer != null;
         childLayer.writeData(data);
     }

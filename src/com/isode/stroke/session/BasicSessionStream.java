@@ -10,6 +10,7 @@ package com.isode.stroke.session;
 import java.util.List;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.ProtocolHeader;
 import com.isode.stroke.elements.StreamType;
@@ -71,15 +72,15 @@ public class BasicSessionStream extends SessionStream {
                 handleXMPPError();
             }
         });
-        xmppLayer.onDataRead.connect(new Slot1<ByteArray>() {
+        xmppLayer.onDataRead.connect(new Slot1<SafeByteArray>() {
 
-            public void call(ByteArray p1) {
+            public void call(SafeByteArray p1) {
                 handleDataRead(p1);
             }
         });
-        xmppLayer.onWriteData.connect(new Slot1<ByteArray>() {
+        xmppLayer.onWriteData.connect(new Slot1<SafeByteArray>() {
 
-            public void call(ByteArray p1) {
+            public void call(SafeByteArray p1) {
                 handleDataWritten(p1);
             }
         });

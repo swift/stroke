@@ -12,6 +12,7 @@ package com.isode.stroke.tls;
 import java.util.List;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Signal1;
 
@@ -21,8 +22,8 @@ public abstract class TLSContext {
 
     public abstract boolean setClientCertificate(CertificateWithKey cert);
 
-    public abstract void handleDataFromNetwork(ByteArray data);
-    public abstract void handleDataFromApplication(ByteArray data);
+    public abstract void handleDataFromNetwork(SafeByteArray data);
+    public abstract void handleDataFromApplication(SafeByteArray data);
 
     /**
      * The peer certificate, as presented by the remote entity
@@ -38,8 +39,8 @@ public abstract class TLSContext {
 
     public abstract ByteArray getFinishMessage();
 
-    public Signal1<ByteArray> onDataForNetwork = new Signal1<ByteArray>();
-    public Signal1<ByteArray> onDataForApplication = new Signal1<ByteArray>();
+    public Signal1<SafeByteArray> onDataForNetwork = new Signal1<SafeByteArray>();
+    public Signal1<SafeByteArray> onDataForApplication = new Signal1<SafeByteArray>();
     public Signal onError = new Signal();
     public Signal onConnected = new Signal();
 }

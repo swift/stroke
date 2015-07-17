@@ -45,6 +45,7 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.X509ExtendedKeyManager;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.tls.CAPICertificate;
 import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateVerificationError;
@@ -238,7 +239,7 @@ public class JSSEContext extends TLSContext {
         int bytesToUnwrap = 0;
         int lastConsumed = 0;
         HandshakeStatus handshakeStatus = null;
-        ByteArray byteArray = null;
+        SafeByteArray byteArray = null;
 
         synchronized(recvMutex) {
             try {
@@ -353,7 +354,7 @@ public class JSSEContext extends TLSContext {
                 byte[] result = new byte[unwrappedReceived.remaining()];
                 unwrappedReceived.get(result);
                 unwrappedReceived.compact();
-                byteArray = new ByteArray(result);
+                byteArray = new SafeByteArray(result);
             }
 
         }
@@ -377,7 +378,7 @@ public class JSSEContext extends TLSContext {
     private int wrapAndSendData() {
 
         int bytesSentToSocket = 0;
-        ByteArray byteArray = null;
+        SafeByteArray byteArray = null;
         SSLEngineResult sslEngineResult = null;
         Status status = null;
         HandshakeStatus handshakeStatus = null;
@@ -394,7 +395,7 @@ public class JSSEContext extends TLSContext {
             if (wrappedToSend.hasRemaining()) {
                 byte[] b = new byte[(wrappedToSend.remaining())];
                 wrappedToSend.get(b);
-                byteArray = new ByteArray(b);
+                byteArray = new SafeByteArray(b);
             }
             wrappedToSend.compact();
         } /* end synchronized */
@@ -480,7 +481,7 @@ public class JSSEContext extends TLSContext {
                 if (wrappedToSend.hasRemaining()) {
                     byte[] b = new byte[(wrappedToSend.remaining())];
                     wrappedToSend.get(b);
-                    byteArray = new ByteArray(b);
+                    byteArray = new SafeByteArray(b);
                 }
                 wrappedToSend.compact();
                 break;
@@ -917,7 +918,7 @@ public class JSSEContext extends TLSContext {
     }
 
     @Override
-    public void handleDataFromNetwork(ByteArray data) {
+    public void handleDataFromNetwork(SafeByteArray data) {
         if (hasError()) {
             /* We have previously seen, and reported, an error.  Emit again */
             onError.emit();        
@@ -995,7 +996,7 @@ public class JSSEContext extends TLSContext {
     }
 
     @Override
-    public void handleDataFromApplication(ByteArray data) {
+    public void handleDataFromApplication(SafeByteArray data) {
         if (hasError()) {
             /* We have previously seen, and reported, an error.  Emit again */
             onError.emit();        

@@ -9,7 +9,7 @@
  */
 package com.isode.stroke.compress;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.jcraft.jzlib.JZlib;
 import com.jcraft.jzlib.ZStream;
 
@@ -17,8 +17,8 @@ public abstract class ZLibCodecompressor {
     protected static final int CHUNK_SIZE = 1024;
     protected final ZStream stream_ = new ZStream();
 
-    public ByteArray process(ByteArray input) throws ZLibException {
-        ByteArray output = new ByteArray();
+    public SafeByteArray process(SafeByteArray input) throws ZLibException {
+        SafeByteArray output = new SafeByteArray();
 	stream_.avail_in = input.getSize();
 	stream_.next_in = input.getData();
         stream_.next_in_index = 0;

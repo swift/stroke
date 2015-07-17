@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.eventloop.Event.Callback;
 import com.isode.stroke.eventloop.EventLoop;
 import com.isode.stroke.eventloop.EventOwner;
@@ -30,16 +31,16 @@ public class JavaConnection extends Connection implements EventOwner {
      * got closed.
      */
     private static class ReadResult {
-        public ByteArray dataRead_;
+        public SafeByteArray dataRead_;
         public boolean socketClosed_;
 
         ReadResult(boolean socketClosed) {
-            dataRead_ = new ByteArray();
+            dataRead_ = new SafeByteArray();
             socketClosed_ = socketClosed;
         }
 
         ReadResult(ByteArrayOutputStream byteArrayOutputStream, boolean socketClosed) {
-            dataRead_ = new ByteArray(byteArrayOutputStream.toByteArray());
+            dataRead_ = new SafeByteArray(byteArrayOutputStream.toByteArray());
             socketClosed_ = socketClosed;
         }
     }
@@ -95,7 +96,7 @@ public class JavaConnection extends Connection implements EventOwner {
                     }
 
                     { /* Handle any reading */
-                        ByteArray dataRead;
+                        SafeByteArray dataRead;
 
                         if (readNeeded) {
                             ReadResult rr = doRead();
@@ -299,7 +300,7 @@ public class JavaConnection extends Connection implements EventOwner {
             }
         }
 
-        private void handleDataRead(final ByteArray data) {
+        private void handleDataRead(final SafeByteArray data) {
             if (synchroniseReads_) {
                 selectionKey_.interestOps(0);
             }
@@ -372,7 +373,7 @@ public class JavaConnection extends Connection implements EventOwner {
     }
 
     @Override
-    public void write(ByteArray data) {
+    public void write(SafeByteArray data) {
         worker_.writeBuffer_.add(data.getData());
         // Check "isOpen" to Avoid Android crash see
         //   https://code.google.com/p/android/issues/detail?id=80785

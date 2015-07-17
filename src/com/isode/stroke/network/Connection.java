@@ -9,7 +9,7 @@
  */
 package com.isode.stroke.network;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Signal1;
 
@@ -30,11 +30,11 @@ public abstract class Connection {
 
     public abstract void disconnect();
 
-    public abstract void write(ByteArray data);
+    public abstract void write(SafeByteArray data);
 
     public abstract HostAddressPort getLocalAddress();
     public final Signal1<Boolean /*error*/> onConnectFinished = new Signal1<Boolean>();
     public final Signal1<Error> onDisconnected = new Signal1<Error>();
-    public final Signal1<ByteArray> onDataRead = new Signal1<ByteArray>();
+    public final Signal1<SafeByteArray> onDataRead = new Signal1<SafeByteArray>();
     public final Signal onDataWritten = new Signal();
 }

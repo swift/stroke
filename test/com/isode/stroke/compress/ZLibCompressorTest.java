@@ -9,7 +9,7 @@
  */
 package com.isode.stroke.compress;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.stringcodecs.Hexify;
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
@@ -27,7 +27,7 @@ public class ZLibCompressorTest {
     @Test
     public void testProcess() throws Exception {
         ZLibCompressor testling = new ZLibCompressor();
-        ByteArray result = testling.process(new ByteArray("foo"));
+        SafeByteArray result = testling.process(new SafeByteArray("foo"));
 
         assertEquals("78da4acbcf07000000ffff", Hexify.hexify(result));
     }
@@ -35,14 +35,14 @@ public class ZLibCompressorTest {
     @Test
     public void testProcess_Twice() throws ZLibException {
         ZLibCompressor testling = new ZLibCompressor();
-        testling.process(new ByteArray("foo"));
-        ByteArray result = testling.process(new ByteArray("bar"));
+        testling.process(new SafeByteArray("foo"));
+        SafeByteArray result = testling.process(new SafeByteArray("bar"));
 
         assertEquals("4a4a2c02000000ffff", Hexify.hexify(result));
     }
 
-    public static ByteArray unhex(String string) {
+    public static SafeByteArray unhex(String string) {
         HexBinaryAdapter adaptor = new HexBinaryAdapter();
-        return new ByteArray(adaptor.unmarshal(string));
+        return new SafeByteArray(adaptor.unmarshal(string));
     }
 }

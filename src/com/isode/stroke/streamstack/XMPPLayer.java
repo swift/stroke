@@ -4,7 +4,7 @@
  */
 package com.isode.stroke.streamstack;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.ProtocolHeader;
 import com.isode.stroke.elements.StreamType;
@@ -25,8 +25,8 @@ import com.isode.stroke.signals.Signal1;
 public class XMPPLayer implements HighLayer, XMPPParserClient {
     public final Signal1<ProtocolHeader> onStreamStart = new Signal1<ProtocolHeader>();
     public final Signal1<Element> onElement = new Signal1<Element>();
-    public final Signal1<ByteArray> onWriteData = new Signal1<ByteArray>();
-    public final Signal1<ByteArray> onDataRead = new Signal1<ByteArray>();
+    public final Signal1<SafeByteArray> onWriteData = new Signal1<SafeByteArray>();
+    public final Signal1<SafeByteArray> onDataRead = new Signal1<SafeByteArray>();
     public final Signal onError = new Signal();
 
     private PayloadParserFactoryCollection payloadParserFactories_;
@@ -59,19 +59,19 @@ public class XMPPLayer implements HighLayer, XMPPParserClient {
     }
 
     public void writeHeader(ProtocolHeader header) {
-        writeDataInternal(new ByteArray(xmppSerializer_.serializeHeader(header)));
+        writeDataInternal(new SafeByteArray(xmppSerializer_.serializeHeader(header)));
     }
 
     public void writeFooter() {
-        writeDataInternal(new ByteArray(xmppSerializer_.serializeFooter()));
+        writeDataInternal(new SafeByteArray(xmppSerializer_.serializeFooter()));
     }
 
     public void writeElement(Element element) {
-        writeDataInternal(new ByteArray(xmppSerializer_.serializeElement(element)));
+        writeDataInternal(new SafeByteArray(xmppSerializer_.serializeElement(element)));
     }
 
     public void writeData(String data) {
-        writeDataInternal(new ByteArray(data));
+        writeDataInternal(new SafeByteArray(data));
     }
 
     public void resetParser() {
@@ -87,11 +87,11 @@ public class XMPPLayer implements HighLayer, XMPPParserClient {
      * Should be protected, but can't because of interface implementation.
      * @param data
      */
-    public void handleDataRead(ByteArray data) {
+    public void handleDataRead(SafeByteArray data) {
         handleDataReadInternal(data);
     }
 
-    protected void writeDataInternal(ByteArray data) {
+    protected void writeDataInternal(SafeByteArray data) {
         onWriteData.emit(data);
         writeDataToChildLayer(data);
     }
@@ -115,16 +115,16 @@ public class XMPPLayer implements HighLayer, XMPPParserClient {
     /* Multiple-inheritance workarounds */
 
     private StreamLayer fakeStreamLayer_ = new StreamLayer() {
-        public void writeData(ByteArray data) {
+        public void writeData(SafeByteArray data) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
-        public void handleDataRead(ByteArray data) {
+        public void handleDataRead(SafeByteArray data) {
             handleDataReadInternal(data);
         }
     };
 
-    private void handleDataReadInternal(ByteArray data) {
+    private void handleDataReadInternal(SafeByteArray data) {
         onDataRead.emit(data);
         inParser_ = true;
         if(!xmppParser_.parse(data.toString())) {
@@ -146,7 +146,7 @@ public class XMPPLayer implements HighLayer, XMPPParserClient {
         fakeStreamLayer_.setChildLayer(childLayer);
     }
 
-    public void writeDataToChildLayer(ByteArray data) {
+    public void writeDataToChildLayer(SafeByteArray data) {
         fakeStreamLayer_.writeDataToChildLayer(data);
     }
 }

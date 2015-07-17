@@ -9,29 +9,29 @@
  */
 package com.isode.stroke.session;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.signals.Slot1;
 
 public class SessionTracer {
 
     public SessionTracer(Session session) {
         this.session = session;
-        session.onDataRead.connect(new Slot1<ByteArray>() {
+        session.onDataRead.connect(new Slot1<SafeByteArray>() {
 
-            public void call(ByteArray p1) {
+            public void call(SafeByteArray p1) {
                 printData('<', p1);
             }
         });
 
-        session.onDataWritten.connect(new Slot1<ByteArray>() {
+        session.onDataWritten.connect(new Slot1<SafeByteArray>() {
 
-            public void call(ByteArray p1) {
+            public void call(SafeByteArray p1) {
                 printData('>', p1);
             }
         });
     }
 
-    private void printData(char direction, ByteArray data) {
+    private void printData(char direction, SafeByteArray data) {
         System.err.print("" + direction + direction + " " + session.getLocalJID().toString() + " ");
         for (int i = 0; i < 72 - session.getLocalJID().toString().length() - session.getRemoteJID().toString().length(); ++i) {
             System.err.print(direction);

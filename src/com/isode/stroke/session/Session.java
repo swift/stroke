@@ -10,6 +10,7 @@
 package com.isode.stroke.session;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.ProtocolHeader;
 import com.isode.stroke.elements.StreamType;
@@ -81,8 +82,8 @@ public abstract class Session {
     }
     public final Signal1<Element> onElementReceived = new Signal1<Element>();
     public final Signal1<SessionError> onSessionFinished = new Signal1<SessionError>();
-    public final Signal1<ByteArray> onDataWritten = new Signal1<ByteArray>();
-    public final Signal1<ByteArray> onDataRead = new Signal1<ByteArray>();
+    public final Signal1<SafeByteArray> onDataWritten = new Signal1<SafeByteArray>();
+    public final Signal1<SafeByteArray> onDataRead = new Signal1<SafeByteArray>();
 
     protected void setRemoteJID(JID j) {
         remoteJID = j;

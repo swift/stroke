@@ -9,7 +9,7 @@
  */
 package com.isode.stroke.streamstack;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.network.Timer;
 import com.isode.stroke.network.TimerFactory;
 import com.isode.stroke.signals.Slot;
@@ -28,17 +28,17 @@ public class WhitespacePingLayer extends StreamLayer {
         });
     }
 
-    public void writeData(ByteArray data) {
+    public void writeData(SafeByteArray data) {
         writeDataToChildLayer(data);
     }
 
-    public void handleDataRead(ByteArray data) {
+    public void handleDataRead(SafeByteArray data) {
         writeDataToParentLayer(data);
     }
 
     private void handleTimerTick() {
         timer.stop();
-        writeDataToChildLayer(new ByteArray(" "));
+        writeDataToChildLayer(new SafeByteArray(" "));
         timer.start();
     }
 

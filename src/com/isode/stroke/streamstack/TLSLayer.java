@@ -11,7 +11,7 @@ package com.isode.stroke.streamstack;
 
 import java.util.List;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.tls.Certificate;
@@ -24,15 +24,15 @@ public class TLSLayer extends StreamLayer {
 
     public TLSLayer(TLSContextFactory factory) {
         context = factory.createTLSContext();
-        context.onDataForNetwork.connect(new Slot1<ByteArray>() {
+        context.onDataForNetwork.connect(new Slot1<SafeByteArray>() {
 
-            public void call(ByteArray p1) {
+            public void call(SafeByteArray p1) {
                 writeDataToChildLayer(p1);
             }
         });
-        context.onDataForApplication.connect(new Slot1<ByteArray>() {
+        context.onDataForApplication.connect(new Slot1<SafeByteArray>() {
 
-            public void call(ByteArray p1) {
+            public void call(SafeByteArray p1) {
                 writeDataToParentLayer(p1);
             }
         });
@@ -44,11 +44,11 @@ public class TLSLayer extends StreamLayer {
         context.connect();
     }
 
-    public void writeData(ByteArray data) {
+    public void writeData(SafeByteArray data) {
         context.handleDataFromApplication(data);
     }
 
-    public void handleDataRead(ByteArray data) {
+    public void handleDataRead(SafeByteArray data) {
         context.handleDataFromNetwork(data);
     }
 
@@ -72,7 +72,7 @@ public class TLSLayer extends StreamLayer {
         return context;
     }
 
-    public final Signal onError = new Signal();
+    public final Signal onError = new Signal();//needs port
     public final Signal onConnected = new Signal();
 
     private final TLSContext context;

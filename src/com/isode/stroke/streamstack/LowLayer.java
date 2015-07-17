@@ -9,7 +9,7 @@
  */
 package com.isode.stroke.streamstack;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 
 /**
  * Because of the lack of multiple inheritance in Java, this has to be done
@@ -18,7 +18,7 @@ import com.isode.stroke.base.ByteArray;
  */
 public interface LowLayer {
 
-    void writeData(ByteArray data);
+    void writeData(SafeByteArray data);
 
     /* Should be protected */
 
@@ -26,5 +26,5 @@ public interface LowLayer {
 
     void setParentLayer(HighLayer parentLayer);
 
-    void writeDataToParentLayer(ByteArray data);
+    void writeDataToParentLayer(SafeByteArray data);
 }

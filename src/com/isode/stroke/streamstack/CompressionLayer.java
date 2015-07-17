@@ -9,7 +9,7 @@
  */
 package com.isode.stroke.streamstack;
 
-import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.compress.ZLibCompressor;
 import com.isode.stroke.compress.ZLibDecompressor;
 import com.isode.stroke.compress.ZLibException;
@@ -17,7 +17,7 @@ import com.isode.stroke.signals.Signal;
 
 public class CompressionLayer extends StreamLayer {
 
-    public void writeData(ByteArray data) {
+    public void writeData(SafeByteArray data) {
         try {
             writeDataToChildLayer(compressor_.process(data));
         }
@@ -26,7 +26,7 @@ public class CompressionLayer extends StreamLayer {
         }
     }
 
-    public void handleDataRead(ByteArray data) {
+    public void handleDataRead(SafeByteArray data) {
         try {
             writeDataToParentLayer(decompressor_.process(data));
         }
