@@ -49,7 +49,7 @@ public class JavaConnection extends Connection implements EventOwner {
 
         private final HostAddressPort address_;
         private final List<byte[]> writeBuffer_ = Collections.synchronizedList(new ArrayList<byte[]>());
-        private SelectionKey selectionKey_;
+        private volatile SelectionKey selectionKey_;
         private boolean disconnected_ = false;
 
         public Worker(HostAddressPort address) {
@@ -311,7 +311,9 @@ public class JavaConnection extends Connection implements EventOwner {
                     //   https://code.google.com/p/android/issues/detail?id=80785
                     if (synchroniseReads_ && selector_ != null) {
                         synchronized (selectorLock_) {
-                            selectionKey_.interestOps(SelectionKey.OP_READ);
+                            if (selectionKey_.isValid()) {
+                                selectionKey_.interestOps(SelectionKey.OP_READ);
+                            }
                             if (selector_.isOpen()) {
                                 selector_.wakeup();
                             }
