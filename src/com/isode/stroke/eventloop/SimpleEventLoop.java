@@ -26,11 +26,16 @@ public class SimpleEventLoop extends EventLoop {
     
     @Override
     protected void finalize() throws Throwable {
-        synchronized (eventsMutex_) {
-            if (!events_.isEmpty()) {
-                System.err.println("Warning: Pending events in SimpleEventLoop at finalize time");
-            }
-        }
+	try {
+	    synchronized (eventsMutex_) {
+		if (!events_.isEmpty()) {
+		    System.err.println("Warning: Pending events in SimpleEventLoop at finalize time");
+		}
+	    }
+	}
+	finally {
+	    super.finalize();
+	}
     }
     
     public void run() {
