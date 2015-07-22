@@ -10,10 +10,13 @@ package com.isode.stroke.sasl;
 
 import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.base.SafeByteArray;
+import com.ibm.icu.text.StringPrepParseException;
 import com.isode.stroke.stringcodecs.Base64;
 import com.isode.stroke.stringcodecs.HMACSHA1;
 import com.isode.stroke.stringcodecs.PBKDF2;
 import com.isode.stroke.stringcodecs.SHA1;
+import com.isode.stroke.idn.IDNConverter;
+import com.isode.stroke.crypto.CryptoProvider;
 import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.HashMap;
@@ -35,14 +38,13 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
         return result;
     }
 
-    public SCRAMSHA1ClientAuthenticator(String nonce) {
-        this(nonce, false);
-    }
-    public SCRAMSHA1ClientAuthenticator(String nonce, boolean useChannelBinding) {
+    public SCRAMSHA1ClientAuthenticator(String nonce, boolean useChannelBinding, IDNConverter idnConverter, CryptoProvider crypto) {
         super(useChannelBinding ? "SCRAM-SHA-1-PLUS" : "SCRAM-SHA-1");
         step = Step.Initial;
         clientnonce = nonce;
         this.useChannelBinding = useChannelBinding;
+        this.idnConverter = idnConverter;
+        this.crypto = crypto;
     }
 
     public void setTLSChannelBindingData(ByteArray channelBindingData) {
@@ -53,9 +55,9 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
         if (step.equals(Step.Initial)) {
             return new SafeByteArray(getGS2Header().append(getInitialBareClientMessage()));
         } else if (step.equals(Step.Proof)) {
-            ByteArray clientKey = HMACSHA1.getResult(saltedPassword, new ByteArray("Client Key"));
-            ByteArray storedKey = SHA1.getHash(clientKey);
-            ByteArray clientSignature = HMACSHA1.getResult(storedKey, authMessage);
+            ByteArray clientKey = crypto.getHMACSHA1(saltedPassword, new ByteArray("Client Key"));
+            ByteArray storedKey = crypto.getSHA1Hash(clientKey);
+            ByteArray clientSignature = crypto.getHMACSHA1(new SafeByteArray(storedKey), authMessage);
             ByteArray clientProof = clientKey;
             byte[] clientProofData = clientProof.getData();
             for (int i = 0; i < clientProofData.length; ++i) {
@@ -104,16 +106,21 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
                 return false;
             }
 
+            //Not Sure, why this here.
             ByteArray channelBindData = new ByteArray();
             if (useChannelBinding && tlsChannelBindingData != null) {
                 channelBindData = tlsChannelBindingData;
             }
 
             // Compute all the values needed for the server signature
-            saltedPassword = PBKDF2.encode(new ByteArray(SASLPrep(getPassword())), salt, iterations);
+            try {
+                saltedPassword = PBKDF2.encode(idnConverter.getStringPrepared(getPassword(), IDNConverter.StringPrepProfile.SASLPrep), salt, iterations, crypto);         
+            } catch (StringPrepParseException e) {
+
+            }
             authMessage = getInitialBareClientMessage().append(",").append(initialServerMessage).append(",").append(getFinalMessageWithoutProof());
-            ByteArray serverKey = HMACSHA1.getResult(saltedPassword, new ByteArray("Server Key"));
-            serverSignature = HMACSHA1.getResult(serverKey, authMessage);
+            ByteArray serverKey = crypto.getHMACSHA1(saltedPassword, new ByteArray("Server Key"));
+            serverSignature = crypto.getHMACSHA1(serverKey, authMessage);
 
             step = Step.Proof;
             return true;
@@ -124,10 +131,6 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
         } else {
             return true;
         }
-    }
-
-    private String SASLPrep(String source) {
-        return Normalizer.normalize(source, Form.NFKC); /* FIXME: Implement real SASLPrep */
     }
 
     private Map<Character, String> parseMap(String s) {
@@ -157,7 +160,12 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
     }
 
     private ByteArray getInitialBareClientMessage() {
-        String authenticationID = SASLPrep(getAuthenticationID());
+        String authenticationID = "";
+        try {
+            authenticationID = idnConverter.getStringPrepared(getAuthenticationID(), IDNConverter.StringPrepProfile.SASLPrep);
+        } catch (StringPrepParseException e) {
+
+        }
         return new ByteArray("n=" + escape(authenticationID) + ",r=" + clientnonce);
     }
 
@@ -198,4 +206,6 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
     private ByteArray serverSignature = new ByteArray();
     private boolean useChannelBinding;
     private ByteArray tlsChannelBindingData;
+    private IDNConverter idnConverter;
+    private CryptoProvider crypto;    
 }

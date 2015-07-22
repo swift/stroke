@@ -22,7 +22,7 @@ public class Client {
     static boolean debugInfo = false;
     static boolean debugInfoXml = false;
     
-    public Client(String name, JID jid, String password, JavaNetworkFactories networkFactories, final Slot connectCallback) {
+    public Client(String name, JID jid, SafeByteArray password, JavaNetworkFactories networkFactories, final Slot connectCallback) {
         name_ = name;
         connecting_ = true;
         connected_ = false;

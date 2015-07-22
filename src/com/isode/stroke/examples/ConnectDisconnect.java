@@ -13,6 +13,7 @@ import com.isode.stroke.jid.JID;
 import com.isode.stroke.network.JavaNetworkFactories;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.base.SafeByteArray;
 
 /**
  * Simple example.
@@ -66,7 +67,7 @@ public class ConnectDisconnect {
 
     public void go(String args[]) {
         jid = new JID(args[0]);
-        String password = args[1];
+        SafeByteArray password = new SafeByteArray(args[1]);
         DummyEventLoop eventLoop = new DummyEventLoop();
         JavaNetworkFactories factories = new JavaNetworkFactories(eventLoop);
 

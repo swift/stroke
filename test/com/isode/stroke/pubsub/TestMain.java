@@ -40,15 +40,16 @@ import com.isode.stroke.jid.JID;
 import com.isode.stroke.network.JavaNetworkFactories;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot2;
+import com.isode.stroke.base.SafeByteArray;
 
 public class TestMain {
     
     /* begin test parameters */
     static String _server = "stan.isode.net";
     static String _pubJID = "test1@stan.isode.net";
-    static String _pubPass = "password";
+    static SafeByteArray _pubPass = new SafeByteArray("password");
     static String _subJID = "test2@stan.isode.net";
-    static String _subPass = "password";
+    static SafeByteArray _subPass = new SafeByteArray("password");
     static String _pubSubDomain = "pubsub.stan.isode.net";
     static String _pubSubNode = "testnode";
     /* end test parameters */

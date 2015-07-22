@@ -158,7 +158,7 @@ public class StrokeGUI extends javax.swing.JFrame {
             }
            
         };
-        client_ = new CoreClient(JID.fromString(loginJID_.getText()), loginPassword_.getText(), new JavaNetworkFactories(eventLoop));
+        client_ = new CoreClient(JID.fromString(loginJID_.getText()), new SafeByteArray(loginPassword_.getText()), new JavaNetworkFactories(eventLoop));
         System.out.println("Connecting");
         try {
             client_.connect(new ClientOptions());

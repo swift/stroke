@@ -21,11 +21,11 @@ public abstract class ClientAuthenticator {
         return name;
     }
 
-    public void setCredentials(String authcid, String password) {
+    public void setCredentials(String authcid, SafeByteArray password) {
         setCredentials(authcid, password, "");
     }
 
-    public void setCredentials(String authcid, String password, String authzid) {
+    public void setCredentials(String authcid, SafeByteArray password, String authzid) {
         this.authcid = authcid;
         this.password = password;
         this.authzid = authzid;
@@ -43,11 +43,11 @@ public abstract class ClientAuthenticator {
         return authzid;
     }
 
-    public String getPassword() {
+    public SafeByteArray getPassword() {
         return password;
     }
     private String name;
     private String authcid;
-    private String password;
+    private SafeByteArray password;
     private String authzid;
 }

@@ -50,6 +50,10 @@ import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.ServerIdentityVerifier;
+import com.isode.stroke.idn.IDNConverter;
+import com.isode.stroke.idn.ICUConverter;
+import com.isode.stroke.crypto.CryptoProvider;
+import com.isode.stroke.crypto.JavaCryptoProvider;
 
 import java.util.List;
 import java.util.UUID;
@@ -84,6 +88,8 @@ public class ClientSession {
     private StanzaAckResponder stanzaAckResponder_;
     private com.isode.stroke.base.Error error_;
     private CertificateTrustChecker certificateTrustChecker;
+    private IDNConverter idnConverter = new ICUConverter(); //TOPORT: Accomodated later in Constructor.
+    private CryptoProvider crypto = new JavaCryptoProvider(); //TOPORT: Accomodated later in Constructor.
 
     public enum State {
 
@@ -354,7 +360,7 @@ public class ClientSession {
                     stream.writeElement(new AuthRequest("EXTERNAL",new SafeByteArray()));
                 }
                 else if (streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1") || streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS")) {
-                    final SCRAMSHA1ClientAuthenticator scramAuthenticator = new SCRAMSHA1ClientAuthenticator(UUID.randomUUID().toString(), streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS"));
+                    final SCRAMSHA1ClientAuthenticator scramAuthenticator = new SCRAMSHA1ClientAuthenticator(UUID.randomUUID().toString(), streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS"), idnConverter, crypto);
                     if (stream.isTLSEncrypted()) {
                         scramAuthenticator.setTLSChannelBindingData(stream.getTLSFinishMessage());
                     }
@@ -508,7 +514,7 @@ public class ClientSession {
         return true;
     }
 
-    public void sendCredentials(final String password) {
+    public void sendCredentials(final SafeByteArray password) {
         if (!checkState(State.WaitingForCredentials)) {
             throw new IllegalStateException("Asking for credentials when we shouldn't be asked.");
         }

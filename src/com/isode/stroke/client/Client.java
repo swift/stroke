@@ -28,6 +28,7 @@ import com.isode.stroke.roster.XMPPRosterController;
 import com.isode.stroke.roster.XMPPRosterImpl;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.vcards.VCardManager;
+import com.isode.stroke.base.SafeByteArray;
 
 /**
  * Provides the core functionality for writing XMPP client software.
@@ -76,7 +77,7 @@ public class Client extends CoreClient {
      * @param networkFactories An implementation of network interaction, must
      *            not be null.
      */
-    public  Client(final JID jid, final String password, final NetworkFactories networkFactories, Storages storages) {
+    public  Client(final JID jid, final SafeByteArray password, final NetworkFactories networkFactories, Storages storages) {
         super(jid, password, networkFactories);
         
         this.storages = storages;
@@ -111,7 +112,7 @@ public class Client extends CoreClient {
     	pubSubManager = new PubSubManagerImpl(getStanzaChannel(), getIQRouter());
     }
     
-    public  Client(final JID jid, final String password, final NetworkFactories networkFactories) {
+    public  Client(final JID jid, final SafeByteArray password, final NetworkFactories networkFactories) {
         this(jid, password, networkFactories, null);
     }
 

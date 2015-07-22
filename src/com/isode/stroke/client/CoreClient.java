@@ -80,7 +80,7 @@ public class CoreClient {
      */
     public final Signal1<Stanza> onStanzaAcked = new Signal1<Stanza>();
     private JID jid_;
-    private String password_;
+    private SafeByteArray password_;
     private ClientSessionStanzaChannel stanzaChannel_;
     private IQRouter iqRouter_;
     private Connector connector_;
@@ -117,7 +117,7 @@ public class CoreClient {
      * @param networkFactories An implementation of network interaction, must
      *            not be null.
      */
-    public CoreClient(final JID jid, final String password, final NetworkFactories networkFactories) {
+    public CoreClient(final JID jid, final SafeByteArray password, final NetworkFactories networkFactories) {
         jid_ = jid;
         password_ = password;
         disconnectRequested_ = false;
