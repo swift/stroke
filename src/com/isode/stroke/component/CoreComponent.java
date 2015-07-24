@@ -35,6 +35,7 @@ import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.client.StanzaChannel;
+import com.isode.stroke.tls.TLSOptions;
 
 /**
  * The central class for communicating with an XMPP server as a component.
@@ -178,8 +179,7 @@ public class CoreComponent extends Entity {
 			connection_ = connection;
 
 			assert(sessionStream_ == null);
-			//TODO: PORT TLSOPTIONS.
-			sessionStream_ = new BasicSessionStream(StreamType.ComponentStreamType, connection_, getPayloadParserFactories(), getPayloadSerializers(), null, networkFactories.getTimerFactory());
+			sessionStream_ = new BasicSessionStream(StreamType.ComponentStreamType, connection_, getPayloadParserFactories(), getPayloadSerializers(), null, networkFactories.getTimerFactory(), new TLSOptions());
 			onDataReadConnection = sessionStream_.onDataRead.connect(new Slot1<SafeByteArray>() {
 				@Override
 				public void call(SafeByteArray s1) {
@@ -235,8 +235,8 @@ public class CoreComponent extends Entity {
 						break;
 				}
 			}
-			else if(error instanceof SessionStream.Error) {
-				SessionStream.Error actualError = (SessionStream.Error)error;
+			else if(error instanceof SessionStream.SessionStreamError) {
+				SessionStream.SessionStreamError actualError = (SessionStream.SessionStreamError)error;
 				switch(actualError.type) {
 					case ParseError:
 						componentError = new ComponentError(ComponentError.Type.XMLError);

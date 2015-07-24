@@ -11,5 +11,7 @@ package com.isode.stroke.tls;
 
 public interface TLSContextFactory {
     boolean canCreate();
-    TLSContext createTLSContext();
+    TLSContext createTLSContext(TLSOptions tlsOptions);
+    //void setCheckCertificateRevocation(boolean b);
+	//void setDisconnectOnCardRemoval(boolean b);
 }

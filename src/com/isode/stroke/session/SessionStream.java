@@ -6,12 +6,13 @@
  * Copyright (c) 2010-2014, Isode Limited, London, England.
  * All rights reserved.
  */
-package com.isode.stroke.session;
+package com.isode.stroke.session; 
 
 import java.util.List;
 
 import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.Error;
 import com.isode.stroke.elements.Element;
 import com.isode.stroke.elements.ProtocolHeader;
 import com.isode.stroke.signals.Signal;
@@ -22,7 +23,7 @@ import com.isode.stroke.tls.CertificateWithKey;
 
 public abstract class SessionStream {
 
-    public static class Error implements com.isode.stroke.base.Error {
+    public static class SessionStreamError implements Error {
 
         public enum Type {
 
@@ -33,7 +34,7 @@ public abstract class SessionStream {
             ConnectionWriteError
         }
 
-        public Error(Type type) {
+        public SessionStreamError(Type type) {
             this.type = type;
         }
         public final Type type;
@@ -64,7 +65,18 @@ public abstract class SessionStream {
     public abstract void setWhitespacePingEnabled(boolean enabled);
 
     public abstract void resetXMPPParser();
-    
+
+    public abstract void disconnect();
+
+    protected void finalize() throws Throwable {
+        try {
+            disconnect();
+        }
+        finally {
+            super.finalize();
+        }
+    }
+
     public void setTLSCertificate(CertificateWithKey cert) {
         certificate = cert;
     }

@@ -65,11 +65,15 @@ public class ComponentSessionTest {
 		}
 
 		public void close() {
-			onClosed.emit((SessionStream.Error)null);
+			onClosed.emit((SessionStream.SessionStreamError)null);
 		}
 
 		public boolean isOpen() {
 			return available;
+		}
+
+		public void disconnect() {
+
 		}
 
 		public void writeHeader(final ProtocolHeader header) {
@@ -133,7 +137,7 @@ public class ComponentSessionTest {
 		}
 
 		public void breakConnection() {
-			onClosed.emit(new SessionStream.Error(SessionStream.Error.Type.ConnectionReadError));
+			onClosed.emit(new SessionStream.SessionStreamError(SessionStream.SessionStreamError.Type.ConnectionReadError));
 		}
 
 		public void sendStreamStart() {

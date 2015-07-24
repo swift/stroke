@@ -29,6 +29,7 @@ import com.isode.stroke.signals.Slot2;
 import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.CertificateWithKey;
+import com.isode.stroke.tls.TLSOptions;
 
 /**
  * The central class for communicating with an XMPP server.
@@ -246,7 +247,7 @@ public class CoreClient {
             connection_ = connection;
 
             assert (sessionStream_ == null);
-            sessionStream_ = new BasicSessionStream(StreamType.ClientStreamType, connection_, payloadParserFactories_, payloadSerializers_, networkFactories.getTLSContextFactory(), networkFactories.getTimerFactory());
+            sessionStream_ = new BasicSessionStream(StreamType.ClientStreamType, connection_, payloadParserFactories_, payloadSerializers_, networkFactories.getTLSContextFactory(), networkFactories.getTimerFactory(), options.tlsOptions);
             if (certificate_ != null && !certificate_.isNull()) {
                 sessionStream_.setTLSCertificate(certificate_);
             }
@@ -352,8 +353,8 @@ public class CoreClient {
                         break;
                     /* Note: no case clause for "StreamError" */
                 }
-            } else if (error instanceof SessionStream.Error) {
-                SessionStream.Error actualError = (SessionStream.Error) error;
+            } else if (error instanceof SessionStream.SessionStreamError) {
+                SessionStream.SessionStreamError actualError = (SessionStream.SessionStreamError) error;
                 switch (actualError.type) {
                     case ParseError:
                         clientError = new ClientError(ClientError.Type.XMLError);
@@ -373,7 +374,7 @@ public class CoreClient {
                 }
             } else if (error instanceof CertificateVerificationError) {
                 CertificateVerificationError verificationError = (CertificateVerificationError)error;
-                switch (verificationError.type) {
+                switch (verificationError.getType()) {
                     case UnknownError:
                         clientError = new ClientError(ClientError.Type.UnknownCertificateError);
                         break;

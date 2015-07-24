@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.isode.stroke.tls.TLSContext;
+import com.isode.stroke.tls.TLSOptions;
 import com.isode.stroke.tls.TLSContextFactory;
 
 /**
@@ -33,7 +34,7 @@ public class JSSEContextFactory implements TLSContextFactory {
     }
 
     @Override
-    public TLSContext createTLSContext() {
+    public TLSContext createTLSContext(TLSOptions tlsOptions) {
         return new JSSEContext(restrictedCipherSuites);
     }
     

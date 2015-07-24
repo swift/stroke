@@ -29,12 +29,21 @@ public class CertificateVerificationError implements Error {
         RevocationCheckFailed
     }
 
+    public CertificateVerificationError() {
+        this(Type.UnknownError);
+    }
+
     public CertificateVerificationError(Type type) {
         if (type == null) {
             throw new IllegalStateException();
         }
         this.type = type;
     }
-    public final Type type;
+
+    public Type getType() {
+        return type;
+    }
+
+    private final Type type;
 }
 

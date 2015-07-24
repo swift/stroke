@@ -20,6 +20,7 @@ import com.isode.stroke.parser.PayloadParserFactoryCollection;
 import com.isode.stroke.serializer.PayloadSerializerCollection;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.streamstack.CompressionLayer;
 import com.isode.stroke.streamstack.ConnectionLayer;
 import com.isode.stroke.streamstack.StreamStack;
@@ -29,6 +30,8 @@ import com.isode.stroke.streamstack.XMPPLayer;
 import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.TLSContextFactory;
+import com.isode.stroke.tls.TLSOptions;
+import com.isode.stroke.tls.TLSError;
 
 public class BasicSessionStream extends SessionStream {
 
@@ -38,7 +41,8 @@ public class BasicSessionStream extends SessionStream {
             PayloadParserFactoryCollection payloadParserFactories,
             PayloadSerializerCollection payloadSerializers,
             TLSContextFactory tlsContextFactory,
-            TimerFactory timerFactory) {
+            TimerFactory timerFactory,
+            TLSOptions tlsOptions) {
         available = false;
         this.connection = connection;
         this.payloadParserFactories = payloadParserFactories;
@@ -52,40 +56,40 @@ public class BasicSessionStream extends SessionStream {
         this.compressionLayer = null;
         this.tlsLayer = null;
         this.whitespacePingLayer = null;
-
+        this.tlsOptions_ = tlsOptions;
         xmppLayer = new XMPPLayer(payloadParserFactories, payloadSerializers, streamType);
-        xmppLayer.onStreamStart.connect(new Slot1<ProtocolHeader>() {
+        onStreamStartConnection = xmppLayer.onStreamStart.connect(new Slot1<ProtocolHeader>() {
 
             public void call(ProtocolHeader p1) {
                 handleStreamStartReceived(p1);
             }
         });
-        xmppLayer.onElement.connect(new Slot1<Element>() {
+        onElementConnection = xmppLayer.onElement.connect(new Slot1<Element>() {
 
             public void call(Element p1) {
                 handleElementReceived(p1);
             }
         });
-        xmppLayer.onError.connect(new Slot() {
+        onErrorConnection = xmppLayer.onError.connect(new Slot() {
 
             public void call() {
                 handleXMPPError();
             }
         });
-        xmppLayer.onDataRead.connect(new Slot1<SafeByteArray>() {
+        onDataReadConnection = xmppLayer.onDataRead.connect(new Slot1<SafeByteArray>() {
 
             public void call(SafeByteArray p1) {
                 handleDataRead(p1);
             }
         });
-        xmppLayer.onWriteData.connect(new Slot1<SafeByteArray>() {
+        onWriteDataConnection = xmppLayer.onWriteData.connect(new Slot1<SafeByteArray>() {
 
             public void call(SafeByteArray p1) {
                 handleDataWritten(p1);
             }
         });
 
-        connection.onDisconnected.connect(new Slot1<Connection.Error>() {
+        onDisconnectedConnection = connection.onDisconnected.connect(new Slot1<Connection.Error>() {
 
             public void call(Connection.Error p1) {
                 handleConnectionFinished(p1);
@@ -97,6 +101,28 @@ public class BasicSessionStream extends SessionStream {
 
         available = true;
 
+    }
+
+    /**
+    * User will have to call disconnect() method to free up the resources.
+    */
+    @Override
+    public void disconnect() {
+    	if(tlsLayer != null) {
+            onErrorConnection.disconnect();
+            onConnectedConnection.disconnect();
+            tlsLayer = null;
+        }
+        whitespacePingLayer = null;
+        streamStack =  null;
+        onDisconnectedConnection.disconnect();
+        connectionLayer = null;
+        onStreamStartConnection.disconnect();
+        onElementConnection.disconnect();
+        onErrorConnection.disconnect();
+        onDataReadConnection.disconnect();
+        onWriteDataConnection.disconnect();
+        xmppLayer = null;
     }
 
     public void writeHeader(ProtocolHeader header) {
@@ -133,18 +159,18 @@ public class BasicSessionStream extends SessionStream {
 
     public void addTLSEncryption() {
         assert available;
-        tlsLayer = new TLSLayer(tlsContextFactory);
+        tlsLayer = new TLSLayer(tlsContextFactory, tlsOptions_);
         if (hasTLSCertificate() && !tlsLayer.setClientCertificate(getTLSCertificate())) {
-            onClosed.emit(new Error(Error.Type.InvalidTLSCertificateError));
+            onClosed.emit(new SessionStreamError(SessionStreamError.Type.InvalidTLSCertificateError));
         } else {
             streamStack.addLayer(tlsLayer);
-            tlsLayer.onError.connect(new Slot() {
+            onErrorConnection = tlsLayer.onError.connect(new Slot1<TLSError>() {
 
-                public void call() {
-                    handleTLSError();
+                public void call(TLSError e) {
+                    handleTLSError(e);
                 }
             });
-            tlsLayer.onConnected.connect(new Slot() {
+            onConnectedConnection = tlsLayer.onConnected.connect(new Slot() {
 
                 public void call() {
                     handleTLSConnected();
@@ -211,25 +237,25 @@ public class BasicSessionStream extends SessionStream {
 
     private void handleXMPPError() {
         available = false;
-        onClosed.emit(new Error(Error.Type.ParseError));
+        onClosed.emit(new SessionStreamError(SessionStreamError.Type.ParseError));
     }
 
     private void handleTLSConnected() {
         onTLSEncrypted.emit();
     }
 
-    private void handleTLSError() {
+    private void handleTLSError(TLSError error) {
         available = false;
-        onClosed.emit(new Error(Error.Type.TLSError));
+        onClosed.emit(error);
     }
 
     private void handleConnectionFinished(Connection.Error error) {
         available = false;
         if (Connection.Error.ReadError.equals(error)) {
-            onClosed.emit(new Error(Error.Type.ConnectionReadError));
+            onClosed.emit(new SessionStreamError(SessionStreamError.Type.ConnectionReadError));
         }
         else if (error != null) {
-            onClosed.emit(new Error(Error.Type.ConnectionWriteError));
+            onClosed.emit(new SessionStreamError(SessionStreamError.Type.ConnectionWriteError));
         }
         else {
             onClosed.emit(null);
@@ -262,5 +288,12 @@ public class BasicSessionStream extends SessionStream {
     private TLSLayer tlsLayer;
     private WhitespacePingLayer whitespacePingLayer;
     private StreamStack streamStack;
-    
+    private TLSOptions tlsOptions_;
+    private SignalConnection onErrorConnection;
+    private SignalConnection onConnectedConnection;
+    private SignalConnection onDisconnectedConnection;
+    private SignalConnection onStreamStartConnection;
+    private SignalConnection onElementConnection;
+    private SignalConnection onDataReadConnection;
+    private SignalConnection onWriteDataConnection;
 }

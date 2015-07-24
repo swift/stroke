@@ -22,6 +22,7 @@ import com.isode.stroke.serializer.PayloadSerializerCollection;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.streamstack.ConnectionLayer;
 import com.isode.stroke.streamstack.StreamStack;
 import com.isode.stroke.streamstack.XMPPLayer;
@@ -46,27 +47,31 @@ public abstract class Session {
     public Session(
             final Connection connection,
             final PayloadParserFactoryCollection payloadParserFactories,
-            final PayloadSerializerCollection payloadSerializers,
-            final EventLoop eventLoop) {
+            final PayloadSerializerCollection payloadSerializers) {
             this.connection = connection;
-            this.eventLoop = eventLoop;
             this.payloadParserFactories = payloadParserFactories;
             this.payloadSerializers = payloadSerializers;
+            xmppLayer = null;
+            connectionLayer = null;
+            streamStack = null;
             finishing = false;
     }
     
 
     public void startSession() {
         initializeStreamStack();
-	handleSessionStarted();
+        handleSessionStarted();
     }
 
     public void finishSession() {
+        if (finishing) {
+            return;
+        }
         finishing = true;
-	connection.disconnect();
-	handleSessionFinished(null);
-	finishing = false;
-	onSessionFinished.emit(null);
+        if (xmppLayer != null) {
+            xmppLayer.writeFooter();
+        }
+        connection.disconnect();
     }
 
     public void sendElement(Element stanza) {
@@ -94,11 +99,14 @@ public abstract class Session {
     }
 
     protected void finishSession(SessionError error) {
+        if (finishing) {
+            return;
+        }
         finishing = true;
-	connection.disconnect();
-	handleSessionFinished(error);
-	finishing = false;
-	onSessionFinished.emit(error);
+        if (xmppLayer != null) {
+            xmppLayer.writeFooter();
+        }
+        connection.disconnect();
     }
 
     protected void handleSessionStarted() {
@@ -133,7 +141,7 @@ public abstract class Session {
         });
         xmppLayer.onDataRead.connect(onDataRead);
         xmppLayer.onWriteData.connect(onDataWritten);
-        connection.onDisconnected.connect(new Slot1<Connection.Error>() {
+        onDisconnectedConnection = connection.onDisconnected.connect(new Slot1<Connection.Error>() {
 
             public void call(Connection.Error p1) {
                 handleDisconnected(p1);
@@ -151,28 +159,33 @@ public abstract class Session {
 
     public StreamStack getStreamStack() {
         return streamStack;
-
-
     }
 
-    /*void setFinished();*/ /* This seems to be unused in Swiften*/
+    /*protected void setFinished();*/ /* This seems to be unused in Swiften*/
 
     private void handleDisconnected(Connection.Error connectionError) {
+        onDisconnectedConnection.disconnect();
         if (connectionError != null) {
             switch (connectionError) {
                 case ReadError:
-                    finishSession(SessionError.ConnectionReadError);
+                    handleSessionFinished(SessionError.ConnectionReadError);
+                    onSessionFinished.emit(SessionError.ConnectionReadError);
                     break;
                 case WriteError:
-                    finishSession(SessionError.ConnectionWriteError);
+                    handleSessionFinished(SessionError.ConnectionWriteError);
+                    onSessionFinished.emit(SessionError.ConnectionWriteError);
                     break;
             }
-        } else {
-            finishSession();
+        }
+        else {
+            SessionError error = null;
+            handleSessionFinished(error);
+            onSessionFinished.emit(error);
         }
     }
-    private JID localJID;
-    private JID remoteJID;
+
+    private JID localJID = new JID();
+    private JID remoteJID = new JID();
     private Connection connection;
     private PayloadParserFactoryCollection payloadParserFactories;
     private PayloadSerializerCollection payloadSerializers;
@@ -180,5 +193,5 @@ public abstract class Session {
     private ConnectionLayer connectionLayer;
     private StreamStack streamStack;
     private boolean finishing;
-    private final EventLoop eventLoop;
+    private SignalConnection onDisconnectedConnection;
 }

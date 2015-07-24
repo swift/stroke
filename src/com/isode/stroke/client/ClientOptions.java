@@ -8,6 +8,9 @@
  */
 package com.isode.stroke.client;
 
+
+import com.isode.stroke.tls.TLSOptions;
+
 /**
  * Options for a client connection
  */
@@ -57,6 +60,11 @@ public class ClientOptions {
      */
     public int manualPort;
 
+
+    /**
+     * Options passed to the TLS stack
+     */
+    public TLSOptions tlsOptions = new TLSOptions();
 
     public enum UseTLS {
         NeverUseTLS,

@@ -53,6 +53,7 @@ import com.isode.stroke.tls.CertificateVerificationError.Type;
 import com.isode.stroke.tls.CertificateWithKey;
 import com.isode.stroke.tls.PKCS12Certificate;
 import com.isode.stroke.tls.TLSContext;
+import com.isode.stroke.tls.TLSError;
 
 
 
@@ -121,7 +122,7 @@ public class JSSEContext extends TLSContext {
          */
         logger_.log(Level.WARNING, jsseContextError.toString(), e);
         errorsEmitted.add(jsseContextError);
-        onError.emit();        
+        onError.emit(null);
     }
     
     @Override
@@ -921,7 +922,7 @@ public class JSSEContext extends TLSContext {
     public void handleDataFromNetwork(SafeByteArray data) {
         if (hasError()) {
             /* We have previously seen, and reported, an error.  Emit again */
-            onError.emit();        
+            onError.emit(null);        
             return;
         }
 
@@ -999,7 +1000,7 @@ public class JSSEContext extends TLSContext {
     public void handleDataFromApplication(SafeByteArray data) {
         if (hasError()) {
             /* We have previously seen, and reported, an error.  Emit again */
-            onError.emit();        
+            onError.emit(null);        
             return;
         }
 	if (closeNotifyReceived) {

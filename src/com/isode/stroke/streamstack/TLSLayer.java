@@ -13,17 +13,20 @@ import java.util.List;
 
 import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.signals.Signal;
+import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.CertificateWithKey;
 import com.isode.stroke.tls.TLSContext;
+import com.isode.stroke.tls.TLSOptions;
+import com.isode.stroke.tls.TLSError;
 import com.isode.stroke.tls.TLSContextFactory;
 
 public class TLSLayer extends StreamLayer {
 
-    public TLSLayer(TLSContextFactory factory) {
-        context = factory.createTLSContext();
+    public TLSLayer(TLSContextFactory factory, TLSOptions tlsOptions) {
+        context = factory.createTLSContext(tlsOptions);
         context.onDataForNetwork.connect(new Slot1<SafeByteArray>() {
 
             public void call(SafeByteArray p1) {
@@ -72,7 +75,7 @@ public class TLSLayer extends StreamLayer {
         return context;
     }
 
-    public final Signal onError = new Signal();//needs port
+    public final Signal1<TLSError> onError = new Signal1<TLSError>();
     public final Signal onConnected = new Signal();
 
     private final TLSContext context;

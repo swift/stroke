@@ -15,6 +15,7 @@ import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Signal1;
+import com.isode.stroke.tls.TLSError;
 
 public abstract class TLSContext {
 
@@ -41,6 +42,6 @@ public abstract class TLSContext {
 
     public Signal1<SafeByteArray> onDataForNetwork = new Signal1<SafeByteArray>();
     public Signal1<SafeByteArray> onDataForApplication = new Signal1<SafeByteArray>();
-    public Signal onError = new Signal();
+    public Signal1<TLSError> onError = new Signal1<TLSError>();
     public Signal onConnected = new Signal();
 }

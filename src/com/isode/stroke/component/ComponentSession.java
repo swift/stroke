@@ -84,9 +84,9 @@ public class ComponentSession {
 				handleElement(e1);
 			}
 		});
-		onClosedConnection = stream.onClosed.connect(new Slot1<SessionStream.Error>() {
+		onClosedConnection = stream.onClosed.connect(new Slot1<com.isode.stroke.base.Error>() {
 			@Override
-			public void call(SessionStream.Error e1) {
+			public void call(com.isode.stroke.base.Error e1) {
 				handleStreamClosed(e1);
 			}
 		});
@@ -172,7 +172,7 @@ public class ComponentSession {
 		stream.writeElement(new ComponentHandshake(ComponentHandshakeGenerator.getHandshake(header.getID(), secret, crypto)));
 	}
 
-	private void handleStreamClosed(SessionStream.Error streamError) {
+	private void handleStreamClosed(com.isode.stroke.base.Error streamError) {
 		State oldState = state;
 		state = State.Finished;
 		stream.setWhitespacePingEnabled(false);

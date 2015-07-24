@@ -212,8 +212,8 @@ public class ClientSession {
                 handleElement(p1);
             }
         });
-	streamClosedConnection = stream.onClosed.connect(new Slot1<SessionStream.Error>(){
-            public void call(final SessionStream.Error p1) {
+	streamClosedConnection = stream.onClosed.connect(new Slot1<com.isode.stroke.base.Error>(){
+            public void call(final com.isode.stroke.base.Error p1) {
                 handleStreamClosed(p1);
             }
         });
@@ -535,7 +535,7 @@ public class ClientSession {
             checkTrustOrFinish(certificateChain, verificationError);
         }
         else {
-            final ServerIdentityVerifier identityVerifier = new ServerIdentityVerifier(localJID);
+            final ServerIdentityVerifier identityVerifier = new ServerIdentityVerifier(localJID, idnConverter);
             if (identityVerifier.certificateVerifies(peerCertificate)) {
                 continueAfterTLSEncrypted();
             }
@@ -560,7 +560,7 @@ public class ClientSession {
         sendStreamHeader();
     }
 
-    private void handleStreamClosed(final SessionStream.Error streamError) {
+    private void handleStreamClosed(final com.isode.stroke.base.Error streamError) {
 	final State previousState = state;
 	state = State.Finished;
 

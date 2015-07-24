@@ -9,15 +9,20 @@
  */
 package com.isode.stroke.tls;
 
-import com.isode.stroke.idn.IDNA;
+import com.isode.stroke.idn.IDNConverter;
 import com.isode.stroke.jid.JID;
 import java.util.List;
 
 public class ServerIdentityVerifier {
 
-    public ServerIdentityVerifier(JID jid) {
+    public ServerIdentityVerifier(JID jid, IDNConverter idnConverter) {
+        this.domainValid = false;
         domain = jid.getDomain();
-        encodedDomain = IDNA.getEncoded(domain);
+        String domainResult = idnConverter.getIDNAEncoded(domain);
+        if (domainResult != null) {
+            encodedDomain = domainResult;
+            domainValid = true;
+        }        
     }
 
     public boolean certificateVerifies(Certificate certificate) {
@@ -69,6 +74,9 @@ public class ServerIdentityVerifier {
     }
 
     boolean matchesDomain(String s) {
+        if (!domainValid) {
+            return false;
+        }        
         if (s.startsWith("*.")) {
             String matchString = s.substring(2);
             String matchDomain = encodedDomain;
@@ -88,4 +96,5 @@ public class ServerIdentityVerifier {
     }
     private String domain;
     private String encodedDomain;
+    private boolean domainValid;
 }

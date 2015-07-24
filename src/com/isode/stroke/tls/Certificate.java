@@ -9,6 +9,7 @@
 package com.isode.stroke.tls;
 
 import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.stringcodecs.Hexify;
 import com.isode.stroke.stringcodecs.SHA1;
 import java.util.List;
@@ -31,8 +32,8 @@ public abstract class Certificate {
 
     public abstract ByteArray toDER();
 
-    public String getSHA1Fingerprint() {
-        ByteArray hash = SHA1.getHash(toDER());
+    public static String getSHA1Fingerprint(Certificate certificate, CryptoProvider crypto) {
+        ByteArray hash = crypto.getSHA1Hash(certificate.toDER());
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < hash.getSize(); ++i) {
             if (i > 0) {
