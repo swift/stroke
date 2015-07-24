@@ -16,9 +16,11 @@ distclean: clean
 dist/lib/stroke.jar: third-party/jzlib/jzlib.jar third-party/icu4j.jar third-party/aalto/aalto-xml.jar third-party/stax2/stax2-api.jar third-party/dnsjava/dnsjava.jar
 	ant ${DEFINES}
 
+FINDBUGS_VERSION=3.0.1
+
 .PHONY : test
-test: dist/lib/stroke.jar third-party/cobertura/cobertura.jar third-party/findbugs/lib/findbugs.jar third-party/pmd/lib/pmd-5.0.0.jar
-	ant ${DEFINES} -DJUNIT_JAR=${JUNIT} -Dcobertura-jar=third-party/cobertura/cobertura.jar -Djakarta-oro-jar=third-party/cobertura/lib/jakarta-oro-2.0.8.jar -Dlog4j-jar=third-party/cobertura/lib/log4j-1.2.9.jar -Dasm-jar=third-party/cobertura/lib/asm-3.0.jar -Dasm-tree-jar=third-party/cobertura/lib/asm-tree-3.0.jar -Dicu4j-jar=third-party/icu4j.jar -Dfindbugs.home=third-party/findbugs -Dpmd.home=third-party/pmd test
+test: dist/lib/stroke.jar third-party/cobertura/cobertura.jar third-party/findbugs-$(FINDBUGS_VERSION)/lib/findbugs.jar third-party/pmd/lib/pmd-5.0.0.jar
+	ant ${DEFINES} -DJUNIT_JAR=${JUNIT} -Dcobertura-jar=third-party/cobertura/cobertura.jar -Djakarta-oro-jar=third-party/cobertura/lib/jakarta-oro-2.0.8.jar -Dlog4j-jar=third-party/cobertura/lib/log4j-1.2.9.jar -Dasm-jar=third-party/cobertura/lib/asm-3.0.jar -Dasm-tree-jar=third-party/cobertura/lib/asm-tree-3.0.jar -Dicu4j-jar=third-party/icu4j.jar -Dfindbugs.home=third-party/findbugs-$(FINDBUGS_VERSION) -Dpmd.home=third-party/pmd test
 
 third-party/aalto/aalto-xml.jar:
 	mkdir -p third-party/aalto
@@ -50,11 +52,11 @@ third-party/cobertura/cobertura.jar:
 	tar -xvjf third-party/cobertura-1.9.4.1-bin.tar.bz2 -C third-party/
 	mv third-party/cobertura-1.9.4.1 third-party/cobertura
 
-third-party/findbugs/lib/findbugs.jar:
+third-party/findbugs-$(FINDBUGS_VERSION)/lib/findbugs.jar:
 	mkdir -p third-party
-	curl -L 'http://prdownloads.sourceforge.net/findbugs/findbugs-2.0.1.tar.gz?download' -o third-party/findbugs-2.0.1.tar.gz
-	tar -xvzf third-party/findbugs-2.0.1.tar.gz -C third-party/
-	mv third-party/findbugs-2.0.1 third-party/findbugs
+	curl -L 'http://prdownloads.sourceforge.net/findbugs/findbugs-$(FINDBUGS_VERSION).tar.gz?download' -o third-party/findbugs-$(FINDBUGS_VERSION).tar.gz
+	tar -xvzf third-party/findbugs-$(FINDBUGS_VERSION).tar.gz -C third-party/
+
 
 third-party/pmd/lib/pmd-5.0.0.jar:
 	mkdir -p third-party
