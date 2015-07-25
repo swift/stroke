@@ -56,7 +56,7 @@ public class PresenceOracle {
 
 	void handleIncomingPresence(Presence presence) {
 		JID bareJID = presence.getFrom().toBare();
-		if (presence.getType() == Presence.Type.Subscribe) {
+		if (Presence.Type.Subscribe.equals(presence.getType())) {
 		}
 		else {
 			Presence passedPresence = presence;
@@ -69,14 +69,14 @@ public class PresenceOracle {
 			}
 			Map<JID,Presence> jidMap = entries_.get(bareJID);
 			if (jidMap == null) jidMap = new HashMap<JID,Presence>();
-			if (passedPresence.getFrom().isBare() && presence.getType() == Presence.Type.Unavailable) {
+			if (passedPresence.getFrom().isBare() && Presence.Type.Unavailable.equals(presence.getType())) {
 				/* Have a bare-JID only presence of offline */
 				jidMap.clear();
-			} else if (passedPresence.getType() == Presence.Type.Available) {
+			} else if (Presence.Type.Available.equals(passedPresence.getType())) {
 				/* Don't have a bare-JID only offline presence once there are available presences */
 				jidMap.remove(bareJID);
 			}
-			if (passedPresence.getType() == Presence.Type.Unavailable && jidMap.size() > 1) {
+			if (Presence.Type.Unavailable.equals(passedPresence.getType()) && jidMap.size() > 1) {
 				jidMap.remove(passedPresence.getFrom());
 			} else {
 				jidMap.put(passedPresence.getFrom(), passedPresence);
@@ -88,13 +88,13 @@ public class PresenceOracle {
 
 	public Presence getLastPresence(final JID jid) {
 		Map<JID,Presence> presenceMap = entries_.get(jid.toBare());
-		if (presenceMap == null) return new Presence();
+		if (presenceMap == null) return null;
 		
 		Presence i = presenceMap.get(jid);
 		if (i != null) {
 			return i;
 		} else {
-			return new Presence();
+			return null;
 		}
 	}
 
@@ -110,7 +110,7 @@ public class PresenceOracle {
 
 	public Presence getHighestPriorityPresence(final JID bareJID) {
 		Map<JID,Presence> presenceMap = entries_.get(bareJID);
-		if (presenceMap == null) return new Presence();
+		if (presenceMap == null) return null;
 
 		Presence highest = null;
 		for (Presence current : presenceMap.values()) {

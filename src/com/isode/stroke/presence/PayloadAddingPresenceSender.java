@@ -7,6 +7,11 @@ package com.isode.stroke.presence;
 import com.isode.stroke.elements.Payload;
 import com.isode.stroke.elements.Presence;
 
+/**
+ * This presence sender adds payloads to outgoing presences.
+ *
+ * This class isn't meant to be used with directed presence.
+ */
 public class PayloadAddingPresenceSender implements PresenceSender {
     private Presence lastSentPresence;
     private final PresenceSender sender;
@@ -25,7 +30,7 @@ public class PayloadAddingPresenceSender implements PresenceSender {
             lastSentPresence = null;
         }
         if (payload != null) {
-            Presence sentPresence = presence;
+            Presence sentPresence = new Presence(presence);
             sentPresence.updatePayload(payload);
             sender.sendPresence(sentPresence);
         } else {

@@ -47,9 +47,9 @@ public class DirectedPresenceSender implements PresenceSender {
 
     public void addDirectedPresenceReceiver(JID jid, SendPresence sendPresence) {
         directedPresenceReceivers_.add(jid);
-        if (sendPresence == SendPresence.AndSendPresence && sender_.isAvailable()) {
+        if (SendPresence.AndSendPresence.equals(sendPresence) && sender_.isAvailable()) {
             if (lastSentUndirectedPresence_ != null && 
-                    lastSentUndirectedPresence_.getType() == Presence.Type.Available) {
+                    Presence.Type.Available.equals(lastSentUndirectedPresence_.getType())) {
                 Presence presenceCopy = new Presence(lastSentUndirectedPresence_);
                 presenceCopy.setTo(jid);
                 sender_.sendPresence(presenceCopy);
@@ -64,7 +64,7 @@ public class DirectedPresenceSender implements PresenceSender {
      */
     public void removeDirectedPresenceReceiver(JID jid, SendPresence sendPresence) {
         directedPresenceReceivers_.remove(jid);
-        if (sendPresence == SendPresence.AndSendPresence && sender_.isAvailable()) {
+        if (SendPresence.AndSendPresence.equals(sendPresence) && sender_.isAvailable()) {
             Presence presence = new Presence();
             presence.setType(Presence.Type.Unavailable);
             presence.setTo(jid);
