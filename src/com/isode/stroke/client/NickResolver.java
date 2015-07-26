@@ -16,14 +16,19 @@ import com.isode.stroke.signals.Slot2;
 import com.isode.stroke.signals.Slot3;
 import com.isode.stroke.vcards.VCardManager;
 
+// FIXME: The NickResolver currently relies on the vcard being requested by the client on login.
+// The VCardManager should get an onConnected() signal (which is signalled when the stanzachannel is available(, and each time this is emitted,
+// the nickresolver should request the vcard.
+// FIXME: The ownJID functionality should probably be removed, and NickManager should be used directly.
+
 public class NickResolver {
-	private JID ownJID_;
-	private String ownNick_;
+	private JID ownJID_ = new JID();
+	private String ownNick_ = "";
 	private XMPPRoster xmppRoster_;
 	private MUCRegistry mucRegistry_;
 	private VCardManager vcardManager_;
 
-	public final Signal2<JID, String> onNickChanged = new Signal2<JID, String>();
+	public final Signal2<JID, String /*previousNick*/ > onNickChanged = new Signal2<JID, String>();
 
 	public NickResolver(final JID ownJID, XMPPRoster xmppRoster, VCardManager vcardManager, MUCRegistry mucRegistry) {
 		ownJID_ = ownJID;
@@ -57,7 +62,7 @@ public class NickResolver {
 	}
 
 	void handleJIDAdded(final JID jid) {
-		String oldNick= jidToNick(jid);
+		String oldNick = jidToNick(jid);
 		onNickChanged.emit(jid, oldNick);
 	}
 
@@ -67,7 +72,7 @@ public class NickResolver {
 				return ownNick_;
 			}
 		}
-
+		String nick = "";
 		if (mucRegistry_ != null && mucRegistry_.isMUC(jid.toBare()) ) {
 			return jid.getResource().isEmpty() ? jid.toBare().toString() : jid.getResource();
 		}
@@ -83,6 +88,7 @@ public class NickResolver {
 		if (jid.compare(ownJID_, JID.CompareType.WithoutResource) != 0) {
 			return;
 		}
+		String initialNick = ownNick_;
 		ownNick_ = ownJID_.toString();
 		if (ownVCard != null) {
 			if (!ownVCard.getNickname().isEmpty()) {

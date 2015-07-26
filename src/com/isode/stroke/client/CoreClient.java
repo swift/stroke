@@ -11,7 +11,10 @@ import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.Stanza;
 import com.isode.stroke.elements.StreamType;
 import com.isode.stroke.jid.JID;
+import com.isode.stroke.crypto.JavaCryptoProvider;
+import com.isode.stroke.idn.ICUConverter;
 import com.isode.stroke.network.Connection;
+import com.isode.stroke.network.ConnectionFactory;
 import com.isode.stroke.network.Connector;
 import com.isode.stroke.network.DomainNameResolveError;
 import com.isode.stroke.network.NetworkFactories;
@@ -30,6 +33,9 @@ import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.CertificateWithKey;
 import com.isode.stroke.tls.TLSOptions;
+import com.isode.stroke.tls.TLSError;
+import java.util.logging.Logger;
+import java.util.Vector;
 
 /**
  * The central class for communicating with an XMPP server.
@@ -85,7 +91,6 @@ public class CoreClient {
     private ClientSessionStanzaChannel stanzaChannel_;
     private IQRouter iqRouter_;
     private Connector connector_;
-    //private ConnectionFactory connectionFactory_;
     private FullPayloadParserFactoryCollection payloadParserFactories_ = new FullPayloadParserFactoryCollection();
     private FullPayloadSerializerCollection payloadSerializers_ = new FullPayloadSerializerCollection();
     private Connection connection_;
@@ -101,6 +106,12 @@ public class CoreClient {
     private SignalConnection sessionFinishedConnection_;
     private SignalConnection sessionNeedCredentialsConnection_;
     private SignalConnection connectorConnectFinishedConnection_;
+    private SignalConnection onMessageReceivedConnection;
+    private SignalConnection onPresenceReceivedConnection;
+    private SignalConnection onStanzaAckedConnection;
+    private SignalConnection onAvailableChangedConnection;
+    private Vector<ConnectionFactory> proxyConnectionFactories = new Vector<ConnectionFactory>();
+    private Logger logger_ = Logger.getLogger(this.getClass().getName());
 
     /**
      * Constructor.
@@ -125,25 +136,25 @@ public class CoreClient {
         this.networkFactories = networkFactories;
         this.certificateTrustChecker = null;
         stanzaChannel_ = new ClientSessionStanzaChannel();
-        stanzaChannel_.onMessageReceived.connect(new Slot1<Message>() {
+        onMessageReceivedConnection = stanzaChannel_.onMessageReceived.connect(new Slot1<Message>() {
 
             public void call(Message p1) {
-                onMessageReceived.emit(p1);
+                handleMessageReceived(p1);
             }
         });
-        stanzaChannel_.onPresenceReceived.connect(new Slot1<Presence>() {
+        onPresenceReceivedConnection = stanzaChannel_.onPresenceReceived.connect(new Slot1<Presence>() {
 
             public void call(Presence p1) {
-                onPresenceReceived.emit(p1);
+                handlePresenceReceived(p1);
             }
         });
-        stanzaChannel_.onStanzaAcked.connect(new Slot1<Stanza>() {
+        onStanzaAckedConnection = stanzaChannel_.onStanzaAcked.connect(new Slot1<Stanza>() {
 
             public void call(Stanza p1) {
-                onStanzaAcked.emit(p1);
+                handleStanzaAcked(p1);
             }
         });
-        stanzaChannel_.onAvailableChanged.connect(new Slot1<Boolean>() {
+        onAvailableChangedConnection = stanzaChannel_.onAvailableChanged.connect(new Slot1<Boolean>() {
 
             public void call(Boolean p1) {
                 handleStanzaChannelAvailableChanged(p1);
@@ -154,22 +165,29 @@ public class CoreClient {
         iqRouter_.setJID(jid);
     }
 
-    /*CoreClient::~CoreClient() {
-    if (session_ || connection_) {
-    std::cerr << "Warning: Client not disconnected properly" << std::endl;
+    protected void finalize() throws Throwable {
+        try {
+            forceReset();
+            onAvailableChangedConnection.disconnect();
+            onMessageReceivedConnection.disconnect();
+            onPresenceReceivedConnection.disconnect();
+            onStanzaAckedConnection.disconnect();
+            stanzaChannel_ = null;
+        }
+        finally {
+            super.finalize();
+        }
     }
-    delete tlsLayerFactory_;
-    delete timerFactory_;
-    delete connectionFactory_;
-    delete iqRouter_;
 
-    stanzaChannel_->onAvailableChanged.disconnect(boost::bind(&CoreClient::handleStanzaChannelAvailableChanged, this, _1));
-    stanzaChannel_->onMessageReceived.disconnect(boost::ref(onMessageReceived));
-    stanzaChannel_->onPresenceReceived.disconnect(boost::ref(onPresenceReceived));
-    stanzaChannel_->onStanzaAcked.disconnect(boost::ref(onStanzaAcked));
-    delete stanzaChannel_;
-    }*/
-
+    /**
+    * Connects the client to the server.
+    *
+    * After the connection is established, the client will set 
+    * initialize the stream and authenticate.
+    */
+    public void connect() {
+        connect(new ClientOptions());
+    }
 
     /**
      * Connect using the standard XMPP connection rules (i.e. SRV then A/AAAA).
@@ -177,33 +195,114 @@ public class CoreClient {
      * @param o Client options to use in the connection, must not be null
      */
     public void connect(final ClientOptions o) {
+        logger_.fine("Connecting ");
         forceReset();
         disconnectRequested_ = false;
         assert (connector_ == null);
         options = o;
-        /* FIXME: Port Proxies */
+
+        //TO PORT
+        /*// Determine connection types to use
+        assert(proxyConnectionFactories.isEmpty());
+        boolean useDirectConnection = true;
+        HostAddressPort systemSOCKS5Proxy = networkFactories.getProxyProvider().getSOCKS5Proxy();
+        HostAddressPort systemHTTPConnectProxy = networkFactories.getProxyProvider().getHTTPConnectProxy();
+        switch (o.proxyType) {
+            case ClientOptions.ProxyType.NoProxy:
+                logger_.fine(" without a proxy\n");
+                break;
+            case ClientOptions.ProxyType.SystemConfiguredProxy:
+                logger_.fine(" with a system configured proxy\n");
+                if (systemSOCKS5Proxy.isValid()) {
+                    logger_.fine("Found SOCK5 Proxy: " + systemSOCKS5Proxy.getAddress().toString() + ":" + systemSOCKS5Proxy.getPort() + "\n");
+                    proxyConnectionFactories.add(new SOCKS5ProxiedConnectionFactory(networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory(), systemSOCKS5Proxy.getAddress().toString(), systemSOCKS5Proxy.getPort()));
+                }
+                if (systemHTTPConnectProxy.isValid()) {
+                    logger_.fine("Found HTTPConnect Proxy: " + systemHTTPConnectProxy.getAddress().toString() + ":" + systemHTTPConnectProxy.getPort() + "\n");
+                    proxyConnectionFactories.add(new HTTPConnectProxiedConnectionFactory(networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory(), systemHTTPConnectProxy.getAddress().toString(), systemHTTPConnectProxy.getPort()));
+                }
+                break;
+            case ClientOptions.ProxyType.SOCKS5Proxy: {
+                logger_.fine(" with manual configured SOCKS5 proxy\n");
+                String proxyHostname = o.manualProxyHostname.empty() ? systemSOCKS5Proxy.getAddress().toString() : o.manualProxyHostname;
+                int proxyPort = o.manualProxyPort == -1 ? systemSOCKS5Proxy.getPort() : o.manualProxyPort;
+                logger_.fine("Proxy: " + proxyHostname + ":" + proxyPort + "\n");
+                proxyConnectionFactories.add(new SOCKS5ProxiedConnectionFactory(networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory(), proxyHostname, proxyPort));
+                useDirectConnection = false;
+                break;
+            }
+            case ClientOptions.ProxyType.HTTPConnectProxy: {
+                logger_.fine(" with manual configured HTTPConnect proxy\n");
+                std::string proxyHostname = o.manualProxyHostname.empty() ? systemHTTPConnectProxy.getAddress().toString() : o.manualProxyHostname;
+                int proxyPort = o.manualProxyPort == -1 ? systemHTTPConnectProxy.getPort() : o.manualProxyPort;
+                logger_.fine("Proxy: " + proxyHostname + ":" << proxyPort + "\n");
+                proxyConnectionFactories.add(new HTTPConnectProxiedConnectionFactory(networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory(), proxyHostname, proxyPort, o.httpTrafficFilter));
+                useDirectConnection = false;
+                break;
+            }
+        }
+        Vector<ConnectionFactory> connectionFactories = new Vector<ConnectionFactory>(proxyConnectionFactories);
+        if (useDirectConnection) {
+            connectionFactories.add(networkFactories.getConnectionFactory());
+        }*/
+
         String host = (o.manualHostname == null || o.manualHostname.isEmpty()) ? jid_.getDomain() : o.manualHostname;
         int port = o.manualPort;
         String serviceLookupPrefix = (o.manualHostname == null || o.manualHostname.isEmpty() ? "_xmpp-client._tcp." : null);
+        assert(connector_ == null);
+        //TO PORT
+        /*if (options.boshURL.isEmpty()) {
+            connector_ = new ChainedConnector(host, port, serviceLookupPrefix, networkFactories.getDomainNameResolver(), connectionFactories, networkFactories.getTimerFactory());
+            connector_.onConnectFinished.connect(boost::bind(&CoreClient::handleConnectorFinished, this, _1, _2));
+            connector_.setTimeoutMilliseconds(2*60*1000);
+            connector_.start();
+        }
+        else {
+            /* Autodiscovery of which proxy works is largely ok with a TCP session, because this is a one-off. With BOSH
+             * it would be quite painful given that potentially every stanza could be sent on a new connection.
+             */
+            //sessionStream_ = boost::make_shared<BOSHSessionStream>(boost::make_shared<BOSHConnectionFactory>(options.boshURL, networkFactories.getConnectionFactory(), networkFactories.getXMLParserFactory(), networkFactories.getTLSContextFactory()), getPayloadParserFactories(), getPayloadSerializers(), networkFactories.getTLSContextFactory(), networkFactories.getTimerFactory(), networkFactories.getXMLParserFactory(), networkFactories.getEventLoop(), host, options.boshHTTPConnectProxyURL, options.boshHTTPConnectProxyAuthID, options.boshHTTPConnectProxyAuthPassword);
+            /*sessionStream_ = boost::shared_ptr<BOSHSessionStream>(new BOSHSessionStream(
+                    options.boshURL,
+                    getPayloadParserFactories(),
+                    getPayloadSerializers(),
+                    networkFactories.getConnectionFactory(),
+                    networkFactories.getTLSContextFactory(),
+                    networkFactories.getTimerFactory(),
+                    networkFactories.getXMLParserFactory(),
+                    networkFactories.getEventLoop(),
+                    networkFactories.getDomainNameResolver(),
+                    host,
+                    options.boshHTTPConnectProxyURL,
+                    options.boshHTTPConnectProxyAuthID,
+                    options.boshHTTPConnectProxyAuthPassword,
+                    options.tlsOptions));
+            sessionStream_.onDataRead.connect(boost::bind(&CoreClient::handleDataRead, this, _1));
+            sessionStream_.onDataWritten.connect(boost::bind(&CoreClient::handleDataWritten, this, _1));
+            bindSessionToStream();
+        }*/
         connector_ = Connector.create(host, port, serviceLookupPrefix, networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory());
         connectorConnectFinishedConnection_ = connector_.onConnectFinished.connect(new Slot2<Connection, com.isode.stroke.base.Error>() {
             public void call(Connection p1, com.isode.stroke.base.Error p2) {
                 handleConnectorFinished(p1, p2);
             }
         });
-        connector_.setTimeoutMilliseconds(60 * 1000);
+        connector_.setTimeoutMilliseconds(2*60*1000);
         connector_.start();
     }
 
     private void bindSessionToStream() {
-        session_ = ClientSession.create(jid_, sessionStream_);
+        //TO PORT
+        //session_ = ClientSession::create(jid_, sessionStream_, networkFactories.getIDNConverter(), networkFactories.getCryptoProvider());
+        session_ = ClientSession.create(jid_, sessionStream_, new ICUConverter(), new JavaCryptoProvider());
         session_.setCertificateTrustChecker(certificateTrustChecker);
         session_.setUseStreamCompression(options.useStreamCompression);
         session_.setAllowPLAINOverNonTLS(options.allowPLAINWithoutTLS);
+        session_.setSingleSignOn(options.singleSignOn);
+        session_.setAuthenticationPort(options.manualPort);        
         switch (options.useTLS) {
             case UseTLSWhenAvailable:
                 session_.setUseTLS(ClientSession.UseTLS.UseTLSWhenAvailable);
-                session_.setCertificateTrustChecker(certificateTrustChecker);
                 break;
             case NeverUseTLS:
                 session_.setUseTLS(ClientSession.UseTLS.NeverUseTLS);
@@ -229,10 +328,13 @@ public class CoreClient {
         session_.start();
     }
 
-    void handleConnectorFinished(final Connection connection, final com.isode.stroke.base.Error error) {
+    private void handleConnectorFinished(final Connection connection, final com.isode.stroke.base.Error error) {
         resetConnector();
         
         if (connection == null) {
+            if (options.forgetPassword) {
+                purgePassword();
+            }            
             ClientError clientError = null;
             if (!disconnectRequested_) {
                 if (error instanceof DomainNameResolveError) {
@@ -242,7 +344,8 @@ public class CoreClient {
                 }
             }
             onDisconnected.emit(clientError);
-        } else {
+        }
+        else {
             assert (connection_ == null);
             connection_ = connection;
 
@@ -284,7 +387,12 @@ public class CoreClient {
             connector_.stop();
         }
     }
-    
+
+    /**
+     * Checks whether the client is active.
+     *
+     * A client is active when it is connected or connecting to the server.
+     */
     public boolean isActive() {
     	return (session_ != null && !session_.isFinished()) || connector_ != null;
     }
@@ -308,19 +416,14 @@ public class CoreClient {
     }
 
     private void handleSessionFinished(final com.isode.stroke.base.Error error) {
-        sessionFinishedConnection_.disconnect();
-        sessionNeedCredentialsConnection_.disconnect();
-        session_ = null;
+        if (options.forgetPassword) {
+            purgePassword();
+        }
+        resetSession();
 
-        sessionStreamDataReadConnection_.disconnect();
-        sessionStreamDataWrittenConnection_.disconnect();
-        sessionStream_ = null;
-
-        connection_.disconnect();
-        connection_ = null;
-
-        ClientError clientError = null;
+        ClientError actualerror = null;
         if (error != null) {
+            ClientError clientError = null;
             if (error instanceof ClientSession.Error) {
                 ClientSession.Error actualError = (ClientSession.Error) error;
                 switch (actualError.type) {
@@ -351,9 +454,23 @@ public class CoreClient {
                     case TLSClientCertificateError:
                         clientError = new ClientError(ClientError.Type.ClientCertificateError);
                         break;
-                    /* Note: no case clause for "StreamError" */
+                    case StreamError:
+                        clientError = new ClientError(ClientError.Type.StreamError);
+                        break;
                 }
-            } else if (error instanceof SessionStream.SessionStreamError) {
+            }
+            else if (error instanceof TLSError) {
+                TLSError actualError = (TLSError)error;
+                switch(actualError.getType()) {
+                    case CertificateCardRemoved:
+                        clientError = new ClientError(ClientError.Type.CertificateCardRemoved);
+                        break;
+                    case UnknownError:
+                        clientError = new ClientError(ClientError.Type.TLSError);
+                        break;
+                }
+            }
+            else if (error instanceof SessionStream.SessionStreamError) {
                 SessionStream.SessionStreamError actualError = (SessionStream.SessionStreamError) error;
                 switch (actualError.type) {
                     case ParseError:
@@ -408,19 +525,29 @@ public class CoreClient {
                     case InvalidServerIdentity:
                         clientError = new ClientError(ClientError.Type.InvalidServerIdentityError);
                         break;
+                    case Revoked:
+                        clientError = new ClientError(ClientError.Type.RevokedError);
+                        break;
+                    case RevocationCheckFailed:
+                        clientError = new ClientError(ClientError.Type.RevocationCheckFailedError);
+                        break;
                 }
             }
             /* If "error" was non-null, we expect to be able to derive 
              * a non-null "clientError".
              */  
             NotNull.exceptIfNull(clientError,"clientError");
+            actualerror = clientError;
         }
-        onDisconnected.emit(clientError);
+        onDisconnected.emit(actualerror);
     }
 
     private void handleNeedCredentials() {
         assert session_ != null;
         session_.sendCredentials(password_);
+        if (options.forgetPassword) {
+            purgePassword();
+        }        
     }
 
     private void handleDataRead(final SafeByteArray data) {
@@ -431,8 +558,26 @@ public class CoreClient {
         onDataWritten.emit(data);
     }
 
+    private void handlePresenceReceived(Presence presence) {
+        onPresenceReceived.emit(presence);
+    }
+
+    private void handleMessageReceived(Message message) {
+        onMessageReceived.emit(message);
+    }
+
+    private void handleStanzaAcked(Stanza stanza) {
+        onStanzaAcked.emit(stanza);
+    }
+
+    private void purgePassword() {
+        password_ = new SafeByteArray();
+    }
+
     private void handleStanzaChannelAvailableChanged(final boolean available) {
         if (available) {
+            iqRouter_.setJID(session_.getLocalJID());
+            handleConnected();
             onConnected.emit();
         }
     }
@@ -443,6 +588,13 @@ public class CoreClient {
 
     public void sendPresence(final Presence presence) {
         stanzaChannel_.sendPresence(presence);
+    }
+
+    /**
+     * Sends raw, unchecked data.
+     */
+    public void sendData(final String data) {
+        sessionStream_.writeData(data);
     }
 
     /**
@@ -458,6 +610,8 @@ public class CoreClient {
     }
 
     /**
+     * Checks whether the client is connected to the server,
+     * and stanzas can be sent.
      * @return session is available for sending/receiving stanzas.
      */
     public boolean isAvailable() {
@@ -478,11 +632,25 @@ public class CoreClient {
             connectorConnectFinishedConnection_.disconnect();
         }
         connector_ = null;
+        //TO PORT
+        /*for(ConnectionFactory* f, proxyConnectionFactories) {
+            delete f;
+        }
+        proxyConnectionFactories.clear();*/
     }
     
     protected ClientSession getSession() {
     	return session_;
     }
+
+    protected NetworkFactories getNetworkFactories() {
+        return networkFactories;
+    }
+
+    /**
+     * Called before onConnected signal is emmitted.
+     */
+    protected void handleConnected() {}
 
     private void resetSession() {
         session_.onFinished.disconnectAll();
@@ -494,6 +662,10 @@ public class CoreClient {
         if (connection_ != null) {
             connection_.disconnect();
         }
+        // TO PORT
+        /*else if (sessionStream_ instanceof BOSHSessionStream) {
+            sessionStream_.close();
+        }*/
         sessionStream_ = null;
         connection_ = null;
     }
@@ -512,11 +684,25 @@ public class CoreClient {
         }
     }
 
+    /**
+     * Checks whether stream management is enabled.
+     *
+     * If stream management is enabled, onStanzaAcked will be
+     * emitted when a stanza is received by the server.
+     *
+     * \see onStanzaAcked
+     */
+    public boolean getStreamManagementEnabled() {
+        return stanzaChannel_.getStreamManagementEnabled();
+    }
+
     private void forceReset() {
         if (connector_ != null) {
+            logger_.warning("Client not disconnected properly: Connector still active\n");
             resetConnector();
         }
         if (sessionStream_ != null || connection_ != null) {
+            logger_.warning("Client not disconnected properly: Session still active\n");
             resetSession();
         }
 

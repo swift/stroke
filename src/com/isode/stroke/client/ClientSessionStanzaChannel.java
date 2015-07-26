@@ -9,6 +9,7 @@
 package com.isode.stroke.client;
 
 import com.isode.stroke.base.Error;
+import com.isode.stroke.base.IDGenerator;
 import com.isode.stroke.elements.IQ;
 import com.isode.stroke.elements.Message;
 import com.isode.stroke.elements.Presence;
@@ -26,13 +27,28 @@ import java.util.logging.Logger;
  * StanzaChannel implementation around a ClientSession.
  */
 public class ClientSessionStanzaChannel extends StanzaChannel {
-    private final IDGenerator idGenerator = new IDGenerator();
+    private IDGenerator idGenerator = new IDGenerator();
     private ClientSession session;
     private static final Logger logger_ = Logger.getLogger(ClientSessionStanzaChannel.class.getName());
     private SignalConnection sessionInitializedConnection;
     private SignalConnection sessionFinishedConnection;
     private SignalConnection sessionStanzaReceivedConnection;
     private SignalConnection sessionStanzaAckedConnection;
+
+    protected void finalize() throws Throwable {
+        try {
+            if(session != null) {
+                sessionFinishedConnection.disconnect();
+                sessionStanzaReceivedConnection.disconnect();
+                sessionStanzaAckedConnection.disconnect();
+                sessionInitializedConnection.disconnect();
+                session = null;
+            }
+        }
+        finally {
+            super.finalize();
+        }
+    }
 
     public void setSession(final ClientSession session) {
         assert this.session == null;

@@ -38,6 +38,8 @@ import com.isode.stroke.jid.JID;
 import com.isode.stroke.sasl.ClientAuthenticator;
 import com.isode.stroke.sasl.PLAINClientAuthenticator;
 import com.isode.stroke.sasl.SCRAMSHA1ClientAuthenticator;
+import com.isode.stroke.sasl.DIGESTMD5ClientAuthenticator;
+import com.isode.stroke.sasl.EXTERNALClientAuthenticator;
 import com.isode.stroke.session.SessionStream;
 import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Signal1;
@@ -54,7 +56,7 @@ import com.isode.stroke.idn.IDNConverter;
 import com.isode.stroke.idn.ICUConverter;
 import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.crypto.JavaCryptoProvider;
-
+import java.util.logging.Logger;
 import java.util.List;
 import java.util.UUID;
 
@@ -65,6 +67,7 @@ public class ClientSession {
     public final Signal1<Stanza> onStanzaReceived = new Signal1<Stanza>();
     public final Signal1<Stanza> onStanzaAcked = new Signal1<Stanza>();
 
+    private Logger logger_ = Logger.getLogger(this.getClass().getName());
     private SignalConnection streamElementReceivedConnection;
     private SignalConnection streamStreamStartReceivedConnection;
     private SignalConnection streamClosedConnection;
@@ -88,8 +91,10 @@ public class ClientSession {
     private StanzaAckResponder stanzaAckResponder_;
     private com.isode.stroke.base.Error error_;
     private CertificateTrustChecker certificateTrustChecker;
-    private IDNConverter idnConverter = new ICUConverter(); //TOPORT: Accomodated later in Constructor.
-    private CryptoProvider crypto = new JavaCryptoProvider(); //TOPORT: Accomodated later in Constructor.
+    private IDNConverter idnConverter;
+    private CryptoProvider crypto;
+    private boolean singleSignOn;
+    private int authenticationPort;
 
     public enum State {
 
@@ -126,9 +131,6 @@ public class ClientSession {
         };
 
         public Error(final Type type) {
-            if (type == null) {
-                throw new IllegalStateException();
-            }
             this.type = type;
         }
     };
@@ -139,10 +141,12 @@ public class ClientSession {
         RequireTLS
     }
 
-    private ClientSession(final JID jid, final SessionStream stream) {
+    private ClientSession(final JID jid, final SessionStream stream, IDNConverter idnConverter, CryptoProvider crypto) {
         localJID = jid;
         state = State.Initial;
         this.stream = stream;
+        this.idnConverter = idnConverter;
+        this.crypto = crypto;
         allowPLAINOverNonTLS = false;
         useStreamCompression = true;
         useTLS = UseTLS.UseTLSWhenAvailable;
@@ -150,11 +154,15 @@ public class ClientSession {
         needSessionStart = false;
         needResourceBind = false;
         needAcking = false;
+        rosterVersioningSupported = false;
         authenticator = null;
+        certificateTrustChecker = null;
+        singleSignOn = false;
+        authenticationPort = -1;
     }
 
-    public static ClientSession create(final JID jid, final SessionStream stream) {
-        return new ClientSession(jid, stream);
+    public static ClientSession create(final JID jid, final SessionStream stream, IDNConverter idnConverter, CryptoProvider crypto) {
+        return new ClientSession(jid, stream, idnConverter, crypto);
     }
 
     public State getState() {
@@ -199,6 +207,18 @@ public class ClientSession {
 
     public void setCertificateTrustChecker(final CertificateTrustChecker checker) {
         certificateTrustChecker = checker;
+    }
+
+    public void setSingleSignOn(boolean b) {
+        singleSignOn = b;
+    }
+
+    /**
+     * Sets the port number used in Kerberos authentication
+     * Does not affect network connectivity.
+     */
+    public void setAuthenticationPort(int i) {
+        authenticationPort = i;
     }
 
     public void start() {
@@ -308,13 +328,13 @@ public class ClientSession {
                 if (ack.isValid()) {
                     stanzaAckRequester_.handleAckReceived(ack.getHandledStanzasCount());
                 }
-                //else {
-                    //logger_.warning("Got invalid ack from server"); /*FIXME: Do we want logging here?
-                //}
+                else {
+                    logger_.warning("Got invalid ack from server");
+                }
             }
-            //else {
-                //logger_.warning("Ignoring ack"); /*FIXME: Do we want logging here?*/
-            //}
+            else {
+                logger_.warning("Ignoring ack");
+            }
         }
         else if (element instanceof StreamError) {
             finishSession(Error.Type.StreamError);
@@ -341,7 +361,7 @@ public class ClientSession {
             else if (UseTLS.RequireTLS.equals(useTLS) && !stream.isTLSEncrypted()) {
                 finishSession(Error.Type.NoSupportedAuthMechanismsError);
             }
-            else if (useStreamCompression && streamFeatures.hasCompressionMethod("zlib")) {
+            else if (useStreamCompression && stream.supportsZLibCompression() && streamFeatures.hasCompressionMethod("zlib")) {
                 state = State.Compressing;
                 stream.writeElement(new CompressRequest("zlib"));
             }
@@ -349,20 +369,27 @@ public class ClientSession {
                 if (stream.hasTLSCertificate()) {
                     if (streamFeatures.hasAuthenticationMechanism("EXTERNAL")) {
                         state = State.Authenticating;
-                        stream.writeElement(new AuthRequest("EXTERNAL",new SafeByteArray()));
+                        stream.writeElement(new AuthRequest("EXTERNAL",new SafeByteArray("")));
                     }
                     else {
                         finishSession(Error.Type.TLSClientCertificateError);
                     }
                 }
                 else if (streamFeatures.hasAuthenticationMechanism("EXTERNAL")) {
+                    authenticator = new EXTERNALClientAuthenticator();
                     state = State.Authenticating;
-                    stream.writeElement(new AuthRequest("EXTERNAL",new SafeByteArray()));
+                    stream.writeElement(new AuthRequest("EXTERNAL",new SafeByteArray("")));
                 }
                 else if (streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1") || streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS")) {
-                    final SCRAMSHA1ClientAuthenticator scramAuthenticator = new SCRAMSHA1ClientAuthenticator(UUID.randomUUID().toString(), streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS"), idnConverter, crypto);
+                    ByteArray finishMessage = new ByteArray();
+                    boolean plus = streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS");
                     if (stream.isTLSEncrypted()) {
-                        scramAuthenticator.setTLSChannelBindingData(stream.getTLSFinishMessage());
+                        finishMessage = stream.getTLSFinishMessage();
+                        plus &= !(finishMessage.isEmpty());
+                    }
+                    final SCRAMSHA1ClientAuthenticator scramAuthenticator = new SCRAMSHA1ClientAuthenticator(UUID.randomUUID().toString(), plus, idnConverter, crypto);
+                    if (!(finishMessage.isEmpty())) {
+                        scramAuthenticator.setTLSChannelBindingData(finishMessage);
                     }
                     authenticator = scramAuthenticator;
                     state = State.WaitingForCredentials;
@@ -373,13 +400,12 @@ public class ClientSession {
                         state = State.WaitingForCredentials;
                         onNeedCredentials.emit();
                 }
-//                        //FIXME: Port
-//			else if (streamFeatures.hasAuthenticationMechanism("DIGEST-MD5")) {
-//				// FIXME: Host should probably be the actual host
-//				authenticator = new DIGESTMD5ClientAuthenticator(localJID.getDomain(), UUID.randomUUID());
-//				state = State.WaitingForCredentials;
-//				onNeedCredentials.emit();
-//			}
+			    else if (streamFeatures.hasAuthenticationMechanism("DIGEST-MD5") && crypto.isMD5AllowedForCrypto()) {
+				    // FIXME: Host should probably be the actual host
+				    authenticator = new DIGESTMD5ClientAuthenticator(localJID.getDomain(), UUID.randomUUID().toString(), crypto);
+				    state = State.WaitingForCredentials;
+				    onNeedCredentials.emit();
+			    }
                 else {
                         finishSession(Error.Type.NoSupportedAuthMechanismsError);
                 }
@@ -400,7 +426,9 @@ public class ClientSession {
             }
 	}
         else if (element instanceof Compressed) {
-            checkState(State.Compressing);
+            if(!checkState(State.Compressing)) {
+                return;
+            }
             state = State.WaitingForStreamStart;
             stream.addZLibCompression();
             stream.resetXMPPParser();
@@ -439,7 +467,9 @@ public class ClientSession {
         }
         else if (element instanceof AuthChallenge) {
             final AuthChallenge challenge = (AuthChallenge) element;
-            checkState(State.Authenticating);
+            if(!checkState(State.Authenticating)) {
+                return;
+            }
             assert authenticator != null;
             if (authenticator.setChallenge(challenge.getValue())) {
                 stream.writeElement(new AuthResponse(authenticator.getResponse()));
@@ -450,8 +480,11 @@ public class ClientSession {
 	}
 	else if (element instanceof AuthSuccess) {
             final AuthSuccess authSuccess = (AuthSuccess)element;
-            checkState(State.Authenticating);
-            if (authenticator != null && !authenticator.setChallenge(authSuccess.getValue())) {
+            if(!checkState(State.Authenticating)) {
+                return;
+            }
+            assert(authenticator != null);
+            if (!authenticator.setChallenge(authSuccess.getValue())) {
                 finishSession(Error.Type.ServerVerificationFailedError);
             }
             else {
@@ -462,7 +495,6 @@ public class ClientSession {
             }
 	}
 	else if (element instanceof AuthFailure) {
-		authenticator = null;
 		finishSession(Error.Type.AuthenticationFailedError);
 	}
 	else if (element instanceof TLSProceed) {
@@ -518,6 +550,8 @@ public class ClientSession {
         if (!checkState(State.WaitingForCredentials)) {
             throw new IllegalStateException("Asking for credentials when we shouldn't be asked.");
         }
+    //assert(WaitingForCredentials);
+    //assert(authenticator);    
 	state = State.Authenticating;
 	authenticator.setCredentials(localJID.getNode(), password);
 	stream.writeElement(new AuthRequest(authenticator.getName(), authenticator.getResponse()));
@@ -536,7 +570,7 @@ public class ClientSession {
         }
         else {
             final ServerIdentityVerifier identityVerifier = new ServerIdentityVerifier(localJID, idnConverter);
-            if (identityVerifier.certificateVerifies(peerCertificate)) {
+            if (!certificateChain.isEmpty() && identityVerifier.certificateVerifies(peerCertificate)) {
                 continueAfterTLSEncrypted();
             }
             else {
@@ -592,20 +626,23 @@ public class ClientSession {
     }
 
     private void finishSession(final Error.Type error) {
-        Error localError = null;
-        if (error != null) {
-            localError = new Error(error);
-        }
-        finishSession(localError);
+        finishSession(new ClientSession.Error(error));
     }
 
     private void finishSession(final com.isode.stroke.base.Error error) {
         state = State.Finishing;
-	error_ = error;
+        if(error_ == null) {
+            error_ = error;
+        } else {
+            logger_.warning("Session finished twice");
+        }
 	assert stream.isOpen();
 	if (stanzaAckResponder_ != null) {
             stanzaAckResponder_.handleAckRequestReceived();
 	}
+        if (authenticator != null) {
+            authenticator = null;
+        }
 	stream.writeFooter();
 	stream.close();
     }

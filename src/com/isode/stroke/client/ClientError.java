@@ -30,9 +30,14 @@ public class ClientError {
         UnexpectedElementError,
         ResourceBindError,
         SessionStartError,
+        StreamError,
         TLSError,
         ClientCertificateLoadError,
         ClientCertificateError,
+
+        // Certifate on smartcard was removed
+        CertificateCardRemoved,
+
         // Certificate verification errors
         UnknownCertificateError,
         CertificateExpiredError,
@@ -45,9 +50,15 @@ public class ClientError {
         InvalidCertificateSignatureError,
         InvalidCAError,
         InvalidServerIdentityError,
+        RevokedError,
+        RevocationCheckFailedError
     };
 
-    ClientError(final Type type) {
+    public ClientError() {
+        type_ = Type.UnknownError;
+    }
+
+    public ClientError(final Type type) {
         type_ = type;
     }
 

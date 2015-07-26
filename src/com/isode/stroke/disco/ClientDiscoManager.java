@@ -69,7 +69,7 @@ public class ClientDiscoManager {
      * Called when the client is connected. This resets the presence sender,
      * such that it assumes initial presence hasn't been sent yet.
      */
-    void handleConnected() {
+    public void handleConnected() {
         presenceSender.reset();
     }
 

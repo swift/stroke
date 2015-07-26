@@ -32,7 +32,7 @@ public abstract class StanzaChannel extends IQChannel {
 
     public final Signal1<Message> onMessageReceived = new Signal1<Message>();
     public final Signal1<Presence> onPresenceReceived = new Signal1<Presence>();
-    public final Signal1<Boolean> onAvailableChanged = new Signal1<Boolean>();
+    public final Signal1<Boolean /* isAvailable */ > onAvailableChanged = new Signal1<Boolean>();
     public final Signal1<Stanza> onStanzaAcked = new Signal1<Stanza>();
 
 

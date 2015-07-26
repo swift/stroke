@@ -13,11 +13,12 @@ import com.isode.stroke.vcards.VCardManager;
 public class NickManagerImpl extends NickManager {
 	private JID ownJID = new JID();
 	private String ownNick = "";
+	private VCardManager vcardManager;
 	private SignalConnection vCardChangedSignal;
 
-	NickManagerImpl(final JID ownJID, VCardManager vcardManager) {
+	public NickManagerImpl(final JID ownJID, VCardManager vcardManager) {
 		this.ownJID = ownJID;
-		
+		this.vcardManager = vcardManager;
 		vCardChangedSignal = vcardManager.onVCardChanged.connect(new Slot2<JID, VCard>() {
 			@Override
 			public void call(JID p1, VCard p2) {
@@ -53,7 +54,7 @@ public class NickManagerImpl extends NickManager {
 		if (vcard != null && !vcard.getNickname().isEmpty()) {
 			nick = vcard.getNickname();
 		}
-		if (ownNick != nick && nick != null && !nick.equals(ownNick)) {
+		if (nick != ownNick && nick != null && !nick.equals(ownNick)) {
 			ownNick = nick;
 			onOwnNickChanged.emit(ownNick);
 		}

@@ -9,6 +9,10 @@ import com.isode.stroke.disco.CapsStorage;
 import com.isode.stroke.roster.RosterStorage;
 import com.isode.stroke.vcards.VCardStorage;
 
+/**
+ * An interface to hold storage classes for different
+ * controllers.
+ */
 public interface Storages {
 	VCardStorage getVCardStorage();
 	AvatarStorage getAvatarStorage();

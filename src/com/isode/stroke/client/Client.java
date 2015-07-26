@@ -29,6 +29,7 @@ import com.isode.stroke.roster.XMPPRosterImpl;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.vcards.VCardManager;
 import com.isode.stroke.base.SafeByteArray;
+import com.isode.stroke.tls.BlindCertificateTrustChecker;
 
 /**
  * Provides the core functionality for writing XMPP client software.
@@ -44,7 +45,7 @@ public class Client extends CoreClient {
     private final DirectedPresenceSender directedPresenceSender; //NOPMD, this is not better as a local variable
     private final StanzaChannelPresenceSender stanzaChannelPresenceSender; //NOPMD, this is not better as a local variable
     private final SoftwareVersionResponder softwareVersionResponder;
-    private final PubSubManager pubSubManager;
+    private final PubSubManager pubsubManager;
     private final XMPPRosterImpl roster;
     private final XMPPRosterController rosterController;
     private final PresenceOracle presenceOracle;
@@ -58,8 +59,13 @@ public class Client extends CoreClient {
     private final SubscriptionManager subscriptionManager;
     private final ClientDiscoManager discoManager;
     private final AvatarManager avatarManager;
+    //private final JingleSessionManager jingleSessionManager;
+    //private final FileTransferManager fileTransferManager;
+    private final BlindCertificateTrustChecker blindCertificateTrustChecker;
+    //private final WhiteboardSessionManager whiteboardSessionManager;
+    private final ClientBlockListManager blockListManager;
 
-    final Signal1<Presence> onPresenceChange = new Signal1<Presence>();
+    public final Signal1<Presence> onPresenceChange = new Signal1<Presence>();
 
     /**
      * Constructor.
@@ -109,9 +115,45 @@ public class Client extends CoreClient {
     	nickManager = new NickManagerImpl(jid.toBare(), vcardManager);
     	nickResolver = new NickResolver(jid.toBare(), roster, vcardManager, mucRegistry);
 
-    	pubSubManager = new PubSubManagerImpl(getStanzaChannel(), getIQRouter());
+        blindCertificateTrustChecker = new BlindCertificateTrustChecker();
+
+        //TO PORT
+        //jingleSessionManager = new JingleSessionManager(getIQRouter());
+        blockListManager = new ClientBlockListManager(getIQRouter());
+
+        /*whiteboardSessionManager = NULL;
+        #ifdef SWIFT_EXPERIMENTAL_WB
+            whiteboardSessionManager = new WhiteboardSessionManager(getIQRouter(), getStanzaChannel(), presenceOracle, getEntityCapsProvider());
+        #endif*/
+
+    	pubsubManager = new PubSubManagerImpl(getStanzaChannel(), getIQRouter());
+
+        /*#ifdef SWIFT_EXPERIMENTAL_FT
+            fileTransferManager = new FileTransferManagerImpl(
+                    getJID(),
+                    jingleSessionManager,
+                    getIQRouter(),
+                    getEntityCapsProvider(),
+                    presenceOracle,
+                    getNetworkFactories()->getConnectionFactory(),
+                    getNetworkFactories()->getConnectionServerFactory(),
+                    getNetworkFactories()->getTimerFactory(),
+                    getNetworkFactories()->getDomainNameResolver(),
+                    getNetworkFactories()->getNetworkEnvironment(),
+                    getNetworkFactories()->getNATTraverser(),
+                    getNetworkFactories()->getCryptoProvider());
+        #else
+            fileTransferManager = new DummyFileTransferManager();
+        #endif*/
     }
-    
+
+    /**
+     * Constructs a client for the given JID with the given password.
+     *
+     * \param storages The interfaces for storing cache information etc. If 
+     *  this is NULL,
+     *  all data will be stored in memory (and be lost on shutdown)
+     */
     public  Client(final JID jid, final SafeByteArray password, final NetworkFactories networkFactories) {
         this(jid, password, networkFactories, null);
     }
@@ -137,13 +179,32 @@ public class Client extends CoreClient {
      * @return PubSub manager, not null
      */
     public PubSubManager getPubSubManager() {
-        return pubSubManager;
+        return pubsubManager;
     }
-    
+
+    /** 
+     * Returns a representation of the roster.
+     *
+     * The roster is initially empty. To populate it, call requestRoster(),
+     * which will request the roster from the server. When the roster has
+     * been requested, it will also be kept up to date when it is updated on
+     * the server side.
+     *
+     * This pointer remains the same across the lifetime of Client. All
+     * changes to the roster (e.g. after the initial roster request, or after
+     * subsequent roster updates) are notified through the XMPPRoster's
+     * signals.
+     *
+     * \see requestRoster()
+     */
     public XMPPRoster getRoster() {
     	return roster;
     }
-    
+
+    public void setSoftwareVersion(final String name, final String version) {
+        setSoftwareVersion(name, version, "");
+    }
+
     /**
      * Sets the software version of the client.                  
      *
@@ -153,7 +214,11 @@ public class Client extends CoreClient {
         softwareVersionResponder.setVersion(name, version, os);
     }
 
-
+    /**
+     * Requests the roster from the server.
+     *
+     * \see getRoster()
+     */
     public void requestRoster() {
     	// FIXME: We should set this once when the session is finished, but there
     	// is currently no callback for this
@@ -190,7 +255,37 @@ public class Client extends CoreClient {
     public ClientDiscoManager getDiscoManager() {
         return discoManager;
     }
-    
+
+    public ClientBlockListManager getClientBlockListManager() {
+        return blockListManager;
+    }
+
+    /**
+     * Returns a FileTransferManager for the client. This is only available after the onConnected 
+     * signal has been fired.
+     *
+     * WARNING: File transfer will only work if Swiften is built in 'experimental' mode.
+     */
+    //TO PORT
+    /*public FileTransferManager getFileTransferManager() {
+        return fileTransferManager;
+    }*/
+
+    /**
+     * Configures the client to always trust a non-validating
+     * TLS certificate from the server.
+     * This is equivalent to setting a BlindCertificateTrustChecker
+     * using setCertificateTrustChecker().
+     */
+    public void setAlwaysTrustCertificates() {
+        setCertificateTrustChecker(blindCertificateTrustChecker);
+    }
+
+    //TO PORT
+    /*public WhiteboardSessionManager getWhiteboardSessionManager() {
+        return whiteboardSessionManager;
+    }*/
+
     public VCardManager getVCardManager() {
     	return vcardManager;
     }
@@ -205,7 +300,11 @@ public class Client extends CoreClient {
     	}
     	return memoryStorages;
     }
-    
+
+    protected void handleConnected() {
+        discoManager.handleConnected();
+    }
+
     public PresenceSender getPresenceSender() {
         return discoManager.getPresenceSender();
     }

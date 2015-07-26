@@ -14,8 +14,12 @@ import com.isode.stroke.roster.RosterStorage;
 import com.isode.stroke.vcards.VCardMemoryStorage;
 import com.isode.stroke.vcards.VCardStorage;
 
+/**
+ * An implementation of Storages for storing all
+ * controller data in memory.
+ */
 public class MemoryStorages implements Storages {
-	private VCardStorage vcardStorage;
+	private VCardMemoryStorage vcardStorage;
 	private AvatarStorage avatarStorage;
 	private CapsStorage capsStorage;
 	private RosterStorage rosterStorage;
@@ -53,4 +57,8 @@ public class MemoryStorages implements Storages {
 		return avatarStorage;
 	}
 
+	/*@Override
+	public HistoryStorage getHistoryStorage() {
+		return historyStorage;
+	}*/
 }

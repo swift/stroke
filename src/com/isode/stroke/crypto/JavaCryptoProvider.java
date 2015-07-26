@@ -139,6 +139,6 @@ public class JavaCryptoProvider extends CryptoProvider {
 
 	@Override
 	public boolean isMD5AllowedForCrypto() {
-		return false;
+		return true;
 	}
 }
