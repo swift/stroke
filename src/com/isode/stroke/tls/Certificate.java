@@ -11,7 +11,6 @@ package com.isode.stroke.tls;
 import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.stringcodecs.Hexify;
-import com.isode.stroke.stringcodecs.SHA1;
 import java.util.List;
 
 public abstract class Certificate {
