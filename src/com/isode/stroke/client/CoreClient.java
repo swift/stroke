@@ -18,6 +18,9 @@ import com.isode.stroke.network.ConnectionFactory;
 import com.isode.stroke.network.Connector;
 import com.isode.stroke.network.DomainNameResolveError;
 import com.isode.stroke.network.NetworkFactories;
+import com.isode.stroke.network.HostAddressPort;
+import com.isode.stroke.network.SOCKS5ProxiedConnectionFactory;
+import com.isode.stroke.network.HTTPConnectProxiedConnectionFactory;
 import com.isode.stroke.parser.payloadparsers.FullPayloadParserFactoryCollection;
 import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.serializer.payloadserializers.FullPayloadSerializerCollection;
@@ -201,17 +204,16 @@ public class CoreClient {
         assert (connector_ == null);
         options = o;
 
-        //TO PORT
-        /*// Determine connection types to use
+        // Determine connection types to use
         assert(proxyConnectionFactories.isEmpty());
         boolean useDirectConnection = true;
         HostAddressPort systemSOCKS5Proxy = networkFactories.getProxyProvider().getSOCKS5Proxy();
         HostAddressPort systemHTTPConnectProxy = networkFactories.getProxyProvider().getHTTPConnectProxy();
         switch (o.proxyType) {
-            case ClientOptions.ProxyType.NoProxy:
+            case NoProxy:
                 logger_.fine(" without a proxy\n");
                 break;
-            case ClientOptions.ProxyType.SystemConfiguredProxy:
+            case SystemConfiguredProxy:
                 logger_.fine(" with a system configured proxy\n");
                 if (systemSOCKS5Proxy.isValid()) {
                     logger_.fine("Found SOCK5 Proxy: " + systemSOCKS5Proxy.getAddress().toString() + ":" + systemSOCKS5Proxy.getPort() + "\n");
@@ -222,20 +224,20 @@ public class CoreClient {
                     proxyConnectionFactories.add(new HTTPConnectProxiedConnectionFactory(networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory(), systemHTTPConnectProxy.getAddress().toString(), systemHTTPConnectProxy.getPort()));
                 }
                 break;
-            case ClientOptions.ProxyType.SOCKS5Proxy: {
+            case SOCKS5Proxy: {
                 logger_.fine(" with manual configured SOCKS5 proxy\n");
-                String proxyHostname = o.manualProxyHostname.empty() ? systemSOCKS5Proxy.getAddress().toString() : o.manualProxyHostname;
+                String proxyHostname = o.manualProxyHostname.isEmpty() ? systemSOCKS5Proxy.getAddress().toString() : o.manualProxyHostname;
                 int proxyPort = o.manualProxyPort == -1 ? systemSOCKS5Proxy.getPort() : o.manualProxyPort;
                 logger_.fine("Proxy: " + proxyHostname + ":" + proxyPort + "\n");
                 proxyConnectionFactories.add(new SOCKS5ProxiedConnectionFactory(networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory(), proxyHostname, proxyPort));
                 useDirectConnection = false;
                 break;
             }
-            case ClientOptions.ProxyType.HTTPConnectProxy: {
+            case HTTPConnectProxy: {
                 logger_.fine(" with manual configured HTTPConnect proxy\n");
-                std::string proxyHostname = o.manualProxyHostname.empty() ? systemHTTPConnectProxy.getAddress().toString() : o.manualProxyHostname;
+                String proxyHostname = o.manualProxyHostname.isEmpty() ? systemHTTPConnectProxy.getAddress().toString() : o.manualProxyHostname;
                 int proxyPort = o.manualProxyPort == -1 ? systemHTTPConnectProxy.getPort() : o.manualProxyPort;
-                logger_.fine("Proxy: " + proxyHostname + ":" << proxyPort + "\n");
+                logger_.fine("Proxy: " + proxyHostname + ":" + proxyPort + "\n");
                 proxyConnectionFactories.add(new HTTPConnectProxiedConnectionFactory(networkFactories.getDomainNameResolver(), networkFactories.getConnectionFactory(), networkFactories.getTimerFactory(), proxyHostname, proxyPort, o.httpTrafficFilter));
                 useDirectConnection = false;
                 break;
@@ -244,7 +246,7 @@ public class CoreClient {
         Vector<ConnectionFactory> connectionFactories = new Vector<ConnectionFactory>(proxyConnectionFactories);
         if (useDirectConnection) {
             connectionFactories.add(networkFactories.getConnectionFactory());
-        }*/
+        }
 
         String host = (o.manualHostname == null || o.manualHostname.isEmpty()) ? jid_.getDomain() : o.manualHostname;
         int port = o.manualPort;
@@ -292,9 +294,7 @@ public class CoreClient {
     }
 
     private void bindSessionToStream() {
-        //TO PORT
-        //session_ = ClientSession::create(jid_, sessionStream_, networkFactories.getIDNConverter(), networkFactories.getCryptoProvider());
-        session_ = ClientSession.create(jid_, sessionStream_, new ICUConverter(), new JavaCryptoProvider());
+        session_ = ClientSession.create(jid_, sessionStream_, networkFactories.getIDNConverter(), networkFactories.getCryptoProvider());
         session_.setCertificateTrustChecker(certificateTrustChecker);
         session_.setUseStreamCompression(options.useStreamCompression);
         session_.setAllowPLAINOverNonTLS(options.allowPLAINWithoutTLS);

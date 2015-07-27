@@ -12,6 +12,7 @@ package com.isode.stroke.client;
 import com.isode.stroke.tls.TLSOptions;
 import com.isode.stroke.base.URL;
 import com.isode.stroke.base.SafeByteArray;
+import com.isode.stroke.network.HTTPTrafficFilter;
 
 /**
  * Options for a client connection
@@ -119,7 +120,7 @@ public class ClientOptions {
      * This can be initialized with a custom HTTPTrafficFilter, which allows HTTP CONNECT
      * proxy initialization to be customized.
      */
-    //public HTTPTrafficFilter httpTrafficFilter; //TOPORT NETWORK
+    public HTTPTrafficFilter httpTrafficFilter;
 
     /**
      * Options passed to the TLS stack

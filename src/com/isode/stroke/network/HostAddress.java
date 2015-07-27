@@ -10,6 +10,7 @@
 package com.isode.stroke.network;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class HostAddress {
 
@@ -17,12 +18,39 @@ public class HostAddress {
         address_ = null;
     }
 
+    public HostAddress(String address) {
+        try {
+            address_ = InetAddress.getByName(address);
+        }
+        catch (UnknownHostException e) {
+            address_ = null;
+        }
+    }
+
     public HostAddress(InetAddress address) {
         address_ = address;
     }
-    /*			public HostAddress(const String&);
-    public 			HostAddress(const unsigned char* address, int length);
-    public 		HostAddress(const boost::asio::ip::address& address);*/
+    
+    public HostAddress(final char[] address, int length) {
+        try {
+            assert(length == 4 || length == 16);
+            byte[] data = new byte[length];
+            if (length == 4) {
+                for (int i = 0; i < length; ++i) {
+                    data[i] = (byte)address[i];
+                }
+            }
+            else {
+                for (int i = 0; i < length; ++i) {
+                    data[i] = (byte)address[i];
+                }
+            }
+            address_ = InetAddress.getByAddress(data);
+        } catch (UnknownHostException e) {
+            address_ = null;
+        }
+    }
+    
 
     @Override
     public String toString() {
@@ -57,5 +85,5 @@ public class HostAddress {
         return address_;
     }
     
-    private final InetAddress address_;
+    private InetAddress address_;
 }

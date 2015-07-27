@@ -32,7 +32,6 @@ public class Connector {
         assert serviceQuery == null;
         assert timer == null;
         queriedAllServices = false;
-        serviceQueryResults = new ArrayList<Result>();
         
         if (timeoutMilliseconds > 0) {
             timer = timerFactory.createTimer(timeoutMilliseconds);
@@ -41,16 +40,21 @@ public class Connector {
                     handleTimeout();
                 }
             });
-            timer.start();
         }
         if (serviceLookupPrefix != null) {
-            serviceQuery = resolver.createServiceQuery(serviceLookupPrefix + hostname);
+            serviceQuery = resolver.createServiceQuery(serviceLookupPrefix, hostname);
             serviceQuery.onResult.connect(new Slot1<Collection<DomainNameServiceQuery.Result>>() {
                 public void call(Collection<Result> p1) {
                     handleServiceQueryResult(p1);
                 }
             });
             serviceQuery.run();
+        }
+        else if (new HostAddress(hostname).isValid()) {
+            // hostname is already a valid address; skip name lookup.
+            foundSomeDNS = true;
+            addressQueryResults.add(new HostAddress(hostname));
+            tryNextAddress();
         }
         else {
             queryAddress(hostname);
@@ -70,6 +74,9 @@ public class Connector {
         this.timerFactory = timerFactory;
         this.port = port;
         this.serviceLookupPrefix = serviceLookupPrefix;
+        this.timeoutMilliseconds = 0;
+        this.queriedAllServices = true;
+        this.foundSomeDNS = false;
     }
 
     private void handleServiceQueryResult(Collection<Result> result) {
@@ -161,10 +168,17 @@ public class Connector {
         });
 
 	currentConnection.connect(target);
+    if (timer != null) {
+        timer.start();
+    }
     }
 
     private void handleConnectionConnectFinished(boolean error) {
         //std::cout << "Connector::handleConnectionConnectFinished() " << error << std::endl;
+    if (timer != null) {
+        timer.stop();
+        timer = null;
+    }        
 	currentConnectionConnectFinishedConnection.disconnect();
 	if (error) {
 		currentConnection = null;
@@ -206,7 +220,8 @@ public class Connector {
     }
 
     private void handleTimeout() {
-        finish(null);
+        //SWIFT_LOG(debug) << "Timeout" << std::endl;
+        handleConnectionConnectFinished(true);
     }
     
     @Override
@@ -223,9 +238,9 @@ public class Connector {
     private int timeoutMilliseconds = 0;
     private Timer timer;
     private DomainNameServiceQuery serviceQuery;
-    private ArrayList<DomainNameServiceQuery.Result> serviceQueryResults;
+    private ArrayList<DomainNameServiceQuery.Result> serviceQueryResults = new ArrayList<DomainNameServiceQuery.Result>();
     private DomainNameAddressQuery addressQuery;
-    private ArrayList<HostAddress> addressQueryResults;
+    private ArrayList<HostAddress> addressQueryResults = new ArrayList<HostAddress>();
     private boolean queriedAllServices = true;
     private Connection currentConnection;
     private SignalConnection currentConnectionConnectFinishedConnection;

@@ -13,7 +13,7 @@ import java.util.Collection;
 
 public abstract class DomainNameServiceQuery {
 
-    public class Result {
+    public static class Result {
 
         public Result() {
             hostname = "";

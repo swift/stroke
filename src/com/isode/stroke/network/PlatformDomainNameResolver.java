@@ -16,6 +16,8 @@ import java.util.Collection;
 import com.isode.stroke.eventloop.Event.Callback;
 import com.isode.stroke.eventloop.EventLoop;
 import com.isode.stroke.eventloop.EventOwner;
+import com.isode.stroke.idn.IDNConverter;
+import com.isode.stroke.idn.ICUConverter;
 
 public class PlatformDomainNameResolver extends DomainNameResolver {
 
@@ -54,18 +56,25 @@ public class PlatformDomainNameResolver extends DomainNameResolver {
         final EventLoop eventLoop;
     }
 
-    public PlatformDomainNameResolver(EventLoop eventLoop) {
+    public PlatformDomainNameResolver(IDNConverter idnConverter, EventLoop eventLoop) {
         this.eventLoop_ = eventLoop;
+        this.idnConverter = idnConverter;
     }
 
     @Override
-    public DomainNameServiceQuery createServiceQuery(String name) {
-        return new PlatformDomainNameServiceQuery(getNormalized(name), eventLoop_);
+    public DomainNameServiceQuery createServiceQuery(String serviceLookupPrefix, String name) {
+        String encodedDomain = idnConverter.getIDNAEncoded(name);
+        String result = "";
+        if (encodedDomain != null) {
+            result = serviceLookupPrefix + encodedDomain;
+        }        
+        return new PlatformDomainNameServiceQuery(result, eventLoop_);
     }
 
     @Override
     public DomainNameAddressQuery createAddressQuery(String name) {
-        return new AddressQuery(getNormalized(name), eventLoop_);
+        return new AddressQuery(idnConverter.getIDNAEncoded(name), eventLoop_);
     }
     private final EventLoop eventLoop_;
+    private IDNConverter idnConverter;
 }

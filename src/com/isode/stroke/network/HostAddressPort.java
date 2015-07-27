@@ -11,9 +11,12 @@ package com.isode.stroke.network;
 
 public class HostAddressPort {
 
+    public HostAddressPort() {
+        this(new HostAddress(), -1);
+    }
+
     public HostAddressPort(HostAddress address) {
-        address_ = address;
-        port_ = -1;
+        this(address, -1);
     }
 
     public HostAddressPort(HostAddress address, int port) {

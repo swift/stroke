@@ -9,6 +9,8 @@ import com.isode.stroke.crypto.JavaCryptoProvider;
 import com.isode.stroke.eventloop.EventLoop;
 import com.isode.stroke.tls.PlatformTLSFactories;
 import com.isode.stroke.tls.TLSContextFactory;
+import com.isode.stroke.idn.IDNConverter;
+import com.isode.stroke.idn.ICUConverter;
 
 public class JavaNetworkFactories implements NetworkFactories {
 
@@ -16,9 +18,11 @@ public class JavaNetworkFactories implements NetworkFactories {
         eventLoop_ = eventLoop;
         timers_ = new JavaTimerFactory(eventLoop_);
         connections_ = new JavaConnectionFactory(eventLoop_);
-        dns_ = new PlatformDomainNameResolver(eventLoop_);
         platformTLSFactories_ = new PlatformTLSFactories();
         cryptoProvider_ = new JavaCryptoProvider();
+        idnConverter_ = new ICUConverter();
+        dns_ = new PlatformDomainNameResolver(idnConverter_, eventLoop_);
+        proxyProvider_ = new JavaProxyProvider();
     }
 
     public TimerFactory getTimerFactory() {
@@ -36,10 +40,23 @@ public class JavaNetworkFactories implements NetworkFactories {
     public TLSContextFactory getTLSContextFactory() {
         return platformTLSFactories_.getTLSContextFactory();        
     }
-    
+
+    public ProxyProvider getProxyProvider() {
+        return proxyProvider_;
+    }
+
+    public EventLoop getEventLoop() {
+        return eventLoop_;
+    }
+
     @Override
     public CryptoProvider getCryptoProvider() {
         return cryptoProvider_;
+    }
+
+    @Override
+    public IDNConverter getIDNConverter() {
+        return idnConverter_;
     }
 
     private final EventLoop eventLoop_;
@@ -47,5 +64,7 @@ public class JavaNetworkFactories implements NetworkFactories {
     private final JavaConnectionFactory connections_;
     private final PlatformDomainNameResolver dns_;
     private final PlatformTLSFactories platformTLSFactories_;
+    private final ProxyProvider proxyProvider_;
     private final CryptoProvider cryptoProvider_;
+    private final IDNConverter idnConverter_;   
 }

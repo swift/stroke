@@ -6,6 +6,8 @@ package com.isode.stroke.network;
 
 import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.tls.TLSContextFactory;
+import com.isode.stroke.idn.IDNConverter;
+import com.isode.stroke.eventloop.EventLoop;
 
 public interface NetworkFactories {
 
@@ -13,6 +15,8 @@ public interface NetworkFactories {
     ConnectionFactory getConnectionFactory();
     DomainNameResolver getDomainNameResolver();
     TLSContextFactory getTLSContextFactory();
+    ProxyProvider getProxyProvider();
+	EventLoop getEventLoop();    
     CryptoProvider getCryptoProvider();
-
+    IDNConverter getIDNConverter();
 }
