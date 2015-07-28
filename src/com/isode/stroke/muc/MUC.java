@@ -68,6 +68,14 @@ public abstract class MUC {
 	public abstract Map<String, MUCOccupant> getOccupants();
 	public abstract void changeNickname(final String newNickname);
 	public abstract void part();
+	/**
+	* Disconnect signals for this MUC.
+	* Java-specific method (not in Swiften) required so that any connected
+	* signals can be disconnected when the object is no longer required.
+	* While any signals are still connected, the MUC object will not be
+	* eligible for garbage collection.
+	*/
+        public abstract void disconnect();
 	/*public abstract void handleIncomingMessage(Message::ref message); */
 	/** Expose public so it can be called when e.g. user goes offline */
 	public abstract void handleUserLeft(LeavingType l);

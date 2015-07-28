@@ -88,6 +88,7 @@ public class MockMUC extends MUC {
 
 	public void changeNickname(final String newNickname) {}
 	public void part() {}
+        public void disconnect() {}
 	/*public void handleIncomingMessage(Message::ref message); */
 	/** Expose public so it can be called when e.g. user goes offline */
 	public void handleUserLeft(LeavingType l) {}
