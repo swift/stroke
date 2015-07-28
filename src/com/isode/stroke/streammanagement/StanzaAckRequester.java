@@ -20,7 +20,7 @@ public class StanzaAckRequester {
     static final long MAX_HANDLED_STANZA_COUNT = Long.parseLong("4294967295"); //boost::numeric_cast<unsigned int>((1ULL<<32) - 1);
 
     public StanzaAckRequester() {
-
+        this.lastHandledStanzasCount = 0L;
     }
 
     public void handleStanzaSent(Stanza stanza) {
@@ -34,7 +34,7 @@ public class StanzaAckRequester {
         long i = lastHandledStanzasCount;
         while (i != handledStanzasCount) {
             if (unackedStanzas.isEmpty()) {
-                //std::cerr << "Warning: Server acked more stanzas than we sent" << std::endl;
+                System.err.println("Warning: Server acked more stanzas than we sent");
                 break;
             }
             Stanza ackedStanza = unackedStanzas.get(0);
@@ -49,7 +49,7 @@ public class StanzaAckRequester {
 
     public Signal1<Stanza> onStanzaAcked = new Signal1<Stanza>();
 
-    private long lastHandledStanzasCount;
+    long lastHandledStanzasCount;
 
-    private List<Stanza> unackedStanzas = new ArrayList<Stanza>();
+    List<Stanza> unackedStanzas = new ArrayList<Stanza>();
 }

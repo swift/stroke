@@ -14,6 +14,7 @@ import com.isode.stroke.elements.Message;
 import com.isode.stroke.parser.payloadparsers.PubSubEvent;
 import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.signals.SignalConnection;
 
 public class PubSubManagerImpl extends PubSubManager {
     
@@ -21,16 +22,30 @@ public class PubSubManagerImpl extends PubSubManager {
         stanzaChannel_ = stanzaChannel;
         router_ = router;
         
-        stanzaChannel.onMessageReceived.connect(new Slot1<Message>() {
+        onMessageReceivedConnection = stanzaChannel.onMessageReceived.connect(new Slot1<Message>() {
             public void call(Message message) {
-                PubSubEvent event = (PubSubEvent)message.getPayload(new PubSubEvent());
-                if (event != null) {
-                    onEvent.emit(message.getFrom(), event.getPayload());
-                }
+                handleMessageRecevied(message);
             }
         });
     }
-    
-    StanzaChannel stanzaChannel_;
-    IQRouter router_;
+
+    protected void finalize() throws Throwable {
+        try {
+            onMessageReceivedConnection.disconnect();
+        }
+        finally {
+            super.finalize();
+        }
+    }
+
+    private void handleMessageRecevied(Message message) {
+        if (message.getPayload(new PubSubEvent()) != null) {
+            PubSubEvent event = (PubSubEvent)message.getPayload(new PubSubEvent());
+            onEvent.emit(message.getFrom(), event.getPayload());
+        }
+    }
+
+    private SignalConnection onMessageReceivedConnection;
+    private StanzaChannel stanzaChannel_;
+    private IQRouter router_;
 }

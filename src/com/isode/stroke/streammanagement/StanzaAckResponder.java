@@ -25,5 +25,5 @@ public class StanzaAckResponder {
         onAck.emit(handledStanzasCount);
     }
     public Signal1<Long> onAck = new Signal1<Long>();
-    private long handledStanzasCount = 0;
+    long handledStanzasCount = 0;
 }
