@@ -27,7 +27,7 @@ public class GenericRequest<T extends Payload> extends Request {
     }
 
     @Override
-    protected void handleResponse(Payload payload, ErrorPayload error) {
+    public void handleResponse(Payload payload, ErrorPayload error) {
         T genericPayload = null;
         try {
             genericPayload = (T)payload;
@@ -37,7 +37,7 @@ public class GenericRequest<T extends Payload> extends Request {
         onResponse.emit(genericPayload, error);
     }
 
-    protected T getPayloadGeneric() {
+    public T getPayloadGeneric() {
         return (T)getPayload();
     }
 
