@@ -17,7 +17,7 @@ import com.isode.stroke.elements.Presence;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.disco.EntityCapsProvider;
 import com.isode.stroke.presence.PresenceOracle;
-//import com.isode.stroke.filetransfer.FileTransferManager;
+import com.isode.stroke.filetransfer.FileTransferManager;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,10 +32,7 @@ public class FeatureOracle {
 		this.presenceOracle_ = presenceOracle;
 	}
 
-	/**
-	* To PORT : FileTransfer.
-	*/
-	/*public Tristate isFileTransferSupported(JID jid) {
+	public Tristate isFileTransferSupported(JID jid) {
 		DiscoInfo discoInfo = getDiscoResultForJID(jid);
 		if (discoInfo != null) {
 			return FileTransferManager.isSupportedBy(discoInfo) ? Tristate.Yes : Tristate.No;
@@ -43,7 +40,7 @@ public class FeatureOracle {
 		else {
 			return Tristate.Maybe;
 		}
-	}*/
+	}
 
 	public Tristate isMessageReceiptsSupported(JID jid) {
 		return isFeatureSupported(jid, DiscoInfo.MessageDeliveryReceiptsFeature);

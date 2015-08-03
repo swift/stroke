@@ -22,8 +22,27 @@ public class GenericRequest<T extends Payload> extends Request {
 
     public Signal2<T, ErrorPayload> onResponse = new Signal2<T, ErrorPayload>();
 
+    /**
+     * Create a request suitable for client use.
+     * @param type Iq type - Get or Set.
+     * @param receiver JID to send request to.
+     * @param payload Payload to send in stanza.
+     * @param router IQRouter instance for current connection.
+     */
     public GenericRequest(IQ.Type type, JID receiver, Payload payload, IQRouter router) {
         super(type, receiver, payload, router);
+    }
+
+    /**
+     * Create a request suitable for component or server use. As a client, use the other constructor instead.
+     * @param type Iq type - Get or Set.
+     * @param sender JID to use in "from" of stanza.
+     * @param receiver JID to send request to.
+     * @param payload Payload to send in stanza.
+     * @param router IQRouter instance for current connection.
+     */
+    public GenericRequest(IQ.Type type, final JID sender, final JID receiver, Payload payload, IQRouter router) {
+        super(type, sender, receiver, payload, router);
     }
 
     @Override

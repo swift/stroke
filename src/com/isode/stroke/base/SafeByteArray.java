@@ -61,6 +61,11 @@ public class SafeByteArray extends ByteArray {
 		return this;
 	}
 
+	public SafeByteArray append(SafeByteArray b) {
+		append(b.getData());
+		return this;
+	}
+
 	/** 
 	 * Updates the SafeByteArray by adding all the bytes
 	 * in a byte[] to the end of the array (mutable add).  

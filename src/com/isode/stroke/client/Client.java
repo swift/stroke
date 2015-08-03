@@ -30,6 +30,10 @@ import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.vcards.VCardManager;
 import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.tls.BlindCertificateTrustChecker;
+import com.isode.stroke.filetransfer.FileTransferManager;
+import com.isode.stroke.filetransfer.FileTransferManagerImpl;
+import com.isode.stroke.jingle.JingleSessionManager;
+import com.isode.stroke.filetransfer.DummyFileTransferManager;
 
 /**
  * Provides the core functionality for writing XMPP client software.
@@ -59,8 +63,8 @@ public class Client extends CoreClient {
     private final SubscriptionManager subscriptionManager;
     private final ClientDiscoManager discoManager;
     private final AvatarManager avatarManager;
-    //private final JingleSessionManager jingleSessionManager;
-    //private final FileTransferManager fileTransferManager;
+    private final JingleSessionManager jingleSessionManager;
+    private final FileTransferManager fileTransferManager;
     private final BlindCertificateTrustChecker blindCertificateTrustChecker;
     //private final WhiteboardSessionManager whiteboardSessionManager;
     private final ClientBlockListManager blockListManager;
@@ -117,8 +121,7 @@ public class Client extends CoreClient {
 
         blindCertificateTrustChecker = new BlindCertificateTrustChecker();
 
-        //TO PORT
-        //jingleSessionManager = new JingleSessionManager(getIQRouter());
+        jingleSessionManager = new JingleSessionManager(getIQRouter());
         blockListManager = new ClientBlockListManager(getIQRouter());
 
         /*whiteboardSessionManager = NULL;
@@ -135,16 +138,16 @@ public class Client extends CoreClient {
                     getIQRouter(),
                     getEntityCapsProvider(),
                     presenceOracle,
-                    getNetworkFactories()->getConnectionFactory(),
-                    getNetworkFactories()->getConnectionServerFactory(),
-                    getNetworkFactories()->getTimerFactory(),
-                    getNetworkFactories()->getDomainNameResolver(),
-                    getNetworkFactories()->getNetworkEnvironment(),
-                    getNetworkFactories()->getNATTraverser(),
-                    getNetworkFactories()->getCryptoProvider());
-        #else
-            fileTransferManager = new DummyFileTransferManager();
-        #endif*/
+                    getNetworkFactories().getConnectionFactory(),
+                    getNetworkFactories().getConnectionServerFactory(),
+                    getNetworkFactories().getTimerFactory(),
+                    getNetworkFactories().getDomainNameResolver(),
+                    getNetworkFactories().getNetworkEnvironment(),
+                    getNetworkFactories().getNATTraverser(),
+                    getNetworkFactories().getCryptoProvider());
+        #else*/
+        fileTransferManager = new DummyFileTransferManager();
+        //#endif
     }
 
     /**
@@ -266,10 +269,9 @@ public class Client extends CoreClient {
      *
      * WARNING: File transfer will only work if Swiften is built in 'experimental' mode.
      */
-    //TO PORT
-    /*public FileTransferManager getFileTransferManager() {
+    public FileTransferManager getFileTransferManager() {
         return fileTransferManager;
-    }*/
+    }
 
     /**
      * Configures the client to always trust a non-validating

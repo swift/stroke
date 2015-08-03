@@ -16,8 +16,8 @@ import com.isode.stroke.elements.Payload;
 import java.util.Vector;
 
 public class Jingle {
-
-	public <T extends Payload> JingleContentPayload getContentWithDescription(final Vector<JingleContentPayload> contents, T payload) {
+    
+	public static <T extends Payload> JingleContentPayload getContentWithDescription(final Vector<JingleContentPayload> contents, T payload) {
 		for (JingleContentPayload jingleContentPayload : contents) {
 			if (jingleContentPayload.getDescription(payload) != null) {
 				return jingleContentPayload;

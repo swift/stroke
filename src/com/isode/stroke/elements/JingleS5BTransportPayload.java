@@ -17,6 +17,7 @@ import com.isode.stroke.network.HostAddressPort;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.base.NotNull;
 import java.util.Vector;
+import java.util.Comparator;
 
 public class JingleS5BTransportPayload extends JingleTransportPayload {
 
@@ -46,9 +47,20 @@ public class JingleS5BTransportPayload extends JingleTransportPayload {
 		}
 	}
 
-	public class CompareCandidate {
-		public boolean compareTo(JingleS5BTransportPayload.Candidate c1, JingleS5BTransportPayload.Candidate c2) {
-			return (c1.priority < c2.priority);
+	public static class CompareCandidate implements Comparator<JingleS5BTransportPayload.Candidate> {
+		public int compare(JingleS5BTransportPayload.Candidate c1, JingleS5BTransportPayload.Candidate c2) {
+			if (c1.priority == c2.priority) { return 0; }
+			else if (c1.priority < c2.priority) { return -1; }
+			else  { return 1; }
+		}
+
+		public boolean equals(Object c) {
+			if(!(c instanceof JingleS5BTransportPayload.Candidate)) {
+				return false;
+			}
+			else {
+				return this.equals(c);
+			}
 		}
 	}
 
