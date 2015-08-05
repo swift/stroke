@@ -11,39 +11,13 @@
 
 package com.isode.stroke.muc;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
 
-import com.isode.stroke.client.StanzaChannel;
-import com.isode.stroke.elements.ErrorPayload;
-import com.isode.stroke.elements.CapsInfo;
 import com.isode.stroke.elements.Form;
-import com.isode.stroke.elements.IQ;
-import com.isode.stroke.elements.MUCAdminPayload;
-import com.isode.stroke.elements.MUCDestroyPayload;
-import com.isode.stroke.elements.MUCInvitationPayload;
-import com.isode.stroke.elements.MUCItem;
 import com.isode.stroke.elements.MUCOccupant;
-import com.isode.stroke.elements.MUCOwnerPayload;
-import com.isode.stroke.elements.MUCPayload;
-import com.isode.stroke.elements.MUCUserPayload;
-import com.isode.stroke.elements.Message;
-import com.isode.stroke.elements.Presence;
 import com.isode.stroke.jid.JID;
-import com.isode.stroke.jid.JID.CompareType;
-import com.isode.stroke.presence.DirectedPresenceSender;
-import com.isode.stroke.queries.GenericRequest;
-import com.isode.stroke.queries.IQRouter;
-import com.isode.stroke.signals.Signal;
-import com.isode.stroke.signals.Signal1;
-import com.isode.stroke.signals.Signal2;
-import com.isode.stroke.signals.Signal3;
-import com.isode.stroke.signals.SignalConnection;
-import com.isode.stroke.signals.Slot1;
-import com.isode.stroke.signals.Slot2;
 
 public class MockMUC extends MUC {
 
@@ -65,6 +39,7 @@ public class MockMUC extends MUC {
 	/**
 	 * Returns the (bare) JID of the MUC.
 	 */
+	@Override
 	public JID getJID() {
 		return ownMUCJID.toBare();
 	}
@@ -73,38 +48,49 @@ public class MockMUC extends MUC {
 	 * Returns if the room is unlocked and other people can join the room.
 	 * @return True if joinable by others; false otherwise.
 	 */
+	@Override
 	public boolean isUnlocked() {
 		return true;
 	}
 
+	@Override
 	public void joinAs(final String nick) {}
+	@Override
 	public void joinWithContextSince(final String nick, final Date since) {}
 	/*public void queryRoomInfo(); */
 	/*public void queryRoomItems(); */
 	/*public String getCurrentNick(); */
+	@Override
 	public Map<String, MUCOccupant> getOccupants() { 
 		return occupants_; 
 	}
 
+	@Override
 	public void changeNickname(final String newNickname) {}
+	@Override
 	public void part() {}
         public void disconnect() {}
 	/*public void handleIncomingMessage(Message::ref message); */
 	/** Expose public so it can be called when e.g. user goes offline */
+	@Override
 	public void handleUserLeft(LeavingType l) {}
 
 	/**
 	 * Get occupant information. 
 	 */
+	@Override
 	public MUCOccupant getOccupant(final String nick) {
 		return occupants_.get(nick);
 	}
+	@Override
 	public boolean hasOccupant(final String nick){
 		return occupants_.containsKey(nick);
 	}
 
+	@Override
 	public void kickOccupant(final JID jid) {}
 
+	@Override
 	public void changeOccupantRole(final JID jid, MUCOccupant.Role newRole) {
 		String resource = jid.getResource();
 		if(occupants_.containsKey(resource)) {
@@ -115,8 +101,10 @@ public class MockMUC extends MUC {
 		}
 	}
 
+	@Override
 	public void requestAffiliationList(MUCOccupant.Affiliation aff) {}
 
+	@Override
 	public void changeAffiliation(final JID jid, MUCOccupant.Affiliation newAffilation) {
 		String resource = jid.getResource();
 		if(occupants_.containsKey(resource)) {
@@ -127,14 +115,22 @@ public class MockMUC extends MUC {
 		}
 	}
 
+	@Override
 	public void changeSubject(final String subject) {}
+	@Override
 	public void requestConfigurationForm() {}
+	@Override
 	public void configureRoom(Form f) {}
+	@Override
 	public void cancelConfigureRoom() {}
+	@Override
 	public void destroyRoom() {}
 	/** Send an invite for the person to join the MUC */
+	@Override
 	public void invitePerson(final JID person, final String reason, boolean isImpromptu, boolean isReuseChat) {}
+	@Override
 	public void setCreateAsReservedIfNew() {}
+	@Override
 	public void setPassword(final String password) {}
 
 	protected boolean isFromMUC(final JID j) {

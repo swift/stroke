@@ -11,38 +11,19 @@
 
 package com.isode.stroke.muc;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import com.isode.stroke.client.StanzaChannel;
 import com.isode.stroke.elements.ErrorPayload;
 import com.isode.stroke.elements.Form;
-import com.isode.stroke.elements.IQ;
-import com.isode.stroke.elements.MUCAdminPayload;
-import com.isode.stroke.elements.MUCDestroyPayload;
-import com.isode.stroke.elements.MUCInvitationPayload;
-import com.isode.stroke.elements.MUCItem;
 import com.isode.stroke.elements.MUCOccupant;
-import com.isode.stroke.elements.MUCOwnerPayload;
-import com.isode.stroke.elements.MUCPayload;
-import com.isode.stroke.elements.MUCUserPayload;
-import com.isode.stroke.elements.Message;
 import com.isode.stroke.elements.Presence;
 import com.isode.stroke.jid.JID;
-import com.isode.stroke.jid.JID.CompareType;
-import com.isode.stroke.presence.DirectedPresenceSender;
-import com.isode.stroke.queries.GenericRequest;
-import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.Signal2;
 import com.isode.stroke.signals.Signal3;
-import com.isode.stroke.signals.SignalConnection;
-import com.isode.stroke.signals.Slot1;
-import com.isode.stroke.signals.Slot2;
 
 public abstract class MUC {
 
@@ -91,7 +72,41 @@ public abstract class MUC {
 	public abstract void configureRoom(Form f);
 	public abstract void cancelConfigureRoom();
 	public abstract void destroyRoom();
-	/** Send an invite for the person to join the MUC */
+
+	/**
+	 * Invite the person with given JID to the chat room
+	 * @param person Jabber ID to the person to invite, not null
+	 */
+	public void invitePerson(JID person) {
+		invitePerson(person, "", false, false);
+	}
+
+	/**
+	 * Invite the person with given JID to the chat room
+	 * @param person Jabber ID to the person to invite, not null
+	 * @param reason join reason, not null
+	 */
+	public void invitePerson(JID person, String reason) {
+		invitePerson(person, reason, false, false);
+	}
+	
+	/**
+	 * Send an invite for the person to join the MUC 
+	 * @param person Jabber ID of the person to invite, not null
+	 * @param reason join reason, not null
+	 * @param isImpromptu 
+	 */
+	public void invitePerson(JID person, String reason, boolean isImpromptu) {
+		invitePerson(person, reason, isImpromptu, false);
+	}
+
+	/**
+	 * Send an invite for the person to join the MUC 
+	 * @param person Jabber ID of the person to invite, not null
+	 * @param reason join reason, not null
+	 * @param isImpromptu 
+	 * @param isReuseChat 
+	 */
 	public abstract void invitePerson(final JID person, final String reason, boolean isImpromptu, boolean isReuseChat);
 	public abstract void setCreateAsReservedIfNew();
 	public abstract void setPassword(final String password);

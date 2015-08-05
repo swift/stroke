@@ -10,15 +10,14 @@
 
 package com.isode.stroke.muc;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
 import com.isode.stroke.client.StanzaChannel;
-import com.isode.stroke.elements.ErrorPayload;
 import com.isode.stroke.elements.CapsInfo;
+import com.isode.stroke.elements.ErrorPayload;
 import com.isode.stroke.elements.Form;
 import com.isode.stroke.elements.IQ;
 import com.isode.stroke.elements.MUCAdminPayload;
@@ -36,10 +35,6 @@ import com.isode.stroke.jid.JID.CompareType;
 import com.isode.stroke.presence.DirectedPresenceSender;
 import com.isode.stroke.queries.GenericRequest;
 import com.isode.stroke.queries.IQRouter;
-import com.isode.stroke.signals.Signal;
-import com.isode.stroke.signals.Signal1;
-import com.isode.stroke.signals.Signal2;
-import com.isode.stroke.signals.Signal3;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.signals.Slot2;
@@ -99,6 +94,7 @@ public class MUCImpl extends MUC {
 	/**
 	 * Cancel the command for configuring room 
 	 */
+	@Override
 	public void cancelConfigureRoom() {
 		MUCOwnerPayload mucPayload = new MUCOwnerPayload();
 		mucPayload.setPayload(new Form(Form.Type.CANCEL_TYPE));
@@ -113,6 +109,7 @@ public class MUCImpl extends MUC {
 	 * @param jid real jabber ID, not null
 	 * @param affiliation new affiliation, not null 
 	 */
+	@Override
 	public void changeAffiliation(final JID jid, final MUCOccupant.Affiliation affiliation) {
 		final MUCAdminPayload mucPayload = new MUCAdminPayload();
 		MUCItem item = new MUCItem();
@@ -136,6 +133,7 @@ public class MUCImpl extends MUC {
 	 * @param jid Jabber ID of the occupant in the chat room, not null
 	 * @param role new role, not null
 	 */
+	@Override
 	public void changeOccupantRole(final JID jid, final MUCOccupant.Role role) {
 		final MUCAdminPayload mucPayload = new MUCAdminPayload();
 		MUCItem item = new MUCItem();
@@ -157,6 +155,7 @@ public class MUCImpl extends MUC {
 	 * Change the subject of the chat room
 	 * @param subject new subject, not null
 	 */
+	@Override
 	public void changeSubject(String subject) {
 		Message message = new Message();
 		message.setSubject(subject);
@@ -169,6 +168,7 @@ public class MUCImpl extends MUC {
 	 * Configure a chat room room
 	 * @param form form to be used for configuration, not null
 	 */
+	@Override
 	public void configureRoom(Form form) {
 		MUCOwnerPayload mucPayload = new MUCOwnerPayload();
 		mucPayload.setPayload(form);
@@ -195,6 +195,7 @@ public class MUCImpl extends MUC {
 	/**
 	 * Destroy the chat room 
 	 */
+	@Override
 	public void destroyRoom() {
 		MUCOwnerPayload mucPayload = new MUCOwnerPayload();
 		MUCDestroyPayload mucDestroyPayload = new MUCDestroyPayload();
@@ -214,6 +215,7 @@ public class MUCImpl extends MUC {
 	 * Returns the (bare) JID of the MUC.
 	 * @return bare JID(i.e. without resource)
 	 */
+	@Override
 	public JID getJID() {
 		return ownMUCJID.toBare();
 	}
@@ -222,6 +224,7 @@ public class MUCImpl extends MUC {
 	* Returns if the room is unlocked and other people can join the room.
 	* @return True if joinable by others; false otherwise.
 	*/
+	@Override
 	public boolean isUnlocked() {
 		return isUnlocked_;
 	}
@@ -231,6 +234,7 @@ public class MUCImpl extends MUC {
 	 * @param nick nick name, not null
 	 * @return MUC occupant if it exists or null if not
 	 */
+	@Override
 	public MUCOccupant getOccupant(String nick) {
 		return occupants.get(nick);
 	}
@@ -240,10 +244,12 @@ public class MUCImpl extends MUC {
 	 * @param nick given nick
 	 * @return true if the occupant exists, false otherwise
 	 */
+	@Override
 	public boolean hasOccupant(String nick) {
 		return occupants.containsKey(nick);
 	}
 
+	@Override
 	public Map<String, MUCOccupant> getOccupants() {
 		return occupants;
 	}
@@ -252,6 +258,7 @@ public class MUCImpl extends MUC {
 	 * Invite the person with give JID to the chat room
 	 * @param person jabber ID o the person to invite,not nul
 	 */
+	@Override
 	public void invitePerson(JID person) {
 		invitePerson(person, "", false, false);
 	}
@@ -262,6 +269,7 @@ public class MUCImpl extends MUC {
 	 * @param reason join reason, not null
 	 * @param isImpromptu 
 	 */
+	@Override
 	public void invitePerson(JID person, String reason, boolean isImpromptu) {
 		invitePerson(person, reason, isImpromptu, false);
 	}
@@ -274,6 +282,7 @@ public class MUCImpl extends MUC {
 	 * @param isImpromptu 
 	 * @param isReuseChat 
 	 */
+	@Override
 	public void invitePerson(JID person, String reason, boolean isImpromptu, boolean isReuseChat) {
 		Message message = new Message();
 		message.setTo(person);
@@ -291,6 +300,7 @@ public class MUCImpl extends MUC {
 	 * Join the MUC with default context.
 	 * @param nick nick name of the user, not null
 	 */
+	@Override
 	public void joinAs(String nick) {
 		joinSince_ = null;
 		internalJoin(nick);
@@ -301,6 +311,7 @@ public class MUCImpl extends MUC {
 	 * @param nick nick name, not null
 	 * @param since  date since the nick joined, not null
 	 */
+	@Override
 	public void joinWithContextSince(String nick, Date since) { 
 		joinSince_ = since;
 		internalJoin(nick);
@@ -310,10 +321,12 @@ public class MUCImpl extends MUC {
 	 * Kick the given occupant out of the chat room
 	 * @param jid jabber ID of the user to kick, not null
 	 */
+	@Override
 	public void kickOccupant(JID jid) {
 		changeOccupantRole(jid, MUCOccupant.Role.NoRole);
 	}    
 
+	@Override
 	public void changeNickname(final String newNickname) {
 		Presence changeNicknamePresence = new Presence();
 		changeNicknamePresence.setTo(new JID(ownMUCJID.toBare().toString() + "/" + newNickname));
@@ -323,6 +336,7 @@ public class MUCImpl extends MUC {
 	/**
 	 * Leave the chat room 
 	 */
+	@Override
 	public void part() {
 		presenceSender.removeDirectedPresenceReceiver(ownMUCJID, 
 				DirectedPresenceSender.SendPresence.AndSendPresence);
@@ -333,6 +347,7 @@ public class MUCImpl extends MUC {
 	 * Send a request to get a list of users for the given affiliation
 	 * @param affiliation affiliation, not null
 	 */
+	@Override
 	public void requestAffiliationList(final MUCOccupant.Affiliation affiliation) {
 		MUCAdminPayload mucPayload = new MUCAdminPayload();
 		MUCItem item = new  MUCItem();
@@ -352,6 +367,7 @@ public class MUCImpl extends MUC {
 	/**
 	 * Send a request for getting form for configuring a room 
 	 */
+	@Override
 	public void requestConfigurationForm() {
 		MUCOwnerPayload mucPayload = new MUCOwnerPayload();
 		GenericRequest<MUCOwnerPayload> request = new GenericRequest<MUCOwnerPayload>(
@@ -371,6 +387,7 @@ public class MUCImpl extends MUC {
 	 * The effect of calling this function is to leave the room in reserved state
 	 * but not configured so that it can be configured later.
 	 */
+	@Override
 	public void setCreateAsReservedIfNew() {
 		createAsReservedIfNew = true;
 	}
@@ -379,6 +396,7 @@ public class MUCImpl extends MUC {
 	 * Set the password used for entering the room.
 	 * @param newPassword password, can be null
 	 */
+	@Override
 	public void setPassword(String newPassword) {
 		password = newPassword;
 	}
@@ -465,7 +483,6 @@ public class MUCImpl extends MUC {
 		// (i.e. we start getting non-error presence from the MUC) or not
 		if (!joinSucceeded_) {
 			if(presence.getType().equals(Presence.Type.Error)) {
-				String reason = "";                
 				onJoinFailed.emit(presence.getPayload(new ErrorPayload()));
 				return;
 			}
@@ -683,6 +700,7 @@ public class MUCImpl extends MUC {
 		return ownMUCJID.compare(j, CompareType.WithoutResource) == 0;
 	}
 
+	@Override
 	public void handleUserLeft(LeavingType type) {
 		String resource = ownMUCJID.getResource();
 		if (occupants.containsKey(resource)) {
@@ -703,6 +721,7 @@ public class MUCImpl extends MUC {
 	 * This method should be called when the MUC object is no longer in use
 	 * so as to enable the garbage collector to remove this object from used space. 
 	 */
+	@Override
 	public void disconnect() {
 		if (scopedConnection_ != null) {
 			scopedConnection_.onDestroyed.emit();
