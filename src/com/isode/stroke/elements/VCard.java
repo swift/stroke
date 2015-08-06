@@ -12,6 +12,11 @@ import java.util.List;
 import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.jid.JID;
 
+/**
+ * Note: Swiften initializes collection members when an instance is initiated.
+ * This implementation uses lazy allocation.
+ */
+
 public class VCard extends Payload implements Serializable {
     private String version_ = "";
     private String fullName_ = "";
@@ -26,16 +31,16 @@ public class VCard extends Payload implements Serializable {
     private String nick_ = "";
     private Date birthday_;
     private String unknownContent_ = "";
-    private List<EMailAddress> emailAddresses_ = new ArrayList<EMailAddress>();
-    private List<Telephone> telephones_ = new ArrayList<Telephone>();
-    private List<Address> addresses_ = new ArrayList<Address>();
-    private List<AddressLabel> addressLabels_ = new ArrayList<AddressLabel>();
-    private List<JID> jids_ = new ArrayList<JID>();
+    private List<EMailAddress> emailAddresses_;
+    private List<Telephone> telephones_;
+    private List<Address> addresses_;
+    private List<AddressLabel> addressLabels_;
+    private List<JID> jids_;
     private String description_ = "";
-    private List<Organization> organizations_ = new ArrayList<Organization>();
-    private List<String> titles_ = new ArrayList<String>();
-    private List<String> roles_ = new ArrayList<String>();
-    private List<String> urls_ = new ArrayList<String>();
+    private List<Organization> organizations_;
+    private List<String> titles_;
+    private List<String> roles_;
+    private List<String> urls_;
 
     public static class EMailAddress {
         public boolean isHome;
@@ -152,6 +157,9 @@ public class VCard extends Payload implements Serializable {
         unknownContent_ += c;
     }
 
+    /**
+     * @return Unlike Swiften, this may return null.
+     */
     public final List<EMailAddress> getEMailAddresses() {
         return emailAddresses_;
     }
@@ -188,6 +196,9 @@ public class VCard extends Payload implements Serializable {
         if (telephones_ != null) telephones_.clear();
     }
 
+    /**
+     * @return Unlike Swiften, this may return null.
+     */
     public final List<Address> getAddresses() {
         return addresses_;
     }
@@ -201,6 +212,9 @@ public class VCard extends Payload implements Serializable {
         if (addresses_ != null) addresses_.clear();
     }
 
+    /**
+     * @return Unlike Swiften, this may return null.
+     */
     public final List<AddressLabel> getAddressLabels() {
         return addressLabels_;
     }
@@ -214,6 +228,9 @@ public class VCard extends Payload implements Serializable {
         if (addressLabels_ != null) addressLabels_.clear();
     }
 
+    /**
+     * @return Unlike Swiften, this may return null.
+     */
     public final List<JID> getJIDs() {
         if (jids_ == null) jids_ = new ArrayList<JID>();
         return jids_;
@@ -231,6 +248,9 @@ public class VCard extends Payload implements Serializable {
         this.description_ = description;
     }
 
+    /**
+     * @return Unlike Swiften, this may return null.
+     */
     public final List<Organization> getOrganizations() {
         return organizations_;
     }
@@ -244,6 +264,9 @@ public class VCard extends Payload implements Serializable {
         if (organizations_ != null) organizations_.clear();
     }
 
+    /**
+     * @return Unlike Swiften, this may return null.
+     */
     public final List<String> getTitles() {
         return titles_;
     }
@@ -257,6 +280,9 @@ public class VCard extends Payload implements Serializable {
         if (titles_ != null) titles_.clear();
     }
 
+    /**
+     * @return Unlike Swiften, this may return null.
+     */
     public final List<String> getRoles() {
         return roles_;
     }
@@ -270,6 +296,9 @@ public class VCard extends Payload implements Serializable {
         if (roles_ != null) roles_.clear();
     }
 
+    /**
+     * @return Unlike Swiften, this may return null.
+     */
     public final List<String> getURLs() {
         return urls_;
     }
@@ -303,6 +332,9 @@ public class VCard extends Payload implements Serializable {
         return empty;
     }
 
+    /**
+     * @return Unlike Swiften, this may return null.
+     */
     public EMailAddress getPreferredEMailAddress() {
         for (final EMailAddress address : emailAddresses_) {
             if (address.isPreferred) {
@@ -320,6 +352,9 @@ public class VCard extends Payload implements Serializable {
     	jids_.add(jid);
     }
 
+    /**
+     * @return Unlike Swiften, this may return null.
+     */
     public List<Telephone> getTelephones() {
         return telephones_;
     }

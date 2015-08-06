@@ -27,4 +27,8 @@ If you want to commit changes to Stroke, first run `make .git/hooks/commit-msg` 
 
 Stroke tries to be a clean and accurate port of Swiften, in order to facilitate mirroring changes. Sometimes differences are either necessary or desirable.
 
-* `VCard.getPhoto()` returns null instead of an empty `ByteArray` when there is no photo.
+* `VCard.getPhoto()` returns *null* instead of an empty `ByteArray` when there is no photo.
+
+* `VCard` does not allocate empty collections for unused members.
+The way a VCard is used, pessimistic allocation puts an undue load on the Java GC.
+Callers have to check for *null* not just `isEmpty()`.
