@@ -8,8 +8,13 @@
  */
 package com.isode.stroke.client;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Logger;
+
 import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.base.SafeByteArray;
+import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.elements.AuthChallenge;
 import com.isode.stroke.elements.AuthFailure;
 import com.isode.stroke.elements.AuthRequest;
@@ -28,18 +33,19 @@ import com.isode.stroke.elements.StanzaAck;
 import com.isode.stroke.elements.StanzaAckRequest;
 import com.isode.stroke.elements.StartSession;
 import com.isode.stroke.elements.StartTLSFailure;
-import com.isode.stroke.elements.StreamFeatures;
 import com.isode.stroke.elements.StartTLSRequest;
 import com.isode.stroke.elements.StreamError;
+import com.isode.stroke.elements.StreamFeatures;
 import com.isode.stroke.elements.StreamManagementEnabled;
 import com.isode.stroke.elements.StreamManagementFailed;
 import com.isode.stroke.elements.TLSProceed;
+import com.isode.stroke.idn.IDNConverter;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.sasl.ClientAuthenticator;
-import com.isode.stroke.sasl.PLAINClientAuthenticator;
-import com.isode.stroke.sasl.SCRAMSHA1ClientAuthenticator;
 import com.isode.stroke.sasl.DIGESTMD5ClientAuthenticator;
 import com.isode.stroke.sasl.EXTERNALClientAuthenticator;
+import com.isode.stroke.sasl.PLAINClientAuthenticator;
+import com.isode.stroke.sasl.SCRAMSHA1ClientAuthenticator;
 import com.isode.stroke.session.SessionStream;
 import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Signal1;
@@ -52,13 +58,6 @@ import com.isode.stroke.tls.Certificate;
 import com.isode.stroke.tls.CertificateTrustChecker;
 import com.isode.stroke.tls.CertificateVerificationError;
 import com.isode.stroke.tls.ServerIdentityVerifier;
-import com.isode.stroke.idn.IDNConverter;
-import com.isode.stroke.idn.ICUConverter;
-import com.isode.stroke.crypto.CryptoProvider;
-import com.isode.stroke.crypto.JavaCryptoProvider;
-import java.util.logging.Logger;
-import java.util.List;
-import java.util.UUID;
 
 public class ClientSession {
     public final Signal onNeedCredentials = new Signal();
@@ -385,10 +384,10 @@ public class ClientSession {
                     boolean plus = streamFeatures.hasAuthenticationMechanism("SCRAM-SHA-1-PLUS");
                     if (stream.isTLSEncrypted()) {
                         finishMessage = stream.getTLSFinishMessage();
-                        plus &= !(finishMessage.isEmpty());
+                        plus &= !(finishMessage == null || finishMessage.isEmpty());
                     }
                     final SCRAMSHA1ClientAuthenticator scramAuthenticator = new SCRAMSHA1ClientAuthenticator(UUID.randomUUID().toString(), plus, idnConverter, crypto);
-                    if (!(finishMessage.isEmpty())) {
+                    if (!(finishMessage == null || finishMessage.isEmpty())) {
                         scramAuthenticator.setTLSChannelBindingData(finishMessage);
                     }
                     authenticator = scramAuthenticator;
