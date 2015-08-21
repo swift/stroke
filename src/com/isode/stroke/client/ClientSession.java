@@ -621,7 +621,7 @@ public class ClientSession {
     }
 
     public void finish() {
-        finishSession((Error.Type)null);
+        finishSession((Error)null);
     }
 
     private void finishSession(final Error.Type error) {
