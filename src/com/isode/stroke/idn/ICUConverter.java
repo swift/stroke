@@ -19,18 +19,25 @@ import com.ibm.icu.text.StringPrepParseException;
 
 public class ICUConverter implements IDNConverter {
 
-	public String getStringPrepared(String s, StringPrepProfile profile) throws StringPrepParseException {
+	public String getStringPrepared(String s, StringPrepProfile profile) throws IllegalArgumentException {
 		StringPrep str = StringPrep.getInstance(getICUProfileType(profile));
-
-		String preparedData = str.prepare(s, StringPrep.DEFAULT);
-		return preparedData;
+		try {
+		    String preparedData = str.prepare(s, StringPrep.DEFAULT);
+		    return preparedData;
+		}catch(StringPrepParseException e){
+		    throw new IllegalArgumentException(e);
+		}
 	}
 
-	public SafeByteArray getStringPrepared(SafeByteArray s, StringPrepProfile profile) throws StringPrepParseException {
+	public SafeByteArray getStringPrepared(SafeByteArray s, StringPrepProfile profile) throws IllegalArgumentException {
 		StringPrep str = StringPrep.getInstance(getICUProfileType(profile));
 
-		String preparedData = str.prepare(s.toString(), StringPrep.DEFAULT);
-		return new SafeByteArray(preparedData);
+		try {
+		    String preparedData = str.prepare(s.toString(), StringPrep.DEFAULT);
+		    return new SafeByteArray(preparedData);
+		}catch(StringPrepParseException e){
+		    throw new IllegalArgumentException(e);
+		}
 	}
 
 	public String getIDNAEncoded(String s) {

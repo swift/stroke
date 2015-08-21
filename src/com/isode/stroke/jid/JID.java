@@ -160,7 +160,7 @@ public class JID implements Comparable<JID> {
 			node_ = idnConverter.getStringPrepared(node, IDNConverter.StringPrepProfile.XMPPNodePrep);
 			domain_ = idnConverter.getStringPrepared(domain, IDNConverter.StringPrepProfile.NamePrep);
 			resource_ = resource != null ? idnConverter.getStringPrepared(resource, IDNConverter.StringPrepProfile.XMPPResourcePrep) : null;
-		} catch (StringPrepParseException e) {
+		} catch (IllegalArgumentException e) {
 			valid_ = false;
 			return;
 		}

@@ -8,17 +8,15 @@
  */
 package com.isode.stroke.sasl;
 
-import com.isode.stroke.base.ByteArray;
-import com.isode.stroke.base.SafeByteArray;
-import com.ibm.icu.text.StringPrepParseException;
-import com.isode.stroke.stringcodecs.Base64;
-import com.isode.stroke.stringcodecs.PBKDF2;
-import com.isode.stroke.idn.IDNConverter;
-import com.isode.stroke.crypto.CryptoProvider;
-import java.text.Normalizer;
-import java.text.Normalizer.Form;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.isode.stroke.base.ByteArray;
+import com.isode.stroke.base.SafeByteArray;
+import com.isode.stroke.crypto.CryptoProvider;
+import com.isode.stroke.idn.IDNConverter;
+import com.isode.stroke.stringcodecs.Base64;
+import com.isode.stroke.stringcodecs.PBKDF2;
 
 public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
 
@@ -113,7 +111,7 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
             // Compute all the values needed for the server signature
             try {
                 saltedPassword = PBKDF2.encode(idnConverter.getStringPrepared(getPassword(), IDNConverter.StringPrepProfile.SASLPrep), salt, iterations, crypto);         
-            } catch (StringPrepParseException e) {
+            } catch (IllegalArgumentException e) {
 
             }
             authMessage = getInitialBareClientMessage().append(",").append(initialServerMessage).append(",").append(getFinalMessageWithoutProof());
@@ -161,7 +159,7 @@ public class SCRAMSHA1ClientAuthenticator extends ClientAuthenticator {
         String authenticationID = "";
         try {
             authenticationID = idnConverter.getStringPrepared(getAuthenticationID(), IDNConverter.StringPrepProfile.SASLPrep);
-        } catch (StringPrepParseException e) {
+        } catch (IllegalArgumentException e) {
 
         }
         return new ByteArray("n=" + escape(authenticationID) + ",r=" + clientnonce);

@@ -12,7 +12,6 @@
 package com.isode.stroke.idn;
 
 import com.isode.stroke.base.SafeByteArray;
-import com.ibm.icu.text.StringPrepParseException;
 
 public interface IDNConverter {
 
@@ -21,10 +20,10 @@ public interface IDNConverter {
 		XMPPNodePrep,
 		XMPPResourcePrep,
 		SASLPrep
-	};
+	}
 
-	public String getStringPrepared(String s, StringPrepProfile profile) throws StringPrepParseException;
-	public SafeByteArray getStringPrepared(SafeByteArray s, StringPrepProfile profile) throws StringPrepParseException;
+	public String getStringPrepared(String s, StringPrepProfile profile) throws IllegalArgumentException;
+	public SafeByteArray getStringPrepared(SafeByteArray s, StringPrepProfile profile) throws IllegalArgumentException;
 
 	// Thread-safe
 	public String getIDNAEncoded(String s);

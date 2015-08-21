@@ -38,7 +38,7 @@ public class IDNConverterTest {
 		try {
 			String result = testling.getStringPrepared("tronçon", IDNConverter.StringPrepProfile.NamePrep);
 			assertEquals("tronçon", result);
-		} catch (StringPrepParseException e) {
+		} catch (IllegalArgumentException e) {
 			assertTrue("getStringPrep threw " + e, (e == null));
 		}
 	}
@@ -49,7 +49,7 @@ public class IDNConverterTest {
 			assertEquals("", testling.getStringPrepared("", IDNConverter.StringPrepProfile.NamePrep));
 			assertEquals("", testling.getStringPrepared("", IDNConverter.StringPrepProfile.XMPPNodePrep));
 			assertEquals("", testling.getStringPrepared("", IDNConverter.StringPrepProfile.XMPPResourcePrep));
-		} catch (StringPrepParseException e) {
+		} catch (IllegalArgumentException e) {
 			assertTrue("getStringPrep threw " + e, (e == null));
 		}
 	}
