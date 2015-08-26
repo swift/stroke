@@ -367,6 +367,7 @@ public class ClientSession {
             else if (streamFeatures.hasAuthenticationMechanisms()) {
                 if (stream.hasTLSCertificate()) {
                     if (streamFeatures.hasAuthenticationMechanism("EXTERNAL")) {
+                        authenticator = new EXTERNALClientAuthenticator();
                         state = State.Authenticating;
                         stream.writeElement(new AuthRequest("EXTERNAL",new SafeByteArray("")));
                     }
