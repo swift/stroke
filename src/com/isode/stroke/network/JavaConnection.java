@@ -4,7 +4,6 @@
  */
 package com.isode.stroke.network;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -25,26 +24,6 @@ import com.isode.stroke.eventloop.EventLoop;
 import com.isode.stroke.eventloop.EventOwner;
 
 public class JavaConnection extends Connection implements EventOwner {
-    
-    /**
-     * Wrapper class that is used by the "doRead" method so that it can
-     * return both a ByteArray and an indication of whether the socket
-     * got closed.
-     */
-    private static class ReadResult {
-        public SafeByteArray dataRead_;
-        public boolean socketClosed_;
-
-        ReadResult(boolean socketClosed) {
-            dataRead_ = new SafeByteArray();
-            socketClosed_ = socketClosed;
-        }
-
-        ReadResult(ByteArrayOutputStream byteArrayOutputStream, boolean socketClosed) {
-            dataRead_ = new SafeByteArray(byteArrayOutputStream.toByteArray());
-            socketClosed_ = socketClosed;
-        }
-    }
 
     private class Worker implements Runnable {
 
@@ -174,12 +153,12 @@ public class JavaConnection extends Connection implements EventOwner {
 
                     /* Handle any reading */
                     if (readNeeded) {
-                        final ReadResult rr = doRead();
-                        final SafeByteArray dataRead = rr.dataRead_;
-                        if (!dataRead.isEmpty()) {
-                            handleDataRead(dataRead);
+                    	final SafeByteArray data = new SafeByteArray();
+                        final boolean closed = doRead(data);
+                        if (!data.isEmpty()) {
+                            handleDataRead(data);
                         }
-                        if (rr.socketClosed_) {
+                        if (closed) {
                             handleDisconnected(Error.ReadError);
                             return;
                         }
@@ -336,16 +315,15 @@ public class JavaConnection extends Connection implements EventOwner {
             return;
         }
         
+
         /**
-         * Called when there's something that's come in on the socket. The ReadResult
-         * returned will contain any data that was read from the socket and a
-         * flag to say whether the socket has been closed.
+         * Called when there's something that's come in on the socket.
          * <p>If the socket has been closed, it may still be the case that data
-         * was read before the close happened. 
-         * @return a ReadResult containing bytes read (may be empty, won't be null),
-         * and an indication of whether the was closed.
+         * was read before the close happened.
+         * @param data a SafeByteArray in which to store the read data
+         * @return true if socket has been closed
          */
-        private ReadResult doRead() {
+        private boolean doRead(SafeByteArray data) {
 
             ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
@@ -354,41 +332,33 @@ public class JavaConnection extends Connection implements EventOwner {
                 count = socketChannel_.read(byteBuffer);
             }
             catch (IOException e) {
-                // Nothing read and the socket's closed
-                return new ReadResult(true);
+                // Nothing read and the socket is closed
+                return true;
             }
-            if (count == 0) {
-                // Nothing read, but socket's open
-                return new ReadResult(false);
-            }
-            boolean isClosed = false;
-            ByteArrayOutputStream byteArrayOutputStream = 
-                    new ByteArrayOutputStream(1024);
             
             while (count > 0) {
                 byteBuffer.flip();
                 byte[] result = new byte[byteBuffer.remaining()];
                 byteBuffer.get(result);
+                data.append(result);
                 byteBuffer.compact();
                 try {
-                    byteArrayOutputStream.write(result);
                     count = socketChannel_.read(byteBuffer);
                 }
                 catch (IOException e) {
-                    // Force exit from loop and indicate socket closed
-                    count = -1;
+                    // indicate socket closed
+                    return true;
                 }
             }
+            
             if (count == -1) {
                 /* socketChannel input has reached "end-of-stream", which
                  * we regard as meaning that the socket has been closed 
                  */
-                isClosed = true;
+                return true;
             }
             
-            /* There is no need to close the ByteArrayOutputStream */
-            return new ReadResult(byteArrayOutputStream, isClosed);
-
+            return false;
         }
         
         private void handleConnected(final boolean error) {
