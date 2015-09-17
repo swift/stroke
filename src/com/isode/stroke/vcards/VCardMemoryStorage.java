@@ -16,7 +16,6 @@ import java.util.TimeZone;
 public class VCardMemoryStorage extends VCardStorage {
     public VCardMemoryStorage(CryptoProvider crypto) {
         super(crypto);
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
     private Map<JID, VCard> vcards = new HashMap<JID, VCard>();

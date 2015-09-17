@@ -39,7 +39,6 @@ public class VCardManager {
         this.ownJID = ownJID;
         this.iqRouter = iqRouter;
         this.storage = vcardStorage;
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     }
 
     public void delete() {

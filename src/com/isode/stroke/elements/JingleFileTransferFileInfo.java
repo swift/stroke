@@ -79,7 +79,6 @@ public class JingleFileTransferFileInfo extends Payload {
 	public JingleFileTransferFileInfo(String name, String description, long size, Date date) {
 		NotNull.exceptIfNull(name, "name");
 		NotNull.exceptIfNull(description, "description");
-		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 		this.name_ = name;
 		this.description_ = description;
 		this.size_ = size;
