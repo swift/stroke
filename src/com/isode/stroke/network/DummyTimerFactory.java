@@ -19,7 +19,7 @@ public class DummyTimerFactory implements TimerFactory {
 	private int currentTime;
 	private List<DummyTimer> timers = new ArrayList<DummyTimer>();
 
-	public class DummyTimer extends Timer {
+	public static class DummyTimer extends Timer {
 
 		public DummyTimer(long timeout, DummyTimerFactory factory) {
 			this.timeout = timeout;

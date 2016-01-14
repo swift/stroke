@@ -13,7 +13,7 @@ package com.isode.stroke.network;
 
 public class JavaProxyProvider implements ProxyProvider {
 
-	private EnvironmentProxyProvider environmentProxyProvider;
+	private EnvironmentProxyProvider environmentProxyProvider = new EnvironmentProxyProvider();
 
 	public JavaProxyProvider() {
 

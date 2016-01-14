@@ -18,6 +18,8 @@ package com.isode.stroke.network;
 
 import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.stringcodecs.Base64;
+
+import java.util.Scanner;
 import java.util.Vector;
 
 public class HTTPConnectProxiedConnection extends ProxiedConnection {
@@ -69,8 +71,7 @@ public class HTTPConnectProxiedConnection extends ProxiedConnection {
 		String dataString = data.toString();
 		//SWIFT_LOG(debug) << data << std::endl;
 		httpResponseBuffer_.append(dataString);
-
-		String statusLine = "";
+		
 		Vector<Pair> headerFields = new Vector<Pair>();
 
 		int headerEnd = httpResponseBuffer_.indexOf("\r\n\r\n", 0);
@@ -81,7 +82,7 @@ public class HTTPConnectProxiedConnection extends ProxiedConnection {
 			return;
 		}
 
-		parseHTTPHeader(httpResponseBuffer_.substring(0, headerEnd), statusLine, headerFields);
+		String statusLine = parseHTTPHeader(httpResponseBuffer_.substring(0, headerEnd), headerFields);
 
 		if (trafficFilter_ != null) {
 			Vector<Pair> newHeaderFields = trafficFilter_.filterHTTPResponseHeader(headerFields);
@@ -128,21 +129,29 @@ public class HTTPConnectProxiedConnection extends ProxiedConnection {
 		write(new SafeByteArray(request.toString()));
 	}
 
-	private void parseHTTPHeader(final String data, String statusLine, Vector<Pair> headerFields) {
-		StringBuffer dataStream = new StringBuffer(data);
+	private String parseHTTPHeader(final String data, Vector<Pair> headerFields) {
+	    Scanner dataScanner = new Scanner(data);
 
+	    String statusLine = "";
 		// parse status line
-		statusLine = dataStream.toString();
+	    if (dataScanner.hasNext()) {
+	        statusLine = dataScanner.nextLine();
+	    }
+		
 
 		// parse fields
-		String headerLine = dataStream.toString();
-		int splitIndex;
-		while (headerLine != null && !headerLine.equals("\r")) {
-			splitIndex = headerLine.indexOf(':', 0);
+		while (dataScanner.hasNext()) {
+		    String headerLine = dataScanner.nextLine();
+		    if (headerLine.equals("\r")) {
+		        break;
+		    }
+			int splitIndex = headerLine.indexOf(':', 0);
 			if (splitIndex != -1) {
 				headerFields.add(new Pair(headerLine.substring(0, splitIndex), headerLine.substring(splitIndex + 1)));
 			}
 		}
+		
+		return statusLine;
 	}
 
 }

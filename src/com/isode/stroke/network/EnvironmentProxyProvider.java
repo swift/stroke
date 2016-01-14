@@ -43,9 +43,13 @@ public class EnvironmentProxyProvider implements ProxyProvider {
 
 		proxyProtocol += "://";
 		address = envVar != null ? envVar : "0.0.0.0";
-		if(envVar != null && address.substring(0, proxyProtocol.length()).equals(proxyProtocol)) {
+		if(envVar != null && address.startsWith(proxyProtocol)) {
 			address = address.substring(proxyProtocol.length(), address.length());
-			port = Integer.parseInt(address.substring(address.indexOf(':') + 1, address.length()));
+			try {
+                port = Integer.parseInt(address.substring(address.indexOf(':') + 1, address.length()));
+            } catch (NumberFormatException e) {
+                port = 0;
+            }
 			address = address.substring(0, address.indexOf(':'));
 		}
 

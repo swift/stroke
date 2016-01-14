@@ -86,10 +86,18 @@ public class TLSConnection extends Connection {
 
 	protected void finalize() throws Throwable {
 		try {
-			onConnectFinishedConnection.disconnect();
-			onDataReadConnection.disconnect();
-			onDataWrittenConnection.disconnect();
-			onDisconnectedConnection.disconnect();
+		    if (onConnectFinished != null) {
+	            onConnectFinishedConnection.disconnect();
+	        }
+		    if (onDataReadConnection != null) {
+		        onDataReadConnection.disconnect();
+		    }
+		    if (onDataWrittenConnection != null) {
+		        onDataWrittenConnection.disconnect();
+		    }
+			if (onDisconnectedConnection != null) {
+			    onDisconnectedConnection.disconnect();
+			}
 		}
 		finally {
 			super.finalize();
@@ -117,7 +125,9 @@ public class TLSConnection extends Connection {
 	}
 
 	private void handleRawConnectFinished(boolean error) {
-		onConnectFinishedConnection.disconnect();
+	    if (onConnectFinished != null) {
+	        onConnectFinishedConnection.disconnect();
+	    }
 		if (error) {
 			onConnectFinished.emit(true);
 		}
