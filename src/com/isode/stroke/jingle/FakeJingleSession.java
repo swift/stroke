@@ -152,52 +152,63 @@ public class FakeJingleSession extends JingleSession {
 	}
 
 	public void handleSessionTerminateReceived(final JinglePayload.Reason reason) {
-		notifyListeners(new Slot1<JinglePayload.Reason>() {
-			@Override
-			public void call(JinglePayload.Reason reason) {
-				handleSessionTerminateReceived(reason);
-			}
-		}, reason);
+		notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+            @Override
+            public void call(JingleSessionListener listener) {
+                listener.handleSessionTerminateReceived(reason);
+            }
+            
+        });
 	}
 
-	public void handleSessionAcceptReceived(final JingleContentID id, JingleDescription desc, JingleTransportPayload transport) {
-		notifyListeners(new Slot3<JingleContentID, JingleDescription, JingleTransportPayload>() {
-			@Override
-			public void call(JingleContentID d, JingleDescription n, JingleTransportPayload p) {
-				handleSessionAcceptReceived(d, n, p);
-			}
-		}, id, desc, transport);
+	public void handleSessionAcceptReceived(final JingleContentID id,final JingleDescription desc,
+	        final JingleTransportPayload transport) {
+		notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+            @Override
+            public void call(JingleSessionListener listener) {
+                listener.handleSessionAcceptReceived(id, desc, transport);
+            }
+            
+        });
 	}
 
 	public void handleSessionInfoReceived(JinglePayload payload) {
 
 	}
 
-	public void handleTransportReplaceReceived(final JingleContentID id, JingleTransportPayload payload) {
-		notifyListeners(new Slot2<JingleContentID, JingleTransportPayload>() {
-			@Override
-			public void call(JingleContentID d, JingleTransportPayload p) {
-				handleTransportReplaceReceived(d, p);
-			}
-		}, id, payload);
+	public void handleTransportReplaceReceived(final JingleContentID id,final JingleTransportPayload payload) {
+	    notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+            @Override
+            public void call(JingleSessionListener listener) {
+                listener.handleTransportReplaceReceived(id, payload);
+            }
+            
+        });
 	}
 
-	public void handleTransportAcceptReceived(final JingleContentID id, JingleTransportPayload payload) {
-		notifyListeners(new Slot2<JingleContentID, JingleTransportPayload>() {
-			@Override
-			public void call(JingleContentID d, JingleTransportPayload p) {
-				handleTransportAcceptReceived(d, p);
-			}
-		}, id, payload);
+	public void handleTransportAcceptReceived(final JingleContentID id,final JingleTransportPayload payload) {
+	    notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+            @Override
+            public void call(JingleSessionListener listener) {
+                listener.handleTransportAcceptReceived(id, payload);
+            }
+            
+        });
 	}
 
-	public void handleTransportInfoReceived(final JingleContentID id, JingleTransportPayload payload) {
-		notifyListeners(new Slot2<JingleContentID, JingleTransportPayload>() {
-			@Override
-			public void call(JingleContentID d, JingleTransportPayload p) {
-				handleTransportInfoReceived(d, p);
-			}
-		}, id, payload);
+	public void handleTransportInfoReceived(final JingleContentID id,final JingleTransportPayload payload) {
+	    notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+            @Override
+            public void call(JingleSessionListener listener) {
+                listener.handleTransportInfoReceived(id, payload);;
+            }
+            
+        });
 	}
 
 	public void handleTransportRejectReceived(final JingleContentID id, JingleTransportPayload payload) {

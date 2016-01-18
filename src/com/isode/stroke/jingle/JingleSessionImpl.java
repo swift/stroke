@@ -142,23 +142,27 @@ public class JingleSessionImpl extends JingleSession {
 		sendSetRequest(payload);
 	}
 
-	void handleIncomingAction(JinglePayload action) {
+	void handleIncomingAction(final JinglePayload action) {
 		if (JinglePayload.Action.SessionTerminate.equals(action.getAction())) {
-			/*notifyListeners(new Slot1<JinglePayload.Reason>() {
-				@Override
-				public void call(JinglePayload.Reason reason) {
-					handleSessionTerminateReceived(reason);
-				}
-			}, action.getReason());*/
+		    notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+                @Override
+                public void call(JingleSessionListener listener) {
+                    listener.handleSessionTerminateReceived(action.getReason());
+                }
+            
+            });
 			return;
 		}
 		if (JinglePayload.Action.SessionInfo.equals(action.getAction())) {
-			/*notifyListeners(new Slot1<JinglePayload>() {
-				@Override
-				public void call(JinglePayload p) {
-					handleSessionInfoReceived(p);
-				}
-			}, action);*/
+		    notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+                @Override
+                public void call(JingleSessionListener listener) {
+                    listener.handleSessionInfoReceived(action);
+                }
+            
+            });
 			return;
 		}
 
@@ -167,49 +171,59 @@ public class JingleSessionImpl extends JingleSession {
 			logger_.fine("no content payload!\n");
 			return;
 		}
-		JingleContentID contentID = new JingleContentID(content.getName(), content.getCreator());
-		JingleDescription description = content.getDescriptions().isEmpty() ? null : content.getDescriptions().get(0);
-		JingleTransportPayload transport = content.getTransports().isEmpty() ? null : content.getTransports().get(0);
+		final JingleContentID contentID = new JingleContentID(content.getName(), content.getCreator());
+		final JingleDescription description = content.getDescriptions().isEmpty() ? null : content.getDescriptions().get(0);
+		final JingleTransportPayload transport = content.getTransports().isEmpty() ? null : content.getTransports().get(0);
 		switch(action.getAction()) {
 			case SessionAccept:
-				/*notifyListeners(new Slot3<JingleContentID, JingleDescription, JingleTransportPayload>() {
-					@Override
-					public void call(JingleContentID id, JingleDescription des, JingleTransportPayload tr) {
-						handleSessionAcceptReceived(id, des, tr);
-					}
-				}, contentID, description, transport);*/
+			    notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+	                @Override
+	                public void call(JingleSessionListener listener) {
+	                    listener.handleSessionAcceptReceived(contentID, description, transport);
+	                }
+	            
+	            });
 				return;
 			case TransportAccept:
-				/*notifyListeners(new Slot2<JingleContentID, JingleTransportPayload>() {
-					@Override
-					public void call(JingleContentID id, JingleTransportPayload tr) {
-						handleTransportAcceptReceived(id, tr);
-					}
-				}, contentID, transport);*/
+			    notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+	                @Override
+	                public void call(JingleSessionListener listener) {
+	                    listener.handleTransportAcceptReceived(contentID, transport);
+	                }
+	            
+	            });
 				return;
 			case TransportInfo:
-				/*notifyListeners(new Slot2<JingleContentID, JingleTransportPayload>() {
-					@Override
-					public void call(JingleContentID id, JingleTransportPayload tr) {
-						handleTransportInfoReceived(id, tr);
-					}
-				}, contentID, transport);*/
+			    notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+	                @Override
+	                public void call(JingleSessionListener listener) {
+	                    listener.handleTransportInfoReceived(contentID, transport);
+	                }
+	            
+	            });
 				return;
 			case TransportReject:
-				/*notifyListeners(new Slot2<JingleContentID, JingleTransportPayload>() {
-					@Override
-					public void call(JingleContentID id, JingleTransportPayload tr) {
-						handleTransportRejectReceived(id, tr);
-					}
-				}, contentID, transport);*/
+			    notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+	                @Override
+	                public void call(JingleSessionListener listener) {
+	                    listener.handleTransportRejectReceived(contentID, transport);
+	                }
+	            
+	            });
 				return;
 			case TransportReplace:
-				/*notifyListeners(new Slot2<JingleContentID, JingleTransportPayload>() {
-					@Override
-					public void call(JingleContentID id, JingleTransportPayload tr) {
-						handleTransportReplaceReceived(id, tr);
-					}
-				}, contentID, transport);*/
+			    notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+	                @Override
+	                public void call(JingleSessionListener listener) {
+	                    listener.handleTransportReplaceReceived(contentID, transport);
+	                }
+	            
+	            });
 				return;
 			// following unused Jingle actions
 			case ContentAccept:
@@ -249,15 +263,17 @@ public class JingleSessionImpl extends JingleSession {
 		return payload;
 	}
 
-	private void handleRequestResponse(GenericRequest<JinglePayload> request) {
+	private void handleRequestResponse(final GenericRequest<JinglePayload> request) {
 		assert (pendingRequests.containsKey(request));
 		if (JinglePayload.Action.TransportInfo.equals(request.getPayloadGeneric().getAction())) {
-			/*notifyListeners(new Slot1<String>() {
-				@Override
-				public void call(String s) {
-					handleTransportInfoAcknowledged(s);
-				}
-			}, request.getID());*/
+			notifyListeners(new ListenableCallback<JingleSessionListener>() {
+
+                @Override
+                public void call(JingleSessionListener listener) {
+                    listener.handleTransportInfoAcknowledged(request.getID());
+                }
+            
+			});
 		}
 		pendingRequests.get(request).disconnect();
 		pendingRequests.remove(request);		

@@ -18,9 +18,9 @@ import java.util.Vector;
 public class Jingle {
 
 	public <T extends Payload> JingleContentPayload getContentWithDescription(final Vector<JingleContentPayload> contents, T payload) {
-		for (int i = 0; i < contents.size(); ++i) {
-			if (contents.get(i).getDescription(payload) != null) {
-				return contents.get(i);
+		for (JingleContentPayload jingleContentPayload : contents) {
+			if (jingleContentPayload.getDescription(payload) != null) {
+				return jingleContentPayload;
 			}
 		}
 		return null;

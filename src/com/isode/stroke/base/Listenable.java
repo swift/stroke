@@ -11,15 +11,12 @@
 
 package com.isode.stroke.base;
 
-import java.util.Vector;
-import com.isode.stroke.signals.Slot;
-import com.isode.stroke.signals.Slot1;
-import com.isode.stroke.signals.Slot2;
-import com.isode.stroke.signals.Slot3;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class Listenable<T> {
 
-	private Vector<T> listeners = new Vector<T>();
+	private Set<T> listeners = new CopyOnWriteArraySet<T>();
 
 	public void addListener(T listener) {
 		listeners.add(listener);
@@ -30,30 +27,31 @@ public class Listenable<T> {
 			listeners.remove(listener);
 		}
 	}
-
-	//Swiften code calls event(i), which is not yet done.
-	public void notifyListeners(Slot event) {
-		for (T i : listeners) {
-			event.call();
-		}
+	
+	// Swiften code takes advantage of boost binding
+	// which we can't do in java.  Easiest solution seems
+	// to be to pass listener to the caller to handle which
+	// method should be called
+	public void notifyListeners(ListenableCallback<? super T> callback) {
+	    for (T listener : listeners) {
+	        callback.call(listener);
+	    }
 	}
-
-	//Swiften code calls event(i), which is not yet done.
-	public <T1> void notifyListeners(Slot1<T1> event, T1 p1) {
-		for (T i : listeners) {
-			event.call(p1);
-		}
-	}
-
-	public <T1, T2> void notifyListeners(Slot2<T1, T2> event, T1 p1, T2 p2) {
-		for (T i : listeners) {
-			event.call(p1, p2);
-		}
-	}
-
-	public <T1, T2, T3> void notifyListeners(Slot3<T1, T2, T3> event, T1 p1, T2 p2, T3 p3) {
-		for (T i : listeners) {
-			event.call(p1, p2, p3);
-		}
+	
+	/**
+	 * Callback for subclasses to specify how the listers should be
+	 * called
+	 * @param <T> Type of listener that can registered with the {@link Listenable}
+	 */
+	public static interface ListenableCallback<S> {
+	    
+	    /**
+	     * Called by the parent {@link Listenable} class for all
+	     * registered listeners.
+	     * @param listener A registered listener. May be {@code null}
+	     * if a {@code null} was registered as a listener.
+	     */
+	    public void call(S listener);
+	    
 	}
 }

@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import java.util.Vector;
 import java.util.Map;
 import java.util.HashMap;
+
 import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.elements.JingleContentPayload;
 import com.isode.stroke.jid.JID;
@@ -26,12 +27,12 @@ public class JingleSessionManager {
 	private Vector<IncomingJingleSessionHandler> incomingSessionHandlers = new Vector<IncomingJingleSessionHandler>();
 	private Logger logger_ = Logger.getLogger(this.getClass().getName());
 
-	private class JIDSession {
+	private static class JIDSession {
 		public JIDSession(final JID initiator, final String session) {
 			this.initiator = initiator;
 			this.session = session;
 		}
-		public int compareTo(JIDSession other) {
+        public int compareTo(JIDSession other) {
 			if(other == null) {
 				return -1;
 			}
@@ -42,8 +43,39 @@ public class JingleSessionManager {
 				return initiator.compareTo(other.initiator);
 			}
 		}
-		public JID initiator;
-		public String session;
+		@Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result
+                    + ((initiator == null) ? 0 : initiator.hashCode());
+            result = prime * result
+                    + ((session == null) ? 0 : session.hashCode());
+            return result;
+        }
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (getClass() != obj.getClass())
+                return false;
+            JIDSession other = (JIDSession) obj;
+            if (initiator == null) {
+                if (other.initiator != null)
+                    return false;
+            } else if (!initiator.equals(other.initiator))
+                return false;
+            if (session == null) {
+                if (other.session != null)
+                    return false;
+            } else if (!session.equals(other.session))
+                return false;
+            return true;
+        }
+        public final JID initiator;
+		public final String session;
 	};
 
 	private Map<JIDSession, JingleSessionImpl> sessions = new HashMap<JIDSession, JingleSessionImpl>();
