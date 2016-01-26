@@ -42,15 +42,6 @@ public class IncrementalBytestreamHashCalculator {
 		}
 	}
 
-	/*void feedData(const SafeByteArray& data) {
-		if (md5Hasher) {
-			md5Hasher.update(createByteArray(data.data(), data.size()));
-		}
-		if (sha1Hasher) {
-			sha1Hasher.update(createByteArray(data.data(), data.size()));
-		}
-	}*/
-
 	public ByteArray getSHA1Hash() {
 		assert(sha1Hasher != null);
 		if (sha1Hash == null) {

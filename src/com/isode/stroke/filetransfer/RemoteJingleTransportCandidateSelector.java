@@ -75,8 +75,7 @@ public class RemoteJingleTransportCandidateSelector {
 			onCandidateSelectFinished.emit(null, null);
 		} 
 		else {
-			lastCandidate = candidates.peek();
-			candidates.poll();
+			lastCandidate = candidates.poll();
 			logger_.fine("Trying candidate " + lastCandidate.cid + "\n");
 			if ((lastCandidate.type.equals(JingleS5BTransportPayload.Candidate.Type.DirectType) && options.isDirectAllowed()) ||
 				(lastCandidate.type.equals(JingleS5BTransportPayload.Candidate.Type.AssistedType) && options.isAssistedAllowed()) ||

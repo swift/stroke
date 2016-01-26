@@ -46,7 +46,7 @@ public class SOCKS5BytestreamClientSession {
 		private State(int x) {
 			description = x;
 		}
-		public int description;
+		public final int description;
 	};
 
 	private Connection connection;
@@ -274,7 +274,7 @@ public class SOCKS5BytestreamClientSession {
 			process();
 		}
 		else {
-			//---------writeBytestream.write(new ByteArray(vecptr(*data), data.size()));
+		    writeBytestream.write(data);
 			//onBytesReceived(data.size());
 		}
 	}

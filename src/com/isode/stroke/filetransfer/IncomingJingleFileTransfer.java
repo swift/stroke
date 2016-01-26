@@ -392,9 +392,8 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 			return; 
 		}
 
-		JingleIBBTransportPayload ibbTransport;
 		if (options.isInBandAllowed() && transport instanceof JingleIBBTransportPayload) {
-			ibbTransport = (JingleIBBTransportPayload)transport;
+			JingleIBBTransportPayload ibbTransport = (JingleIBBTransportPayload)transport;
 			logger_.fine("transport replaced with IBB\n");
 
 			startTransferring(transporter.createIBBReceiveSession(ibbTransport.getSessionID(), (int)description.getFileInfo().getSize(), stream));

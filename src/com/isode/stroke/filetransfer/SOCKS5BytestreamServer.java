@@ -18,6 +18,10 @@ import com.isode.stroke.jid.JID;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.signals.Slot;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 public class SOCKS5BytestreamServer {
@@ -26,7 +30,13 @@ public class SOCKS5BytestreamServer {
 	private SOCKS5BytestreamRegistry registry;
 	private Vector<SOCKS5BytestreamServerSession> sessions = new Vector<SOCKS5BytestreamServerSession>();
 	private SignalConnection onNewConnectionConn;
-	private SignalConnection onFinishedConnection;
+	
+	/**
+	 * Map between {@link SOCKS5BytestreamServerSession} and the {@link SignalConnection} 
+	 * to that session's {@link SOCKS5BytestreamServerSession#onFinished} signal.
+	 */
+	private Map<SOCKS5BytestreamServerSession, SignalConnection> sessionOnFinishedConnectionMap =
+	        new HashMap<SOCKS5BytestreamServerSession, SignalConnection>();
 
 	public SOCKS5BytestreamServer(ConnectionServer connectionServer, SOCKS5BytestreamRegistry registry) {
 		this.connectionServer = connectionServer;
@@ -49,7 +59,10 @@ public class SOCKS5BytestreamServer {
 	public void stop() {
 		onNewConnectionConn.disconnect();
 		for (SOCKS5BytestreamServerSession session : sessions) {
-			session.onFinished.disconnectAll();
+		    SignalConnection onFinishedConnection = sessionOnFinishedConnectionMap.remove(session);
+		    if (onFinishedConnection != null) {
+	            onFinishedConnection.disconnect();
+	        }
 			session.stop();
 		}
 		sessions.clear();
@@ -67,20 +80,25 @@ public class SOCKS5BytestreamServer {
 
 	private void handleNewConnection(Connection connection) {
 		final SOCKS5BytestreamServerSession session = new SOCKS5BytestreamServerSession(connection, registry);
-		onFinishedConnection = session.onFinished.connect(new Slot1<FileTransferError>() {
+		SignalConnection onFinishedConnection = session.onFinished.connect(new Slot1<FileTransferError>() {
 			@Override
 			public void call(FileTransferError e) {
 				handleSessionFinished(session);
 			}
 		});
 		sessions.add(session);
+		sessionOnFinishedConnectionMap.put(session, onFinishedConnection);
+
 		session.start();
 	}
 
 	private void handleSessionFinished(SOCKS5BytestreamServerSession session) {
-		while(sessions.contains(session)) {
-			sessions.remove(session);
+		while(sessions.remove(session)) {
+		    // Loop will run till session no longer is sessions
 		}
-		onFinishedConnection.disconnect();
+		SignalConnection onFinishedConnection = sessionOnFinishedConnectionMap.remove(session);
+		if (onFinishedConnection != null) {
+		    onFinishedConnection.disconnect();
+		}
 	}
 }

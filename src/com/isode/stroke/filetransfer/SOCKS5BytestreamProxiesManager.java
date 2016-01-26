@@ -25,12 +25,15 @@ import com.isode.stroke.network.DomainNameResolveError;
 import com.isode.stroke.network.DomainNameAddressQuery;
 import com.isode.stroke.network.HostAddress;
 import com.isode.stroke.queries.IQRouter;
+import com.isode.stroke.session.Session;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.signals.Slot2;
 import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.elements.S5BProxyRequest;
 import com.isode.stroke.jid.JID;
+
+import java.util.Iterator;
 import java.util.Vector;
 import java.util.Collection;
 import java.util.Map;
@@ -49,9 +52,9 @@ public class SOCKS5BytestreamProxiesManager {
 	private IQRouter iqRouter_;
 	private JID serviceRoot_;
 	private Logger logger_ = Logger.getLogger(this.getClass().getName());
-	private SignalConnection onSessionReadyConnection;
-	private SignalConnection onFinishedConnection;
 
+	// TODO plonk this into the pair or not
+	// TODO think what this is trying to do?
 	private static class Pair {
 		public JID jid;
 		public SOCKS5BytestreamClientSession sock5;
@@ -61,6 +64,20 @@ public class SOCKS5BytestreamProxiesManager {
 
 	private Map<String, Collection<Pair> > proxySessions_ = new HashMap<String, Collection<Pair> >();
 
+	/**
+	 * Map between {@link SOCKS5BytestreamClientSession} and a {@link SignalConnection} to their
+	 * {@link SOCKS5BytestreamClientSession#onSessionReady}
+	 */
+	private Map<SOCKS5BytestreamClientSession,SignalConnection> onSessionReadyConnectionMap =
+	        new HashMap<SOCKS5BytestreamClientSession,SignalConnection>();
+	
+	/**
+     * Map between {@link SOCKS5BytestreamClientSession} and a {@link SignalConnection} to their
+     * {@link SOCKS5BytestreamClientSession#onFinished}
+     */
+	private Map<SOCKS5BytestreamClientSession,SignalConnection> onFinishedConnectionMap =
+	        new HashMap<SOCKS5BytestreamClientSession,SignalConnection>();
+	
 	private SOCKS5BytestreamProxyFinder proxyFinder_;
 
 	private Collection<S5BProxyRequest> localS5BProxies_;
@@ -107,18 +124,20 @@ public class SOCKS5BytestreamProxiesManager {
 				final SOCKS5BytestreamClientSession session = new SOCKS5BytestreamClientSession(conn, addressPort, sessionID, timerFactory_);
 				final JID proxyJid = proxy.getStreamHost().jid;
 				clientSessions.add(new Pair(proxyJid, session));
-				onSessionReadyConnection = session.onSessionReady.connect(new Slot1<Boolean>() {
+				SignalConnection onSessionReadyConnection = session.onSessionReady.connect(new Slot1<Boolean>() {
 					@Override
 					public void call(Boolean b) {
 						handleProxySessionReady(sessionID, proxyJid, session, b);
 					}
 				});
-				onFinishedConnection = session.onFinished.connect(new Slot1<FileTransferError>() {
+				onSessionReadyConnectionMap.put(session, onSessionReadyConnection);
+				SignalConnection onFinishedConnection = session.onFinished.connect(new Slot1<FileTransferError>() {
 					@Override
 					public void call(FileTransferError e) {
 						handleProxySessionFinished(sessionID, proxyJid, session, e);
 					}
 				});
+				onFinishedConnectionMap.put(session, onFinishedConnection);
 				session.start();
 			}
 		}
@@ -135,8 +154,16 @@ public class SOCKS5BytestreamProxiesManager {
 		// get active session
 		SOCKS5BytestreamClientSession activeSession = null;
 		for(Pair i : proxySessions_.get(sessionID)) {
-			i.sock5.onSessionReady.disconnectAll();
-			i.sock5.onFinished.disconnectAll();
+		    SignalConnection onSessionReadyConnection = 
+		            onSessionReadyConnectionMap.remove(i.sock5);
+		    if (onSessionReadyConnection != null) {
+		        onSessionReadyConnection.disconnect();
+		    }
+		    SignalConnection onFinishedConnection =
+		            onFinishedConnectionMap.remove(i.sock5);
+		    if (onFinishedConnection != null) {
+		        onFinishedConnection.disconnect();
+		    }
 			if (i.jid.equals(proxyJID) && activeSession == null) {
 				activeSession = i.sock5;
 			}
@@ -217,32 +244,42 @@ public class SOCKS5BytestreamProxiesManager {
 	}
 
 	private void handleProxySessionReady(final String sessionID, final JID jid, SOCKS5BytestreamClientSession session, boolean error) {
-		onSessionReadyConnection.disconnect();
+	    SignalConnection onSessionReadyConnection = onSessionReadyConnectionMap.remove(session);
+	    if (onSessionReadyConnection != null) {
+	        onSessionReadyConnection.disconnect();
+	    }
 		if (!error) {
 			// The SOCKS5 bytestream session to the proxy succeeded; stop and remove other sessions.
 			if (proxySessions_.containsKey(sessionID)) {
-				for(Pair i : proxySessions_.get(sessionID)) {
-					if ((i.jid.equals(jid)) && (!i.sock5.equals(session))) {
-						i.sock5.stop();
-						proxySessions_.get(sessionID).remove(i); //Swiften assigns i, so that iterator points to the next element.
-					}
+				Iterator<Pair> iterator = proxySessions_.get(sessionID).iterator();
+				while (iterator.hasNext()) {
+				    Pair i = iterator.next();
+				    if ((i.jid.equals(jid)) && (!i.sock5.equals(session))) {
+                        i.sock5.stop();
+                        iterator.remove();; //Swiften assigns i, so that iterator points to the next element.
+                    }
 				}
 			}
 		}
 	}
 
 	private void handleProxySessionFinished(final String sessionID, final JID jid, SOCKS5BytestreamClientSession session, FileTransferError error) {
-		onFinishedConnection.disconnect();
+	    SignalConnection onFinishedConnection = onFinishedConnectionMap.remove(session);
+	    if (onFinishedConnection != null) {
+	        onFinishedConnection.disconnect();
+	    }
 		if (error != null) {
 			// The SOCKS5 bytestream session to the proxy failed; remove it.
 			if (proxySessions_.containsKey(sessionID)) {
-				for(Pair i : proxySessions_.get(sessionID)) {
-					if ((i.jid.equals(jid)) && (i.sock5.equals(session))) {
-						i.sock5.stop();
-						proxySessions_.get(sessionID).remove(i); //Swiften assigns i, so that iterator points to the next element.
-						break;
-					}
-				}
+			    Iterator<Pair> iterator = proxySessions_.get(sessionID).iterator();
+			    while (iterator.hasNext()) {
+			        Pair i = iterator.next();
+			        if ((i.jid.equals(jid)) && (i.sock5.equals(session))) {
+                        i.sock5.stop();
+                        iterator.remove();; //Swiften assigns i, so that iterator points to the next element.
+                        break;
+                    }
+			    }
 			}
 		}
 	}

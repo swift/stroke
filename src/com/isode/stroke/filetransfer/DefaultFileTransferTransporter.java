@@ -69,13 +69,14 @@ public class DefaultFileTransferTransporter extends FileTransferTransporter {
 		this.responder = responder;
 		this.role = role;
 		this.s5bRegistry = s5bRegistry;
+		this.s5bServerManager = s5bServerManager;
 		this.s5bProxy = s5bProxy;
 		this.crypto = crypto;
 		this.router = router;
 		localCandidateGenerator = new LocalJingleTransportCandidateGenerator(
 				s5bServerManager,
 				s5bProxy,
-				(Role.Initiator.equals(role) ? initiator : responder),
+				(role == Role.Initiator ? initiator : responder),
 				idGenerator,
 				options);
 		localCandidateGenerator.onLocalTransportCandidatesGenerated.connect(new Slot1<Vector<JingleS5BTransportPayload.Candidate>>() {
@@ -132,7 +133,7 @@ public class DefaultFileTransferTransporter extends FileTransferTransporter {
 		logger_.fine("Start activating proxy " + proxyServiceJID.toString() + " with sid = " + s5bSessionID + ".\n");
 		S5BProxyRequest proxyRequest = new S5BProxyRequest();
 		proxyRequest.setSID(s5bSessionID);
-		proxyRequest.setActivate(Role.Initiator.equals(role) ? responder : initiator);
+		proxyRequest.setActivate(role == Role.Initiator ? responder : initiator);
 
 		GenericRequest<S5BProxyRequest> request = new GenericRequest<S5BProxyRequest>(IQ.Type.Set, proxyServiceJID, proxyRequest, router);
 		request.onResponse.connect(new Slot2<S5BProxyRequest, ErrorPayload>() {

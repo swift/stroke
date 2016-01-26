@@ -49,7 +49,7 @@ public abstract class FileTransferTransporter {
 	public abstract TransportSession createLocalCandidateSession(
 					WriteBytestream w, final JingleS5BTransportPayload.Candidate candidate);
 
-	public final Signal3<String /* sessionID */, Vector<JingleS5BTransportPayload.Candidate>, String /* dstAddr */> onLocalCandidatesGenerated = new Signal3<String, Vector<JingleS5BTransportPayload.Candidate>, String>();
-	public final Signal2<String /* sessionID */, JingleS5BTransportPayload.Candidate> onRemoteCandidateSelectFinished = new Signal2<String, JingleS5BTransportPayload.Candidate>();
-	public final Signal2<String /* sessionID */, ErrorPayload> onProxyActivated = new Signal2<String, ErrorPayload>();
+	public final Signal3<String, Vector<JingleS5BTransportPayload.Candidate>, String> onLocalCandidatesGenerated = new Signal3<String, Vector<JingleS5BTransportPayload.Candidate>, String>();
+	public final Signal2<String, JingleS5BTransportPayload.Candidate> onRemoteCandidateSelectFinished = new Signal2<String, JingleS5BTransportPayload.Candidate>();
+	public final Signal2<String, ErrorPayload> onProxyActivated = new Signal2<String, ErrorPayload>();
 }

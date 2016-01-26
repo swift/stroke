@@ -53,15 +53,6 @@ public class JingleS5BTransportPayload extends JingleTransportPayload {
 			else if (c1.priority < c2.priority) { return -1; }
 			else  { return 1; }
 		}
-
-		public boolean equals(Object c) {
-			if(!(c instanceof JingleS5BTransportPayload.Candidate)) {
-				return false;
-			}
-			else {
-				return this.equals(c);
-			}
-		}
 	}
 
 	private Mode mode;

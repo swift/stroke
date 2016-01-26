@@ -46,7 +46,12 @@ public class LocalJingleTransportCandidateGenerator {
 	private SignalConnection onDiscoveredProxiesChangedConnection;
 	private Logger logger_  = Logger.getLogger(this.getClass().getName());
 
-	public LocalJingleTransportCandidateGenerator(
+	/**
+     * {@link SignalConnection} to {@link #s5bServerResourceUser_.onSuccessfulInitialized} 
+     */
+    private SignalConnection onSuccessfulInitializedConnection_;
+
+    public LocalJingleTransportCandidateGenerator(
 			SOCKS5BytestreamServerManager s5bServerManager,
 			SOCKS5BytestreamProxiesManager s5bProxy, 
 			final JID ownJID,
@@ -70,7 +75,7 @@ public class LocalJingleTransportCandidateGenerator {
 				handleS5BServerInitialized(true);
 			}
 			else {
-				s5bServerResourceUser_.onSuccessfulInitialized.connect(new Slot1<Boolean>() {
+				onSuccessfulInitializedConnection_ = s5bServerResourceUser_.onSuccessfulInitialized.connect(new Slot1<Boolean>() {
 					@Override
 					public void call(Boolean b) {
 						handleS5BServerInitialized(b);
@@ -100,17 +105,17 @@ public class LocalJingleTransportCandidateGenerator {
 			s5bServerPortForwardingUser_.onSetup.disconnectAll();
 			s5bServerPortForwardingUser_ = null;
 		}
-		if (s5bServerResourceUser_ != null) {
-			s5bServerResourceUser_.onSuccessfulInitialized.disconnectAll();
-			s5bServerResourceUser_ = null;
+		if (onSuccessfulInitializedConnection_ != null) {
+			onSuccessfulInitializedConnection_.disconnect();
 		}
+		s5bServerResourceUser_ = null;
 	}
 
 	public Signal1<Vector<JingleS5BTransportPayload.Candidate>> onLocalTransportCandidatesGenerated = new Signal1<Vector<JingleS5BTransportPayload.Candidate>>();
-
+    
 	private void handleS5BServerInitialized(boolean success) {
-		if (s5bServerResourceUser_ != null) {
-			s5bServerResourceUser_.onSuccessfulInitialized.disconnectAll();
+		if (onSuccessfulInitializedConnection_ != null) {
+			onSuccessfulInitializedConnection_.disconnect();
 		}
 		triedServerInit_ = true;
 		if (success) {
@@ -130,9 +135,6 @@ public class LocalJingleTransportCandidateGenerator {
 		}
 		else {
 			logger_.warning("Unable to start SOCKS5 server\n");
-			if (s5bServerResourceUser_ != null) {
-				s5bServerResourceUser_.onSuccessfulInitialized.disconnectAll();
-			}
 			s5bServerResourceUser_ = null;
 			handlePortForwardingSetup(false);
 		}
@@ -181,7 +183,7 @@ public class LocalJingleTransportCandidateGenerator {
 		}
 
 		if (options_.isAssistedAllowed()) {
-			// get assissted candidates
+			// get assisted candidates
 			Vector<HostAddressPort> assisstedCandidates = s5bServerManager.getAssistedHostAddressPorts();
 			for(HostAddressPort addressPort : assisstedCandidates) {
 				JingleS5BTransportPayload.Candidate candidate = new JingleS5BTransportPayload.Candidate();

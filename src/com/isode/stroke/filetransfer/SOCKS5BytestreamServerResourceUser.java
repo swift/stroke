@@ -22,7 +22,7 @@ public class SOCKS5BytestreamServerResourceUser {
 
 	public SOCKS5BytestreamServerResourceUser(SOCKS5BytestreamServerManager s5bServerManager) {
 		this.s5bServerManager_ = s5bServerManager;
-		assert(s5bServerManager_ == null);
+		assert(!s5bServerManager_.isInitialized());
 		onInitializedConnection_ = s5bServerManager_.onInitialized.connect(new Slot1<Boolean>() {
 			@Override
 			public void call(Boolean b) {
@@ -36,7 +36,7 @@ public class SOCKS5BytestreamServerResourceUser {
 	* User should call delete to free the resources.
 	*/
 	public void delete() {
-		if (s5bServerManager_ != null) {
+		if (s5bServerManager_.isInitialized()) {
 			s5bServerManager_.stop();
 		}
 	}

@@ -30,7 +30,7 @@ public class ByteArrayReadBytestream extends ReadBytestream {
 		if (position + readSize > data.getSize()) {
 			readSize = data.getSize() - position;
 		}
-		String s = new String(data.getData());
+		String s = data.toString();
 		s = s.substring(position, position+readSize);
 		ByteArray result = new ByteArray(s);
 

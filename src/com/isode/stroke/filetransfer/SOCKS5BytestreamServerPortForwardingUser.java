@@ -23,7 +23,7 @@ public class SOCKS5BytestreamServerPortForwardingUser {
 	public SOCKS5BytestreamServerPortForwardingUser(SOCKS5BytestreamServerManager s5bServerManager) {
 		this.s5bServerManager_ = s5bServerManager;
 		// the server should be initialized, so we know what port to setup a forward for
-		assert(s5bServerManager != null);
+		assert(s5bServerManager.isInitialized());
 		if (s5bServerManager_.isPortForwardingReady()) {
 			onSetup.emit(!s5bServerManager_.getAssistedHostAddressPorts().isEmpty());
 		}

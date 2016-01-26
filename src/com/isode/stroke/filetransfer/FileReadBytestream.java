@@ -31,9 +31,10 @@ public class FileReadBytestream extends ReadBytestream {
 			if (stream == null) {
 				stream = new FileInputStream(file);
 			}
-			ByteArray result = new ByteArray();
 			//assert(stream.good());
-			stream.read(result.getData(), 0, size);
+			byte[] buffer = new byte[size];
+			stream.read(buffer, 0, size);
+			ByteArray result = new ByteArray(buffer);
 			onRead.emit(result);
 			return result;
 		}
