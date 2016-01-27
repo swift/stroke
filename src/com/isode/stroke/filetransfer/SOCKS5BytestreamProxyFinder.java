@@ -16,32 +16,45 @@
 
 package com.isode.stroke.filetransfer;
 
-import com.isode.stroke.network.HostAddressPort;
-import com.isode.stroke.elements.S5BProxyRequest;
-import com.isode.stroke.elements.ErrorPayload;
-import com.isode.stroke.elements.DiscoInfo;
-import com.isode.stroke.elements.IQ;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Logger;
+
 import com.isode.stroke.disco.DiscoServiceWalker;
-import com.isode.stroke.queries.IQRouter;
+import com.isode.stroke.elements.DiscoInfo;
+import com.isode.stroke.elements.ErrorPayload;
+import com.isode.stroke.elements.IQ;
+import com.isode.stroke.elements.S5BProxyRequest;
+import com.isode.stroke.jid.JID;
 import com.isode.stroke.queries.GenericRequest;
+import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.SignalConnection;
+import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot2;
-import com.isode.stroke.jid.JID;
-import java.util.Vector;
-import java.util.logging.Logger;
 
 /*
  * This class is designed to find possible SOCKS5 bytestream proxies which are used for peer-to-peer data transfers in
  * restrictive environments.
  */
 public class SOCKS5BytestreamProxyFinder {
-
+    
 	private JID service;
 	private IQRouter iqRouter;
 	private DiscoServiceWalker serviceWalker;
-	private Vector<GenericRequest<S5BProxyRequest> > requests = new Vector<GenericRequest<S5BProxyRequest>>();
+	private final List<S5BProxyRequest> proxyHosts = new ArrayList<S5BProxyRequest>();
+	private final Set<GenericRequest<S5BProxyRequest>> pendingRequests = new HashSet<GenericRequest<S5BProxyRequest>>();
+	
 	private SignalConnection onServiceFoundConnection;
+	private SignalConnection onWalkCompleteConnection;
+	private final Map<GenericRequest<S5BProxyRequest>,SignalConnection> requestOnResponseConnections
+	    = new HashMap<GenericRequest<S5BProxyRequest>,SignalConnection>();
+	
+
 	private Logger logger_ = Logger.getLogger(this.getClass().getName());
 
 	public SOCKS5BytestreamProxyFinder(final JID service, IQRouter iqRouter) {
@@ -57,27 +70,42 @@ public class SOCKS5BytestreamProxyFinder {
 				handleServiceFound(j, d);
 			}
 		});
+		onWalkCompleteConnection = serviceWalker.onWalkComplete.connect(new Slot() {
+            
+            @Override
+            public void call() {
+                handleWalkEnded();
+            }
+            
+        });
 		serviceWalker.beginWalk();
 	}
 
 	public void stop() {
-		serviceWalker.endWalk();
+		for (SignalConnection onResponseConnection : requestOnResponseConnections.values()) {
+		    onResponseConnection.disconnect();
+		}
+		requestOnResponseConnections.clear();
+	    serviceWalker.endWalk();
 		onServiceFoundConnection.disconnect();
+		onWalkCompleteConnection.disconnect();
 		serviceWalker = null;
 	}
-
-	public final Signal1<S5BProxyRequest> onProxyFound = new Signal1<S5BProxyRequest>();
+	
+	public final Signal1<List<S5BProxyRequest>> onProxiesFound = new Signal1<List<S5BProxyRequest>>();
 
 	private void sendBytestreamQuery(final JID jid) {
 		S5BProxyRequest proxyRequest = new S5BProxyRequest();
-		GenericRequest<S5BProxyRequest> request = new GenericRequest<S5BProxyRequest>(IQ.Type.Get, jid, proxyRequest, iqRouter);
-		request.onResponse.connect(new Slot2<S5BProxyRequest, ErrorPayload>() {
+		final GenericRequest<S5BProxyRequest> requester = new GenericRequest<S5BProxyRequest>(IQ.Type.Get, jid, proxyRequest, iqRouter);
+		SignalConnection requestOnResponseConnection = requester.onResponse.connect(new Slot2<S5BProxyRequest, ErrorPayload>() {
 			@Override
 			public void call(S5BProxyRequest s, ErrorPayload e) {
-				handleProxyResponse(s, e);
+				handleProxyResponse(requester,s,e);
 			}
 		});
-		request.send();
+		pendingRequests.add(requester);
+		requestOnResponseConnections.put(requester, requestOnResponseConnection);
+		requester.send();
 	}
 
 	private void handleServiceFound(final JID jid, DiscoInfo discoInfo) {
@@ -85,15 +113,29 @@ public class SOCKS5BytestreamProxyFinder {
 			sendBytestreamQuery(jid);
 		}
 	}
-	private void handleProxyResponse(S5BProxyRequest request, ErrorPayload error) {
-		if (error != null) {
+	
+	private void handleWalkEnded() {
+	    if (pendingRequests.isEmpty()) {
+	        onProxiesFound.emit(proxyHosts);
+	    }
+	}
+	
+	private void handleProxyResponse(GenericRequest<S5BProxyRequest> requester,S5BProxyRequest request, ErrorPayload error) {
+		SignalConnection requestOnResponseConnection = requestOnResponseConnections.remove(request);
+		if (requestOnResponseConnection != null) {
+		    requestOnResponseConnection.disconnect();
+		}
+		pendingRequests.remove(requester);
+	    if (error != null) {
 			logger_.fine("ERROR\n");
 		} else {
 			if (request != null) {
-				onProxyFound.emit(request);
-			} else {
-				//assert(false);
-			}
+			    logger_.fine("add request\n");
+				proxyHosts.add(request);
+			} 
 		}
+	    if (pendingRequests.isEmpty() && !serviceWalker.isActive()) {
+	        onProxiesFound.emit(proxyHosts);
+	    }
 	}
 }

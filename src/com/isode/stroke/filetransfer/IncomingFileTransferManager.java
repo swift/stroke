@@ -30,20 +30,17 @@ import java.util.Vector;
 public class IncomingFileTransferManager implements IncomingJingleSessionHandler {
 
 	private JingleSessionManager jingleSessionManager;
-	private IQRouter router;
 	private FileTransferTransporterFactory transporterFactory;
 	private TimerFactory timerFactory;
 	private CryptoProvider crypto;
 	private Logger logger_ = Logger.getLogger(this.getClass().getName());
 
 	public IncomingFileTransferManager(
-			JingleSessionManager jingleSessionManager, 
-			IQRouter router, 
+			JingleSessionManager jingleSessionManager,
 			FileTransferTransporterFactory transporterFactory,
 			TimerFactory timerFactory, 
 			CryptoProvider crypto) {
 		this.jingleSessionManager = jingleSessionManager;
-		this.router = router;
 		this.transporterFactory = transporterFactory;
 		this.timerFactory = timerFactory;
 		this.crypto = crypto;

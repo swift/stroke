@@ -88,8 +88,7 @@ public class FileTransferManagerImpl extends FileTransferManager {
 				timerFactory,
 				crypto);
 		incomingFTManager = new IncomingFileTransferManager(
-				jingleSessionManager, 
-				iqRouter, 
+				jingleSessionManager,
 				transporterFactory,
 				timerFactory,
 				crypto);

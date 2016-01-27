@@ -16,29 +16,29 @@
 
 package com.isode.stroke.filetransfer;
 
-import com.isode.stroke.network.Connection;
-import com.isode.stroke.network.ConnectionFactory;
-import com.isode.stroke.network.DomainNameResolver;
-import com.isode.stroke.network.TimerFactory;
-import com.isode.stroke.network.HostAddressPort;
-import com.isode.stroke.network.DomainNameResolveError;
-import com.isode.stroke.network.DomainNameAddressQuery;
-import com.isode.stroke.network.HostAddress;
-import com.isode.stroke.queries.IQRouter;
-import com.isode.stroke.session.Session;
-import com.isode.stroke.signals.Slot1;
-import com.isode.stroke.signals.Slot2;
-import com.isode.stroke.signals.Signal;
-import com.isode.stroke.signals.SignalConnection;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+import java.util.logging.Logger;
+
 import com.isode.stroke.elements.S5BProxyRequest;
 import com.isode.stroke.jid.JID;
-
-import java.util.Iterator;
-import java.util.Vector;
-import java.util.Collection;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.logging.Logger;
+import com.isode.stroke.network.Connection;
+import com.isode.stroke.network.ConnectionFactory;
+import com.isode.stroke.network.DomainNameAddressQuery;
+import com.isode.stroke.network.DomainNameResolveError;
+import com.isode.stroke.network.DomainNameResolver;
+import com.isode.stroke.network.HostAddress;
+import com.isode.stroke.network.HostAddressPort;
+import com.isode.stroke.network.TimerFactory;
+import com.isode.stroke.queries.IQRouter;
+import com.isode.stroke.signals.Signal;
+import com.isode.stroke.signals.SignalConnection;
+import com.isode.stroke.signals.Slot1;
+import com.isode.stroke.signals.Slot2;
 
 /**
  *	- manages list of working S5B proxies
@@ -53,8 +53,6 @@ public class SOCKS5BytestreamProxiesManager {
 	private JID serviceRoot_;
 	private Logger logger_ = Logger.getLogger(this.getClass().getName());
 
-	// TODO plonk this into the pair or not
-	// TODO think what this is trying to do?
 	private static class Pair {
 		public JID jid;
 		public SOCKS5BytestreamClientSession sock5;
@@ -64,7 +62,8 @@ public class SOCKS5BytestreamProxiesManager {
 
 	private Map<String, Collection<Pair> > proxySessions_ = new HashMap<String, Collection<Pair> >();
 
-	/**
+	private SignalConnection onProxiesFoundConnection;
+    /**
 	 * Map between {@link SOCKS5BytestreamClientSession} and a {@link SignalConnection} to their
 	 * {@link SOCKS5BytestreamClientSession#onSessionReady}
 	 */
@@ -183,31 +182,37 @@ public class SOCKS5BytestreamProxiesManager {
 	}
 
 	public final Signal onDiscoveredProxiesChanged = new Signal();
-
-	private void handleProxyFound(final S5BProxyRequest proxy) {
-		if (proxy != null) {
-			if (new HostAddress(proxy.getStreamHost().host).isValid()) {
-				addS5BProxy(proxy);
-				onDiscoveredProxiesChanged.emit();
-			}
-			else {
-				DomainNameAddressQuery resolveRequest = resolver_.createAddressQuery(proxy.getStreamHost().host);
-				resolveRequest.onResult.connect(new Slot2<Collection<HostAddress>, DomainNameResolveError>() {
-					@Override
-					public void call(Collection<HostAddress> c, DomainNameResolveError d) {
-						handleNameLookupResult(c, d, proxy);
-					}
-				});
-				resolveRequest.run();
-			}
-		}
-		else {
-			onDiscoveredProxiesChanged.emit();
-		}
-		proxyFinder_.stop();
-		proxyFinder_ = null;
+	
+    private void handleProxiesFound(Collection<? extends S5BProxyRequest> proxyHosts) {
+	    if (onProxiesFoundConnection != null) {
+	        onProxiesFoundConnection.disconnect();
+	        onProxiesFoundConnection = null;
+	    }
+	    for (final S5BProxyRequest proxy : proxyHosts) {
+	        if (proxy != null) {
+	            if (new HostAddress(proxy.getStreamHost().host).isValid()) {
+	                addS5BProxy(proxy);
+	                onDiscoveredProxiesChanged.emit();
+	            }
+	            else {
+	                DomainNameAddressQuery resolveRequest = resolver_.createAddressQuery(proxy.getStreamHost().host);
+	                resolveRequest.onResult.connect(new Slot2<Collection<HostAddress>, DomainNameResolveError>() {
+	                    @Override
+	                    public void call(Collection<HostAddress> c, DomainNameResolveError d) {
+	                        handleNameLookupResult(c, d, proxy);
+	                    }
+	                });
+	                resolveRequest.run();
+	            }
+	        }
+	    }
+	    proxyFinder_.stop();
+	    proxyFinder_ = null;
+	    if (proxyHosts.isEmpty()) {
+	        onDiscoveredProxiesChanged.emit();
+	    }
 	}
-
+	
 	private void handleNameLookupResult(final Collection<HostAddress> addresses, DomainNameResolveError error, S5BProxyRequest proxy) {
 		if (error != null) {
 			onDiscoveredProxiesChanged.emit();
@@ -215,7 +220,6 @@ public class SOCKS5BytestreamProxiesManager {
 		else {
 			if (addresses.isEmpty()) {
 				logger_.warning("S5B proxy hostname does not resolve.\n");
-				onDiscoveredProxiesChanged.emit();
 			}
 			else {
 				// generate proxy per returned address
@@ -226,18 +230,17 @@ public class SOCKS5BytestreamProxiesManager {
 					proxyForAddress.setStreamHost(streamHost);
 					addS5BProxy(proxyForAddress);
 				}
-				onDiscoveredProxiesChanged.emit();
 			}
+			onDiscoveredProxiesChanged.emit();
 		}
 	}
 
 	private void queryForProxies() {
 		proxyFinder_ = new SOCKS5BytestreamProxyFinder(serviceRoot_, iqRouter_);
-
-		proxyFinder_.onProxyFound.connect(new Slot1<S5BProxyRequest>() {
+		onProxiesFoundConnection = proxyFinder_.onProxiesFound.connect(new Slot1<List<S5BProxyRequest>>() {
 			@Override
-			public void call(S5BProxyRequest s) {
-				handleProxyFound(s);
+			public void call(List<S5BProxyRequest> s) {
+				handleProxiesFound(s);
 			}
 		});
 		proxyFinder_.start();

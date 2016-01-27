@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Isode Limited.
+ * Copyright (c) 2010-2015 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -12,6 +12,7 @@
 package com.isode.stroke.filetransfer;
 
 import com.isode.stroke.signals.Signal1;
+import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot2;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.jid.JID;
@@ -31,8 +32,9 @@ public class IBBSendSession {
 	private int sequenceNumber;
 	private boolean active;
 	private boolean waitingForData;
+	private SignalConnection currentRequestOnResponseConnection;
 
-	public IBBSendSession(final String id, final JID from, final JID to, ReadBytestream bytestream, IQRouter router) {
+    public IBBSendSession(final String id, final JID from, final JID to, ReadBytestream bytestream, IQRouter router) {
 		this.id = id; 
 		this.from = from; 
 		this.to = to; 
@@ -52,7 +54,7 @@ public class IBBSendSession {
 
 	public void start() {
 		IBBRequest request = IBBRequest.create(from, to, IBB.createIBBOpen(id, (int)(blockSize)), router);
-		request.onResponse.connect(new Slot2<IBB, ErrorPayload>() {
+		currentRequestOnResponseConnection = request.onResponse.connect(new Slot2<IBB, ErrorPayload>() {
 			@Override
 			public void call(IBB b, ErrorPayload e) {
 				handleIBBResponse(b, e);
@@ -65,6 +67,10 @@ public class IBBSendSession {
 	public void stop() {
 		if (active && router.isAvailable()) {
 			IBBRequest.create(from, to, IBB.createIBBClose(id), router).send();
+		}
+		if (currentRequestOnResponseConnection != null) {
+		    currentRequestOnResponseConnection.disconnect();
+		    currentRequestOnResponseConnection = null;
 		}
 		finish(null);
 	}
@@ -83,8 +89,11 @@ public class IBBSendSession {
 
 	public final Signal1<FileTransferError> onFinished = new Signal1<FileTransferError>();
 	public final Signal1<Integer> onBytesSent = new Signal1<Integer>();
-
-	private void handleIBBResponse(IBB ibb, ErrorPayload error) {
+    private void handleIBBResponse(IBB ibb, ErrorPayload error) {
+        if (currentRequestOnResponseConnection != null) {
+            currentRequestOnResponseConnection.disconnect();
+            currentRequestOnResponseConnection = null;
+        }
 		if (error == null && active) {
 			if (!bytestream.isFinished()) {
 				sendMoreData();

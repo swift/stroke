@@ -22,8 +22,11 @@ import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Signal1;
+
+import java.net.Inet6Address;
 import java.util.Vector;
 import java.util.logging.Logger;
+
 import com.isode.stroke.network.HostAddressPort;
 import com.isode.stroke.network.HostAddress;
 import com.isode.stroke.elements.JingleS5BTransportPayload;
@@ -172,7 +175,11 @@ public class LocalJingleTransportCandidateGenerator {
 			// get direct candidates
 			Vector<HostAddressPort> directCandidates = s5bServerManager.getHostAddressPorts();
 			for(HostAddressPort addressPort : directCandidates) {
-				JingleS5BTransportPayload.Candidate candidate = new JingleS5BTransportPayload.Candidate();
+				if (addressPort.getAddress().getInetAddress() instanceof Inet6Address
+				        && addressPort.getAddress().getInetAddress().isLinkLocalAddress()) {
+				    continue;
+				}
+			    JingleS5BTransportPayload.Candidate candidate = new JingleS5BTransportPayload.Candidate();
 				candidate.type = JingleS5BTransportPayload.Candidate.Type.DirectType;
 				candidate.jid = ownJID;
 				candidate.hostPort = addressPort;
