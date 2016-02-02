@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015 Isode Limited.
+ * Copyright (c) 2011-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -11,12 +11,12 @@
 
 package com.isode.stroke.elements;
 
-import com.isode.stroke.elements.Payload;
-import com.isode.stroke.jid.JID;
-import com.isode.stroke.base.NotNull;
 import java.util.Vector;
 
-public class UnblockPayload extends Payload {
+import com.isode.stroke.base.NotNull;
+import com.isode.stroke.jid.JID;
+
+public class UnblockPayload extends AbstractBlockPayload {
 
 	private Vector<JID> items = new Vector<JID>();
 
@@ -36,7 +36,8 @@ public class UnblockPayload extends Payload {
 	/**
 	* @param item, Not Null.
 	*/
-	public void addItem(JID item) {
+	@Override
+    public void addItem(JID item) {
 		NotNull.exceptIfNull(item, "item");
 		items.add(item);
 	}
@@ -44,7 +45,8 @@ public class UnblockPayload extends Payload {
 	/**
 	* @return items, Not Null.
 	*/
-	public Vector<JID> getItems() {
+	@Override
+    public Vector<JID> getItems() {
 		return items;
 	}
 }

@@ -8,7 +8,6 @@ import com.isode.stroke.parser.GenericPayloadParserFactory;
 import com.isode.stroke.parser.GenericPayloadParserFactory2;
 import com.isode.stroke.parser.PayloadParserFactory;
 import com.isode.stroke.parser.PayloadParserFactoryCollection;
-import com.isode.stroke.parser.payloadparsers.PubSubOwnerPubSubParser;
 
 public class FullPayloadParserFactoryCollection extends PayloadParserFactoryCollection {
     public FullPayloadParserFactoryCollection() {
@@ -33,9 +32,9 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
         addFactory(new GenericPayloadParserFactory<CapsInfoParser> ("c", "http://jabber.org/protocol/caps", CapsInfoParser.class));
         addFactory(new ResourceBindParserFactory());
         addFactory(new StartSessionParserFactory());
-        // addFactory(new GenericPayloadParserFactory<BlockParser<BlockPayload>("block", "urn:xmpp:blocking", BlockParser.class));
-        // addFactory(GenericPayloadParserFactory<BlockParser<BlockListPayload>("blocklist", "urn:xmpp:blocking", BlockParser.class));
-        // addFactory(GenericPayloadParserFactory<BlockParser<UnblockPayload>("unblock", "urn:xmpp:blocking", BlockParser.class));
+        addFactory(new GenericPayloadParserFactory<BlockBlockPayloadParser>("block", "urn:xmpp:blocking", BlockBlockPayloadParser.class));
+        addFactory(new GenericPayloadParserFactory<BlockBlockListPayloadParser>("blocklist", "urn:xmpp:blocking", BlockBlockListPayloadParser.class));
+        addFactory(new GenericPayloadParserFactory<BlockUnblockPayloadPaser>("unblock", "urn:xmpp:blocking", BlockUnblockPayloadPaser.class));
         addFactory(new SecurityLabelParserFactory());
         addFactory(new GenericPayloadParserFactory<SecurityLabelsCatalogParser>("catalog", "urn:xmpp:sec-label:catalog:2", SecurityLabelsCatalogParser.class));
         addFactory(new FormParserFactory());
