@@ -10,9 +10,7 @@ All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 -----
 Avatars:
 
-All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
-
-CombinedAvatarProviderTest -- Not Yet Ported!
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39
 
 -----
 Base:
