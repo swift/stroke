@@ -72,7 +72,6 @@ Elements:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
-IQTest  --  Not Yet Ported!
 WhiteBoard Functionalities -- Not Yet Ported!
 
 Individual Comments:
