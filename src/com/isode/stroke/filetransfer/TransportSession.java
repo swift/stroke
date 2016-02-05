@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 Isode Limited.
+ * Copyright (c) 2013-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -17,7 +17,7 @@ public abstract class TransportSession {
 
 	public abstract void start();
 	public abstract void stop();
-
+	
 	public final Signal1<Integer> onBytesSent = new Signal1<Integer>();
 	public final Signal1<FileTransferError> onFinished = new Signal1<FileTransferError>();
 }

@@ -82,8 +82,9 @@ Entity:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
-PayloadPersister -- Not Yet Ported!
-GenericPayloadPersister -- Not Yet Ported!
+Individual Comments:
+PayloadPersister and GenericPayloadPersister implemented as 
+GenericPayloadPersister and GenericPayloadLoader.
 
 -----
 EventLoop:
@@ -96,8 +97,10 @@ FileTransfer:
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
 Tests not yet ported.
-Incoming and Outgoing Jingle File Transfer unimplemented due to multiple inheritance.
-S5BTransportSession -- Incomplete.
+
+Individual Comments:
+Incoming and Outgoing Jingle File Transfer have been implemented 
+slightly differently to swiften due to multipe inheritance.
 
 -----
 IDN

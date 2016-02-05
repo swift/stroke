@@ -4,7 +4,7 @@
  * See Documentation/Licenses/BSD-simplified.txt for more information.
  */
 /*
- * Copyright (c) 2015 Isode Limited.
+ * Copyright (c) 2015 - 2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -33,7 +33,7 @@ import java.util.logging.Logger;
  * A session which has been connected to a SOCKS5 server (requester).
  *
  */
-public class SOCKS5BytestreamClientSession {
+public class SOCKS5BytestreamClientSession extends SOCKS5AbstractBytestreamSession {
 
 	public enum State {
 		Initial(0),
@@ -144,10 +144,6 @@ public class SOCKS5BytestreamClientSession {
 	}
 
 	public Signal1<Boolean /*error*/> onSessionReady = new Signal1<Boolean>();
-
-	public Signal1<FileTransferError> onFinished = new Signal1<FileTransferError>();
-	public Signal1<Integer> onBytesSent = new Signal1<Integer>();
-	//public boost::signal<void (size_t)> onBytesReceived;
 
 	private void process() {
 		logger_.fine("unprocessedData.size(): " + unprocessedData.getSize() + "\n");

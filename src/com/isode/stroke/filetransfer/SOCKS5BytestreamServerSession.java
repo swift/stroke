@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -20,9 +20,10 @@ import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.Signal;
 import com.isode.stroke.signals.Slot;
 import com.isode.stroke.signals.Slot1;
+
 import java.util.logging.Logger;
 
-public class SOCKS5BytestreamServerSession {
+public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSession  {
 
 	private Connection connection;
 	private SOCKS5BytestreamRegistry bytestreams;
@@ -116,9 +117,7 @@ public class SOCKS5BytestreamServerSession {
 		return connection.getLocalAddress();
 	}
 
-	public Signal1<FileTransferError> onFinished = new Signal1<FileTransferError>();
-	public Signal1<Long> onBytesSent = new Signal1<Long>();
-	// boost::signal<void (unsigned long long)> onBytesReceived;
+	
 
 	public String getStreamID() {
 		return streamID;
@@ -228,7 +227,7 @@ public class SOCKS5BytestreamServerSession {
 				SafeByteArray dataToSend = new SafeByteArray(readBytestream.read((chunkSize)));
 				if (!dataToSend.isEmpty()) {
 					connection.write(dataToSend);
-					onBytesSent.emit((long)dataToSend.getSize());
+					onBytesSent.emit(dataToSend.getSize());
 					waitingForData = false;
 				}
 				else {
