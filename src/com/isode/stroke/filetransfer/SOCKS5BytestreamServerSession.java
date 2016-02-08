@@ -15,6 +15,7 @@ import com.isode.stroke.network.Connection;
 import com.isode.stroke.network.HostAddressPort;
 import com.isode.stroke.base.ByteArray;
 import com.isode.stroke.base.SafeByteArray;
+import com.isode.stroke.base.StartStoppable;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.Signal;
@@ -23,11 +24,11 @@ import com.isode.stroke.signals.Slot1;
 
 import java.util.logging.Logger;
 
-public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSession  {
+public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSession implements StartStoppable  {
 
 	private Connection connection;
 	private SOCKS5BytestreamRegistry bytestreams;
-	private ByteArray unprocessedData;
+	private ByteArray unprocessedData = new ByteArray();
 	private State state;
 	private int chunkSize;
 	private String streamID = "";
@@ -131,8 +132,12 @@ public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSess
 
 		disconnectedConnection.disconnect();
 		dataReadConnection.disconnect();
-		dataWrittenConnection.disconnect();
-		dataAvailableConnection.disconnect();
+		if (dataWrittenConnection != null) {
+		    dataWrittenConnection.disconnect();
+		}
+		if (dataAvailableConnection != null) {
+		    dataAvailableConnection.disconnect();
+		}
 		readBytestream = null;
 		state = State.Finished;
 		if (error) {
@@ -180,10 +185,10 @@ public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSess
 					unprocessedData.clear();
 					streamID = requestID.toString();
 					boolean hasBytestream = bytestreams.hasBytestream(streamID);
-					SafeByteArray result = new SafeByteArray("0x05");
+					SafeByteArray result = new SafeByteArray((byte)0x05);
 					result.append(hasBytestream ? (byte)0x0 : (byte)0x4);
 					result.append(new ByteArray(new byte[]{0x00, 0x03}));
-					result.append(Integer.toString(requestID.getSize()));
+					result.append((byte)requestID.getSize());
 					result.append(requestID.append(new ByteArray(new byte[]{0x00, 0x00})));
 					if (!hasBytestream) {
 						logger_.fine("Readstream or Wrtiestream with ID " + streamID + " not found!\n");

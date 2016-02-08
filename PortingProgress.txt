@@ -94,13 +94,14 @@ All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 -----
 FileTransfer:
 
-All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
-
-Tests not yet ported.
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39
 
 Individual Comments:
 Incoming and Outgoing Jingle File Transfer have been implemented 
 slightly differently to swiften due to multipe inheritance.
+
+IncomingJingleFileTransferTest -- test_AcceptFailingS5BFallsBackToIBB test commented
+out in Swiften code this test is not run as it does not work in Swiften.
 
 -----
 IDN

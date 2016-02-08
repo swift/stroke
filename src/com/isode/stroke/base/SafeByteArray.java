@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015, Isode Limited, London, England.
+ * Copyright (c) 2011-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.base;
@@ -33,6 +33,14 @@ public class SafeByteArray extends ByteArray {
 	 */
 	public SafeByteArray(byte[] c) {
 		super(c);
+	}
+	
+	/**
+     * Constructs a new {@link SafeByteArray} containing the user supplied byte.
+     * @param b a byte.
+     */
+	public SafeByteArray(byte b) {
+	    super(b);
 	}
 
 	/**

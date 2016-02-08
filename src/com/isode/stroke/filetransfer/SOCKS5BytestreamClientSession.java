@@ -55,7 +55,7 @@ public class SOCKS5BytestreamClientSession extends SOCKS5AbstractBytestreamSessi
 
 	private State state;
 
-	private ByteArray unprocessedData;
+	private final ByteArray unprocessedData = new ByteArray();
 	private ByteArray authenticateAddress;
 
 	private int chunkSize;
@@ -227,12 +227,9 @@ public class SOCKS5BytestreamClientSession extends SOCKS5AbstractBytestreamSessi
 
 	private void authenticate() {
 		logger_.fine("\n");
-		SafeByteArray header = new SafeByteArray(new byte[]{0x05, 0x01, 0x00, 0x03});
-		SafeByteArray message = header;
-		String destinationlength = Integer.toString(destination.length());
-		message.append(new SafeByteArray(destinationlength));
-		authenticateAddress = new ByteArray(destination);
-		message.append(authenticateAddress);
+		SafeByteArray message = new SafeByteArray(new byte[]{0x05, 0x01, 0x00, 0x03});
+		message.append((byte)destination.length());
+		message.append(destination);
 		message.append(new SafeByteArray(new byte[]{0x00, 0x00})); // 2 byte for port
 		connection.write(message);
 		state = State.Authenticating;		
@@ -324,7 +321,9 @@ public class SOCKS5BytestreamClientSession extends SOCKS5AbstractBytestreamSessi
 
 	private void closeConnection() {
 		connectFinishedConnection.disconnect();
-		dataWrittenConnection.disconnect();
+		if (dataWrittenConnection != null) {
+		    dataWrittenConnection.disconnect();
+		}
 		dataReadConnection.disconnect();
 		disconnectedConnection.disconnect();
 		connection.disconnect();

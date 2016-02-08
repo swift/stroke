@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -10,6 +10,8 @@
  */
 
 package com.isode.stroke.filetransfer;
+
+import java.util.Arrays;
 
 import com.isode.stroke.base.ByteArray;
 
@@ -30,9 +32,9 @@ public class ByteArrayReadBytestream extends ReadBytestream {
 		if (position + readSize > data.getSize()) {
 			readSize = data.getSize() - position;
 		}
-		String s = data.toString();
-		s = s.substring(position, position+readSize);
-		ByteArray result = new ByteArray(s);
+		byte[] rawBytes = data.getData();
+		byte[] resultRawBytes = Arrays.copyOfRange(rawBytes, position, position+readSize);
+		ByteArray result = new ByteArray(resultRawBytes);
 
 		onRead.emit(result);
 		position += readSize;

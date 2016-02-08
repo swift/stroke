@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 /*
- * Copyright (c) 2010-2015, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.base;
@@ -59,6 +59,14 @@ public class ByteArray {
      * @param b another ByteArray; must not be null
      */
     public ByteArray(ByteArray b) {
+        append(b);
+    }
+    
+    /**
+     * Constructs a new {@link ByteArray} containing the user supplied byte.
+     * @param b a byte.
+     */
+    public ByteArray(byte b) {
         append(b);
     }
 

@@ -4,7 +4,7 @@
  * See Documentation/Licenses/BSD-simplified.txt for more information.
  */
 /*
- * Copyright (c) 2013-2015 Isode Limited.
+ * Copyright (c) 2013-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -100,6 +100,7 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 		this.idGenerator = idGenerator;
 		this.stream = stream;
 		this.fileInfo = fileInfo;
+		this.options = options;
 		this.session = session;
 		this.contentID = new JingleContentID(idGenerator.generateID(), JingleContentPayload.Creator.InitiatorCreator);
 		this.state = State.Initial;
