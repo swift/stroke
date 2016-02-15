@@ -133,7 +133,6 @@ Network:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
-BOSHConnection, BOSHConnectionPool, BOSHConnectionPoolTest, BOSHConnectionTest -- Not Yet Ported!
 DomainNameServiceQuery -- sortResults not Implemented.
 DomainNameServiceQueryTest -- Not Yet Ported!
 GConfProxyProvider, UnixProxyProvider, WindowsProxyProvider, MacOSXProxyProvider -- Not Yet Ported!
@@ -150,8 +149,7 @@ Parser:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
-BOSHBodyExtractor, BOSHBodyExtractorTest, ExpatParser, 
-IdleParserTest, LibXMLParser, WhiteboardParser -- Not Yet Ported!
+ExpatParser, IdleParserTest, LibXMLParser, WhiteboardParser -- Not Yet Ported!
 
 -----
 Presence:
