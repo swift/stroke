@@ -19,7 +19,7 @@ All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
  Algorithm, API, Atomic, boost_bsignals, BoostFilesystemVersion,
  BoostRandomGenerator, Concat, Debug, Error, foreach, format,
- Log, Override, Path, Paths, PathTest, Platform, RandomGenerator,
+ Log, Override, Path, Paths, PathTest, Platform,
  Regex, sleep, StartStopper, String, StringTest, WindowsRegistry -- Doesn't Need Porting.
 
 SafeAllocator -- Not Yet Ported!
@@ -133,8 +133,6 @@ Network:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
-DomainNameServiceQuery -- sortResults not Implemented.
-DomainNameServiceQueryTest -- Not Yet Ported!
 GConfProxyProvider, UnixProxyProvider, WindowsProxyProvider, MacOSXProxyProvider -- Not Yet Ported!
 NetworkEnvironment, SolarisNetworkEnvironment, UnixNetworkEnvironment, WindowsNetworkEnvironment -- Not Yet Ported!
 HTTPConnectProxiedConnectionTest -- Not Yet Ported!
