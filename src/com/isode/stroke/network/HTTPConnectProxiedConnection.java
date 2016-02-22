@@ -4,7 +4,7 @@
  * See Documentation/Licenses/BSD-simplified.txt for more information.
  */
 /*
- * Copyright (c) 2011-2015 Isode Limited.
+ * Copyright (c) 2011-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -19,6 +19,8 @@ package com.isode.stroke.network;
 import com.isode.stroke.base.SafeByteArray;
 import com.isode.stroke.stringcodecs.Base64;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -28,6 +30,7 @@ public class HTTPConnectProxiedConnection extends ProxiedConnection {
 	private SafeByteArray authPassword_;
 	private HTTPTrafficFilter trafficFilter_;
 	private StringBuffer httpResponseBuffer_ = new StringBuffer("");
+	private final List<Pair> nextHTTPRequestHeaders_ = new ArrayList<Pair>();
 
 	public static class Pair {
 		String a;
@@ -51,6 +54,8 @@ public class HTTPConnectProxiedConnection extends ProxiedConnection {
 	}
 
 	protected void initializeProxy() {
+	    httpResponseBuffer_.setLength(0);
+	    
 		StringBuffer connect = new StringBuffer();
 		connect.append("CONNECT ").append(getServer().getAddress().toString()).append(":").append(getServer().getPort()).append(" HTTP/1.1\r\n");
 		SafeByteArray data = new SafeByteArray(connect.toString());
@@ -62,8 +67,16 @@ public class HTTPConnectProxiedConnection extends ProxiedConnection {
 			data.append(Base64.encode(credentials));
 			data.append(new SafeByteArray("\r\n"));
 		}
+		else if (!nextHTTPRequestHeaders_.isEmpty()) {
+		    for (Pair headerField : nextHTTPRequestHeaders_) {
+		        data.append(headerField.a);
+		        data.append(": ");
+		        data.append(headerField.b);
+		        data.append("\r\n");
+		    }
+		    nextHTTPRequestHeaders_.clear();
+		}
 		data.append(new SafeByteArray("\r\n"));
-		//SWIFT_LOG(debug) << "HTTP Proxy send headers: " << byteArrayToString(ByteArray(data.begin(), data.end())) << std::endl;
 		write(data);
 	}
 
@@ -85,12 +98,12 @@ public class HTTPConnectProxiedConnection extends ProxiedConnection {
 		String statusLine = parseHTTPHeader(httpResponseBuffer_.substring(0, headerEnd), headerFields);
 
 		if (trafficFilter_ != null) {
-			Vector<Pair> newHeaderFields = trafficFilter_.filterHTTPResponseHeader(headerFields);
+			Vector<Pair> newHeaderFields = trafficFilter_.filterHTTPResponseHeader(statusLine, headerFields);
 			if (!newHeaderFields.isEmpty()) {
-				StringBuffer statusLines = new StringBuffer();
-				statusLines.append("CONNECT ").append(getServer().getAddress().toString()).append(":").append(getServer().getPort());
-				sendHTTPRequest(statusLines.toString(), newHeaderFields);
-				return;
+	            reconnect();
+	            nextHTTPRequestHeaders_.clear();
+	            nextHTTPRequestHeaders_.addAll(newHeaderFields);
+	            return;
 			}
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015 Isode Limited.
+ * Copyright (c) 2012-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -27,8 +27,8 @@ public abstract class ProxiedConnection extends Connection {
 	private HostAddressPort server_;
 	private Connector connector_;
 	private Connection connection_;
-	private SignalConnection onDataReadConnection;
-	private SignalConnection onDisconnectedConnection;
+	private SignalConnection onDataReadConnection_;
+	private SignalConnection onDisconnectedConnection_;
 	private SignalConnection onConnectFinishedConnection;
 
 	public ProxiedConnection(DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory, final String proxyHost, int proxyPort) {
@@ -45,8 +45,8 @@ public abstract class ProxiedConnection extends Connection {
 		try {
 			cancelConnector();
 			if (connection_ != null) {
-				onDataReadConnection.disconnect();
-				onDisconnectedConnection.disconnect();
+				onDataReadConnection_.disconnect();
+				onDisconnectedConnection_.disconnect();
 			}
 			if (connected_) {
 				System.err.println("Warning: Connection was still established.");
@@ -147,4 +147,20 @@ public abstract class ProxiedConnection extends Connection {
 	protected HostAddressPort getServer() {
 		return server_;
 	}
+	
+	protected void reconnect() {
+	    if (onDataReadConnection_ != null) {
+	        onDataReadConnection_.disconnect();
+	        onDataReadConnection_ = null;
+	    }
+	    if (onDisconnectedConnection_ != null) {
+	        onDisconnectedConnection_.disconnect();
+	        onDisconnectedConnection_ = null;
+	    }
+	    if (connected_) {
+	        connection_.disconnect();
+	    }
+	    connect(server_);
+	}
+	
 }

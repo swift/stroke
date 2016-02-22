@@ -133,14 +133,22 @@ Network:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
-GConfProxyProvider, UnixProxyProvider, WindowsProxyProvider, MacOSXProxyProvider -- Not Yet Ported!
-NetworkEnvironment, SolarisNetworkEnvironment, UnixNetworkEnvironment, WindowsNetworkEnvironment -- Not Yet Ported!
-HTTPConnectProxiedConnectionTest -- Not Yet Ported!
-HostNameOrAddress -- Not Yet Ported!
-PlatformNATTraversalWorker, MiniUPnPInterface, NATPMPInterface -- Not Yet Ported!
-PlatformDomainNameAddressQuery -- Not Yet Ported!
-PlatformDomainNameServiceQuery -- Constructor needs change.
-UnboundDomainNameResolver -- Not Yet Ported!
+GConfProxyProvider, UnixProxyProvider, WindowsProxyProvider, MacOSXProxyProvider
+-- No need to port.  We already have a JavaProxyProvider.
+
+SolarisNetworkEnvironment, UnixNetworkEnvironment, WindowsNetworkEnvironment, PlatformNATTraversalWorker 
+-- No need to port.  A JavaNetworkEnviroment has been implemented.
+
+HostNameOrAddress -- No need to port. Just a utiltity method to allow .toString to be called on something
+that is either HostName or a String.  We can do this in java with Object.toString().
+
+MiniUPnPInterface, NATPMPInterface -- Not yet ported. These are difficult to import, we are using libminiupnpc which we do not have
+a java equivalent for?
+
+PlatformDomainNameServiceQuery -- Constructor needs change.  Swiften version has an extra field required in constructor that is used
+for swiften implementation but not in stroke so this is not needed.
+
+UnboundDomainNameResolver -- Not yet ported, uses unbound Library which we do not have a java equivalent for?  
 
 -----
 Parser:
