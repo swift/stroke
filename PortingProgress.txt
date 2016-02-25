@@ -172,9 +172,7 @@ All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 -----
 Queries
 
-All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
-
-PubSubParser -- Not Yet Ported!
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 
 -----
 Roster:
@@ -199,9 +197,7 @@ WhiteboardSerializer -- Not Yet Ported! Needs whiteboard classes importing.
 -----
 Session:
 
-All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
-
-BOSHSessionStream -- Not Yet Ported!!
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 
 -----
 StreamManagement:
