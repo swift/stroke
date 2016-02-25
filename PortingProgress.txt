@@ -155,7 +155,9 @@ Parser:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
-ExpatParser, IdleParserTest, LibXMLParser, WhiteboardParser -- Not Yet Ported!
+ExpatParser -- Not yet ported.  Requires expact library.
+LibXMLParser -- Not yet ported.  Requires libxml library. 
+WhiteboardParser -- Not Yet Ported! Needs Whiteboard classes importing.
 
 -----
 Presence:
@@ -192,7 +194,7 @@ Serializer:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
-WhiteboardSerializer, XMPPSerializerTest, IdleSerializerTest -- Not Yet Ported!
+WhiteboardSerializer -- Not Yet Ported! Needs whiteboard classes importing.
 
 -----
 Session:
