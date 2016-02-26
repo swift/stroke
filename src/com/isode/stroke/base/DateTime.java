@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2015, Isode Limited, London, England.
+ * Copyright (c) 2014-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 
@@ -27,6 +27,6 @@ public class DateTime {
         parser.setTimeZone(TimeZone.getTimeZone("UTC"));
         return parser.format(date);
     }
-
-    static private String format = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+    
+    static private String format = "yyyy-MM-dd'T'HH:mm:ssXXX";
 }

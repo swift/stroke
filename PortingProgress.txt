@@ -22,8 +22,9 @@ All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
  Log, Override, Path, Paths, PathTest, Platform,
  Regex, sleep, StartStopper, String, StringTest, WindowsRegistry -- Doesn't Need Porting.
 
-SafeAllocator -- Not Yet Ported!
-DateTimeTest -- Not Yet Ported!
+SafeAllocator -- Not Ported! Class for memory allocation which is not needed in java.
+DateTimeTest -- Did not port testDateTimeToLocalStringNotThrowingException, as we are not implementing
+DateTime.dateToLocalString in java.
 
 Individual Comments:
 StartStopper  --  StartStoppable interface added.
@@ -219,8 +220,8 @@ TLS:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
-PlatformTLSFactories -- Still needs implementing a CertificateFactory.
-TLSContextFactory -- Two methods unimplemented and will also affect JSSEContextFactory.
+TLSContextFactory -- Two methods unimplemented and will also affect JSSEContextFactory.  These methods are not
+supported in java.
 
 -----
 VCards:

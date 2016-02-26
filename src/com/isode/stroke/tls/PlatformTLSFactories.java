@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2013 Isode Limited, London, England.
+ * Copyright (c) 2012-2016 Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -11,14 +11,14 @@ package com.isode.stroke.tls;
 import com.isode.stroke.tls.java.JSSEContextFactory;
 
 public class PlatformTLSFactories {
-    private JSSEContextFactory contextFactory = new JSSEContextFactory();
+    private final JSSEContextFactory contextFactory = new JSSEContextFactory();
+    private final CertificateFactory certificateFactory = new JavaCertificateFactory();
     
     public TLSContextFactory getTLSContextFactory() {        
         return contextFactory;
     }
 
     public CertificateFactory getCertificateFactory() {
-        /*FIXME: Implement*/
-        return null;
+        return certificateFactory;
     }
 }
