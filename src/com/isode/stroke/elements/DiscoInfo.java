@@ -3,7 +3,7 @@
  * All rights reserved.
  */
 /*
- * Copyright (c) 2010-2015, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.elements;
@@ -33,6 +33,7 @@ public class DiscoInfo extends Payload {
     public static final String JingleTransportsS5BFeature = "urn:xmpp:jingle:transports:s5b:1";
     public static final String Bytestream = "http://jabber.org/protocol/bytestreams";
     public static final String MessageDeliveryReceiptsFeature = "urn:xmpp:receipts";
+    public static final String WhiteboardFeature = "http://swift.im/whiteboard";
 
     public static class Identity implements Comparable<Identity> {
         private final String name_;

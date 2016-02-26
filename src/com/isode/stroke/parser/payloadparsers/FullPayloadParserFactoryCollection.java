@@ -64,7 +64,7 @@ public class FullPayloadParserFactoryCollection extends PayloadParserFactoryColl
         addFactory(new GenericPayloadParserFactory<JingleFileTransferFileInfoParser>("file", JingleFileTransferFileInfoParser.class));
         addFactory(new GenericPayloadParserFactory<JingleFileTransferHashParser>("checksum", JingleFileTransferHashParser.class));
         addFactory(new GenericPayloadParserFactory<S5BProxyRequestParser>("query", "http://jabber.org/protocol/bytestreams",S5BProxyRequestParser.class));
-        // addFactory(new GenericPayloadParserFactory<WhiteboardParser>("wb","http://swift.im/whiteboard",WhiteboardParser.class));
+        addFactory(new GenericPayloadParserFactory<WhiteboardParser>("wb","http://swift.im/whiteboard",WhiteboardParser.class));
         addFactory(new GenericPayloadParserFactory<UserLocationParser>("geoloc", "http://jabber.org/protocol/geoloc", UserLocationParser.class));
         addFactory(new GenericPayloadParserFactory<UserTuneParser>("tune", "http://jabber.org/protocol/tune", UserTuneParser.class));
         addFactory(new DeliveryReceiptParserFactory());

@@ -1,6 +1,6 @@
 Porting Progress from Swiften to Stroke.
 This file indicates the porting progress from Swiften Library to Stroke. It indicates, upto which HEAD changes are ported to Stroke. Also indicates any remarks associated with it.
-To Be Ported: history, linklocal, WhiteBoard.
+To Be Ported: history, linklocal.
 
 -----
 Adhoc:
@@ -72,8 +72,6 @@ All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 Elements:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
-
-WhiteBoard Functionalities -- Not Yet Ported!
 
 Individual Comments:
 ToplevelElement -- Not Required in Stroke.Element does the work!
@@ -157,8 +155,7 @@ Parser:
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
 
 ExpatParser -- Not yet ported.  Requires expact library.
-LibXMLParser -- Not yet ported.  Requires libxml library. 
-WhiteboardParser -- Not Yet Ported! Needs Whiteboard classes importing.
+LibXMLParser -- Not yet ported.  Requires libxml library.
 
 -----
 Presence:
@@ -191,9 +188,7 @@ Windows Authenticator not needed!
 -----
 Serializer:
 
-All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39 except for:
-
-WhiteboardSerializer -- Not Yet Ported! Needs whiteboard classes importing.
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
 
 -----
 Session:
@@ -225,5 +220,10 @@ supported in java.
 
 -----
 VCards:
+
+All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
+
+-----
+Whiteboard:
 
 All files ported to 6ca201d0b48f4273e24dd7bff17c4a46eeaddf39.
