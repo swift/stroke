@@ -19,11 +19,6 @@ import java.util.TimeZone;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * @author ac
- * @since 16.5
- *
- */
 public class DateTimeTest {
 
     private final SimpleDateFormat isoFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
@@ -51,6 +46,14 @@ public class DateTimeTest {
     public void testDateTimeToString() {
         Date time = DateTime.stringToDate("1969-07-20T21:56:15-05:00");
         assertEquals("1969-07-21T02:56:15Z", DateTime.dateToString(time));
+    }
+    
+    @Test
+    public void testDatePreEpochToString() {
+        // In Swiften this returns empty string due to pre 1970 dates sometimes
+        // throwing an error.  This is not a problem in java.
+        Date time = DateTime.stringToDate("1954-07-20T21:56:15-05:00");
+        assertEquals("1954-07-21T02:56:15Z", DateTime.dateToString(time));
     }
     
 }
