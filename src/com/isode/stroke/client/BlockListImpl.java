@@ -39,19 +39,19 @@ public class BlockListImpl extends BlockList {
 		return items;
 	}
 
-	public void setItems(final Vector<JID> items) {
-		for (final JID jid : this.items) {
-			if(items.contains(jid)) {
-				onItemRemoved.emit(jid);
-			}
-		}
+	public void setItems(final Vector<JID> newItems) {
+	    for (final JID jid : items) {
+	        if(!newItems.contains(jid)) {
+	            onItemRemoved.emit(jid);
+	        }
+	    }
 
-		for (final JID jid : items) {
-			if(this.items.contains(jid)) {
-				onItemAdded.emit(jid);
-			}
-		}
-		this.items = items;
+	    for (final JID jid : newItems) {
+	        if(!this.items.contains(jid)) {
+	            onItemAdded.emit(jid);
+	        }
+	    }
+	    this.items = newItems;
 	}
 
 	public void addItem(final JID item) {
