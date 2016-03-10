@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2013 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -155,14 +155,12 @@ public class VCardManagerTest {
 
 	@Test
 	public void testRequest_Error() {
-		VCardManager testling = createManager();
-		testling.requestVCard(new JID("foo@bar.com/baz"));
-		stanzaChannel.onIQReceived.emit(IQ.createError(new JID("baz@fum.com/foo"), stanzaChannel.sentStanzas.get(0).getTo(), stanzaChannel.sentStanzas.get(0).getID()));
+	    VCardManager testling = createManager();
+	    testling.requestVCard(new JID("foo@bar.com/baz"));
+	    stanzaChannel.onIQReceived.emit(IQ.createError(new JID("baz@fum.com/foo"), stanzaChannel.sentStanzas.get(0).getTo(), stanzaChannel.sentStanzas.get(0).getID()));
 
-		assertEquals(1, (changes.size()));
-		assertEquals(new JID("foo@bar.com/baz"), changes.get(0).jid);
-		assertEquals((""), changes.get(0).vcard.getFullName());
-		assertEquals((""), vcardStorage.getVCard(new JID("foo@bar.com/baz")).getFullName());
+	    // On error, cached vCards should not be changed
+	    assertEquals(0,changes.size());
 	}
 
 	@Test

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.vcards;
@@ -82,14 +82,15 @@ public class VCardManager {
         requestVCard(new JID());
     }
 
-
     private void handleVCardReceived(final JID actualJID, VCard vcard, ErrorPayload error) {
-        if (error != null || vcard == null) {
-            vcard = new VCard();
+        if (error == null) {
+            if (vcard == null) {
+                vcard = new VCard();
+            }
+            requestedVCards.remove(actualJID);
+            JID jid = actualJID.isValid() ? actualJID : ownJID.toBare();
+            setVCard(jid, vcard);
         }
-        requestedVCards.remove(actualJID);
-        JID jid = actualJID.isValid() ? actualJID : ownJID.toBare();
-        setVCard(jid, vcard);
     }
 
     public SetVCardRequest createSetVCardRequest(final VCard vcard) {
