@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -23,9 +23,13 @@ import com.isode.stroke.signals.Slot2;
 import com.isode.stroke.signals.Signal2;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.base.NotNull;
+
 import java.util.logging.Logger;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+
 import com.isode.stroke.base.NotNull;
 
 /**
@@ -46,8 +50,18 @@ public class DiscoServiceWalker {
 	private SignalConnection onServiceFoundConnection;
 	private SignalConnection onWalkAbortedConnection;
 	private SignalConnection onWalkCompleteConnection;
-	private SignalConnection onResponseDiscoInfoConnection;
-	private SignalConnection onResponseDiscoItemsConnection;
+	
+	/**
+	 * The discoInfo.onResponse connections for each GetDiscoInfoRequest
+	 */
+	private Map<GetDiscoInfoRequest,SignalConnection> onResponseDiscoInfoConnections =
+	        new HashMap<GetDiscoInfoRequest,SignalConnection>();
+	
+	/**
+	 * The discoItems.onResponse connections for each GetDiscoItemsRequest
+	 */
+	private Map<GetDiscoItemsRequest,SignalConnection> onResponseDiscoItemsConnections =
+	        new HashMap<GetDiscoItemsRequest,SignalConnection>();
 
 	/** Emitted for each service found. */
 	public final Signal2<JID, DiscoInfo> onServiceFound = new Signal2<JID, DiscoInfo>();
@@ -99,17 +113,19 @@ public class DiscoServiceWalker {
 	 * End the walk.
 	 */
 	public void endWalk() {
-		if (active_) {
-			logger_.fine("Ending walk to" + service_ + "\n");
-			for (GetDiscoInfoRequest request : pendingDiscoInfoRequests_) {
-				onResponseDiscoInfoConnection.disconnect();
-			}
-			for (GetDiscoItemsRequest request : pendingDiscoItemsRequests_) {
-				onResponseDiscoItemsConnection.disconnect();
-			}
-			active_ = false;
-			onWalkAborted.emit();
-		}		
+	    if (active_) {
+	        logger_.fine("Ending walk to" + service_ + "\n");
+	        for (SignalConnection discoInfoConnection : onResponseDiscoInfoConnections.values()) {
+	            discoInfoConnection.disconnect();
+	        }
+	        onResponseDiscoInfoConnections.clear();
+	        for (SignalConnection discoItemsConnection : onResponseDiscoItemsConnections.values()) {
+	            discoItemsConnection.disconnect();
+	        }
+	        onResponseDiscoItemsConnections.clear();
+	        active_ = false;
+	        onWalkAborted.emit();
+	    }		
 	}
 
 	public boolean isActive() {
@@ -121,13 +137,14 @@ public class DiscoServiceWalker {
 		servicesBeingSearched_.add(jid);
 		searchedServices_.add(jid);
 		final GetDiscoInfoRequest discoInfoRequest = GetDiscoInfoRequest.create(jid, iqRouter_);
-		onResponseDiscoInfoConnection = discoInfoRequest.onResponse.connect(new Slot2<DiscoInfo, ErrorPayload>() {
+		SignalConnection connection = discoInfoRequest.onResponse.connect(new Slot2<DiscoInfo, ErrorPayload>() {
 
 			@Override
 			public void call(DiscoInfo info, ErrorPayload error) {
 				handleDiscoInfoResponse(info, error, discoInfoRequest);
 			}
 		});
+		onResponseDiscoInfoConnections.put(discoInfoRequest, connection);
 		pendingDiscoInfoRequests_.add(discoInfoRequest);
 		discoInfoRequest.send();
 	}
@@ -155,6 +172,10 @@ public class DiscoServiceWalker {
 
 		logger_.fine("Disco info response from " + request.getReceiver() + "\n");
 
+		
+		SignalConnection connection = onResponseDiscoInfoConnections.remove(request);
+		connection.disconnect();
+		
 		pendingDiscoInfoRequests_.remove(request);
 		if (error != null) {
 			handleDiscoError(request.getReceiver(), error);
@@ -170,13 +191,14 @@ public class DiscoServiceWalker {
 		boolean completed = false;
 		if (couldContainServices) {
 			final GetDiscoItemsRequest discoItemsRequest = GetDiscoItemsRequest.create(request.getReceiver(), iqRouter_);
-			onResponseDiscoItemsConnection = discoItemsRequest.onResponse.connect(new Slot2<DiscoItems, ErrorPayload>() {
+			SignalConnection discoItemsConnection = discoItemsRequest.onResponse.connect(new Slot2<DiscoItems, ErrorPayload>() {
 
 				@Override
 				public void call(DiscoItems item, ErrorPayload error) {
 					handleDiscoItemsResponse(item, error, discoItemsRequest);
 				}
 			});
+			onResponseDiscoItemsConnections.put(discoItemsRequest, discoItemsConnection);
 			pendingDiscoItemsRequests_.add(discoItemsRequest);
 			discoItemsRequest.send();
 		} else {
@@ -189,29 +211,33 @@ public class DiscoServiceWalker {
 	}
 
 	private void handleDiscoItemsResponse(DiscoItems items, ErrorPayload error, GetDiscoItemsRequest request) {
-		/* If we got canceled, don't do anything */
-		if (!active_) {
-			return;
-		}
+	    /* If we got canceled, don't do anything */
+	    if (!active_) {
+	        return;
+	    }
 
-		logger_.fine("Received disco items from " + request.getReceiver() + "\n");
-		pendingDiscoItemsRequests_.remove(request);
-		if (error != null) {
-			handleDiscoError(request.getReceiver(), error);
-			return;
-		}
-		for (DiscoItems.Item item : items.getItems()) {
-			if (item.getNode().isEmpty()) {
-				/* Don't look at noded items. It's possible that this will exclude some services,
-				 * but I've never seen one in the wild, and it's an easy fix for not looping.
-				 */
-				if(!searchedServices_.contains(item.getJID())) {
-					logger_.fine("Received disco item " + item.getJID() + "\n");
-					walkNode(item.getJID());
-				}
-			}
-		}
-		markNodeCompleted(request.getReceiver());
+	    logger_.fine("Received disco items from " + request.getReceiver() + "\n");
+
+	    SignalConnection connection = onResponseDiscoItemsConnections.remove(request);
+	    connection.disconnect();
+
+	    pendingDiscoItemsRequests_.remove(request);
+	    if (error != null) {
+	        handleDiscoError(request.getReceiver(), error);
+	        return;
+	    }
+	    for (DiscoItems.Item item : items.getItems()) {
+	        if (item.getNode().isEmpty()) {
+	            /* Don't look at noded items. It's possible that this will exclude some services,
+	             * but I've never seen one in the wild, and it's an easy fix for not looping.
+	             */
+	            if(!searchedServices_.contains(item.getJID())) {
+	                logger_.fine("Received disco item " + item.getJID() + "\n");
+	                walkNode(item.getJID());
+	            }
+	        }
+	    }
+	    markNodeCompleted(request.getReceiver());
 	}
 
 	private void handleDiscoError(JID jid, ErrorPayload error) {
