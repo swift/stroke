@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.presence;
@@ -13,6 +13,7 @@ import com.isode.stroke.client.StanzaChannel;
 import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.StatusShow;
 import com.isode.stroke.jid.JID;
+import com.isode.stroke.roster.XMPPRoster;
 import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot1;
@@ -22,29 +23,41 @@ public class PresenceOracle {
 	private final StanzaChannel stanzaChannel_;
 	private final SignalConnection onPresenceReceivedSignal;
 	private final SignalConnection onAvailableChangedSignal;
+	private final XMPPRoster xmppRoster_;
 
 
 	public final Signal1<Presence> onPresenceChange = new Signal1<Presence>();
+    private final SignalConnection onJIDRemovedConnection;
 
-	public PresenceOracle(StanzaChannel stanzaChannel) {
-		stanzaChannel_ = stanzaChannel;
-		onPresenceReceivedSignal = stanzaChannel_.onPresenceReceived.connect(new Slot1<Presence>() {
-				@Override
-				public void call(Presence p1) {
-					handleIncomingPresence(p1);
-				}
-			});
-		onAvailableChangedSignal = stanzaChannel_.onAvailableChanged.connect(new Slot1<Boolean>() {
-				@Override
-				public void call(Boolean p1) {
-					handleStanzaChannelAvailableChanged(p1);
-				}
-			});
+	public PresenceOracle(StanzaChannel stanzaChannel, XMPPRoster xmppRoster) {
+	    stanzaChannel_ = stanzaChannel;
+	    xmppRoster_ = xmppRoster;
+	    onPresenceReceivedSignal = stanzaChannel_.onPresenceReceived.connect(new Slot1<Presence>() {
+	        @Override
+	        public void call(Presence p1) {
+	            handleIncomingPresence(p1);
+	        }
+	    });
+	    onAvailableChangedSignal = stanzaChannel_.onAvailableChanged.connect(new Slot1<Boolean>() {
+	        @Override
+	        public void call(Boolean p1) {
+	            handleStanzaChannelAvailableChanged(p1);
+	        }
+	    });
+	    onJIDRemovedConnection = xmppRoster_.onJIDRemoved.connect(new Slot1<JID>() {
+
+	        @Override
+	        public void call(JID removedJID) {
+	            handleJIDRemoved(removedJID);
+	        }
+
+	    });
 	}
 
 	void delete() {
 		onPresenceReceivedSignal.disconnect();
 		onAvailableChangedSignal.disconnect();
+		onJIDRemovedConnection.disconnect();
 	}
 
 	void handleStanzaChannelAvailableChanged(boolean available) {
@@ -84,6 +97,21 @@ public class PresenceOracle {
 			entries_.put(bareJID, jidMap);
 			onPresenceChange.emit(passedPresence);
 		}
+	}
+	
+	private void handleJIDRemoved(JID removedJID) {
+	    // 3921bis says that we don't follow up with an unavailable, so simulate this ourselves
+	    Presence unavailablePresence = new Presence();
+	    unavailablePresence.setType(Presence.Type.Unavailable);
+	    unavailablePresence.setFrom(removedJID);
+
+	    if (entries_.containsKey(removedJID.toBare())) {
+	        Map<JID,Presence> presenceMap = entries_.get(removedJID.toBare());
+	        presenceMap.clear();
+	        presenceMap.put(removedJID, unavailablePresence);
+	    }
+
+	    onPresenceChange.emit(unavailablePresence);
 	}
 
 	public Presence getLastPresence(final JID jid) {

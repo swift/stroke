@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -16,8 +16,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 import org.junit.Before;
+
 import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.Payload;
 import com.isode.stroke.client.DummyStanzaChannel;
@@ -27,10 +29,13 @@ import com.isode.stroke.presence.PayloadAddingPresenceSender;
 import com.isode.stroke.presence.PresenceOracle;
 import com.isode.stroke.presence.SubscriptionManager;
 import com.isode.stroke.jid.JID;
+import com.isode.stroke.roster.XMPPRoster;
+import com.isode.stroke.roster.XMPPRosterImpl;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot2;
 import com.isode.stroke.signals.Slot3;
 import com.isode.stroke.signals.Slot1;
+
 import java.util.Collection;
 import java.util.Vector;
 
@@ -49,6 +54,7 @@ public class PresenceOracleTest {
 	private PresenceOracle oracle_;
 	private SubscriptionManager subscriptionManager_;
 	private DummyStanzaChannel stanzaChannel_;
+	private XMPPRoster xmppRoster_;
 	private Collection<Presence> changes = new Vector<Presence>();
 	private Collection<SubscriptionRequestInfo> subscriptionRequests = new Vector<SubscriptionRequestInfo>();
 	private JID user1;
@@ -89,7 +95,8 @@ public class PresenceOracleTest {
 	@Before
 	public void setUp() {
 		stanzaChannel_ = new DummyStanzaChannel();
-		oracle_ = new PresenceOracle(stanzaChannel_);
+		xmppRoster_ = new XMPPRosterImpl();
+		oracle_ = new PresenceOracle(stanzaChannel_,xmppRoster_);
 		oracle_.onPresenceChange.connect(new Slot1<Presence>() {
 			@Override
 			public void call(Presence p) {

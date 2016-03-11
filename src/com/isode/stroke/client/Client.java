@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.client;
@@ -101,7 +101,7 @@ public class Client extends CoreClient {
 
     	subscriptionManager = new SubscriptionManager(getStanzaChannel());
     	
-    	presenceOracle = new PresenceOracle(getStanzaChannel());
+    	presenceOracle = new PresenceOracle(getStanzaChannel(),roster);
     	presenceOracle.onPresenceChange.connect(onPresenceChange);
 
         stanzaChannelPresenceSender = new StanzaChannelPresenceSender(getStanzaChannel());
