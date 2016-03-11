@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -69,7 +69,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 
 	private JingleContentPayload initialContent;
 	private CryptoProvider crypto;
-	private State state;
+	private State internalState;
 	private JingleFileTransferDescription description;
 	private WriteBytestream stream;
 	private long receivedBytes;
@@ -93,7 +93,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 		super(session, toJID, transporterFactory);
 		this.initialContent = content;
 		this.crypto = crypto;
-		this.state = State.Initial;
+		this.internalState = State.Initial;
 		this. receivedBytes = 0;
 		this.hashCalculator = null;
 		this.description = initialContent.getDescription(new JingleFileTransferDescription());
@@ -125,7 +125,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 	@Override
 	public void accept(WriteBytestream stream, final FileTransferOptions options) {
 		logger_.fine("\n");
-		if (!State.Initial.equals(state)) { logger_.warning("Incorrect state \n"); return; }
+		if (!State.Initial.equals(internalState)) { logger_.warning("Incorrect state \n"); return; }
 
 		assert(this.stream == null);
 		this.stream = stream;
@@ -147,7 +147,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 			logger_.fine("Got S5B transport as initial payload.\n");
 			setTransporter(transporterFactory.createResponderTransporter(getInitiator(), getResponder(), s5bTransport.getSessionID(), options));
 			transporter.addRemoteCandidates(s5bTransport.getCandidates(), s5bTransport.getDstAddr());
-			setState(State.GeneratingInitialLocalCandidates);
+			setInternalState(State.GeneratingInitialLocalCandidates);
 			transporter.startGeneratingLocalCandidates();
 		}
 		else if(initialContent.getTransport(new JingleIBBTransportPayload()) != null) {
@@ -187,14 +187,14 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 	@Override
 	public void cancel() {
 		logger_.fine("\n");
-		terminate(State.Initial.equals(state) ? JinglePayload.Reason.Type.Decline : JinglePayload.Reason.Type.Cancel);
+		terminate(State.Initial.equals(internalState) ? JinglePayload.Reason.Type.Decline : JinglePayload.Reason.Type.Cancel);
 	}
 
 	protected void startTransferViaRemoteCandidate() {
 		logger_.fine("\n");
 
 		if (JingleS5BTransportPayload.Candidate.Type.ProxyType.equals(ourCandidateChoice.type)) {
-			setState(State.WaitingForPeerProxyActivate);
+			setInternalState(State.WaitingForPeerProxyActivate);
 		} 
 		else {
 			startTransferring(createRemoteCandidateSession());
@@ -205,7 +205,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 		logger_.fine("\n");
 
 		if (JingleS5BTransportPayload.Candidate.Type.ProxyType.equals(theirCandidateChoice.type)) {
-			setState(State.WaitingForLocalProxyActivate);
+			setInternalState(State.WaitingForLocalProxyActivate);
 			transporter.startActivatingProxy(theirCandidateChoice.jid);
 		} 
 		else {
@@ -224,11 +224,11 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 	}
 
 	protected void stopAll() {
-		if (!State.Initial.equals(state)) {
+		if (!State.Initial.equals(internalState)) {
 			writeStreamDataReceivedConnection.disconnect();
 			hashCalculator = null;
 		}
-		switch (state) {
+		switch (internalState) {
 			case Initial: break;
 			case GeneratingInitialLocalCandidates: transporter.stopGeneratingLocalCandidates(); break;
 			case TryingCandidates: transporter.stopTryingRemoteCandidates(); break;
@@ -244,20 +244,25 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 				break;
 			case Finished: logger_.warning("Already finished\n"); break;
 		}
-		if (!State.Initial.equals(state)) {
+		if (!State.Initial.equals(internalState)) {
 			removeTransporter();
 		}
 	}
 
-	protected void setState(State state) {
+	protected void setInternalState(State state) {
 		logger_.fine(state + "\n");
-		this.state = state;
+		this.internalState = state;
 		onStateChanged.emit(new FileTransfer.State(getExternalState(state)));
+	}
+	
+	@Override
+	public com.isode.stroke.filetransfer.FileTransfer.State getState() {
+	    return new FileTransfer.State(getExternalState(internalState));
 	}
 
 	protected void setFinishedState(FileTransfer.State.Type type, final FileTransferError error) {
 		logger_.fine("\n");
-		this.state = State.Finished;
+		this.internalState = State.Finished;
 		onStateChanged.emit(new FileTransfer.State(type));
 		onFinished.emit(error);
 	}
@@ -283,7 +288,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 	}
 
 	protected void fallback() {
-		setState(State.WaitingForFallbackOrTerminate);
+		setInternalState(State.WaitingForFallbackOrTerminate);
 	}
 
 	protected void startTransferring(TransportSession transportSession) {
@@ -296,20 +301,20 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 				handleTransferFinished(e);
 			}
 		});
-		setState(State.Transferring);
+		setInternalState(State.Transferring);
 		transportSession.start();
 	}
 
 	protected boolean isWaitingForPeerProxyActivate() {
-		return State.WaitingForPeerProxyActivate.equals(state);
+		return State.WaitingForPeerProxyActivate.equals(internalState);
 	}
 
 	protected boolean isWaitingForLocalProxyActivate() {
-		return State.WaitingForLocalProxyActivate.equals(state);
+		return State.WaitingForLocalProxyActivate.equals(internalState);
 	}
 
 	protected boolean isTryingCandidates() {
-		return State.TryingCandidates.equals(state);
+		return State.TryingCandidates.equals(internalState);
 	}
 
 	protected TransportSession createLocalCandidateSession() {
@@ -323,7 +328,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 	protected void terminate(JinglePayload.Reason.Type reason) {
 		logger_.fine(reason + "\n");
 
-		if (!State.Finished.equals(state)) {
+		if (!State.Finished.equals(internalState)) {
 			session.sendTerminate(reason);
 		}
 		stopAll();
@@ -344,9 +349,9 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 
 	public void handleSessionTerminateReceived(JinglePayload.Reason reason) {
 		logger_.fine("\n");
-		if (State.Finished.equals(state)) { logger_.warning("Incorrect state\n"); return; }
+		if (State.Finished.equals(internalState)) { logger_.warning("Incorrect state\n"); return; }
 
-		if (State.Finished.equals(state)) { 
+		if (State.Finished.equals(internalState)) { 
 			logger_.fine("Already terminated\n");
 			return; 
 		}
@@ -376,7 +381,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 			if (transferHash.getFileInfo().getHashes().containsKey("md5")) {
 				hashes.put("md5", transferHash.getFileInfo().getHash("md5"));
 			}
-			if (State.WaitingForHash.equals(state)) {
+			if (State.WaitingForHash.equals(internalState)) {
 				checkHashAndTerminate();
 			}
 		}
@@ -387,7 +392,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 
 	public void handleTransportReplaceReceived(final JingleContentID content, JingleTransportPayload transport) {
 		logger_.fine("\n");
-		if (!State.WaitingForFallbackOrTerminate.equals(state)) { 
+		if (!State.WaitingForFallbackOrTerminate.equals(internalState)) { 
 			logger_.warning("Incorrect state\n"); 
 			return; 
 		}
@@ -407,7 +412,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 
 	protected void handleLocalTransportCandidatesGenerated(final String s5bSessionID, final Vector<JingleS5BTransportPayload.Candidate> candidates, final String dstAddr) {
 		logger_.fine("\n");
-		if (!State.GeneratingInitialLocalCandidates.equals(state)) { logger_.warning("Incorrect state\n"); return; }
+		if (!State.GeneratingInitialLocalCandidates.equals(internalState)) { logger_.warning("Incorrect state\n"); return; }
 
 		fillCandidateMap(localCandidates, candidates);
 
@@ -420,7 +425,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 		}
 		session.sendAccept(getContentID(), initialContent.getDescriptions().get(0), transport);
 
-		setState(State.TryingCandidates);
+		setInternalState(State.TryingCandidates);
 		transporter.startTryingRemoteCandidates();
 	}
 
@@ -453,7 +458,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 
 			if (!hashInfoAvailable) {
 				logger_.fine("No hash information yet. Waiting a while on hash info.\n");
-				setState(State.WaitingForHash);
+				setInternalState(State.WaitingForHash);
 				waitOnHashTimer.start();
 			} 
 			else {
@@ -492,7 +497,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 	}
 
 	private void handleTransferFinished(FileTransferError error) {
-		if (error != null && !State.WaitingForHash.equals(state)) {
+		if (error != null && !State.WaitingForHash.equals(internalState)) {
 			terminate(JinglePayload.Reason.Type.MediaError);
 		}
 	}

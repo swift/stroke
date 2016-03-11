@@ -4,7 +4,7 @@
  * See Documentation/Licenses/BSD-simplified.txt for more information.
  */
 /*
- * Copyright (c) 2013-2015 Isode Limited.
+ * Copyright (c) 2013-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -64,4 +64,7 @@ public interface FileTransfer {
 	public long getFileSizeInBytes();
 
 	public void setFileInfo(final String name, long size);
+	
+	public State getState();
+	
 }
