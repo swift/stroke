@@ -4,7 +4,7 @@
  * See Documentation/Licenses/BSD-simplified.txt for more information.
  */
 /*
- * Copyright (c) 2015 Isode Limited.
+ * Copyright (c) 2015-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -18,28 +18,27 @@ package com.isode.stroke.parser.payloadparsers;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Vector;
+import java.util.logging.Logger;
+
 import org.junit.Test;
-import com.isode.stroke.serializer.payloadserializers.JingleContentPayloadSerializer;
-import com.isode.stroke.elements.JinglePayload;
+
+import com.isode.stroke.base.DateTime;
 import com.isode.stroke.elements.JingleContentPayload;
 import com.isode.stroke.elements.JingleFileTransferDescription;
 import com.isode.stroke.elements.JingleFileTransferFileInfo;
-import com.isode.stroke.elements.JingleIBBTransportPayload;
-import com.isode.stroke.elements.JingleS5BTransportPayload;
 import com.isode.stroke.elements.JingleFileTransferHash;
-import com.isode.stroke.parser.payloadparsers.PayloadsParserTester;
+import com.isode.stroke.elements.JingleIBBTransportPayload;
+import com.isode.stroke.elements.JinglePayload;
+import com.isode.stroke.elements.JingleS5BTransportPayload;
 import com.isode.stroke.eventloop.DummyEventLoop;
 import com.isode.stroke.jid.JID;
-import com.isode.stroke.base.DateTime;
-import com.isode.stroke.stringcodecs.Base64;
-import java.util.Vector;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import com.isode.stroke.network.HostAddress;
 import com.isode.stroke.network.HostAddressPort;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import com.isode.stroke.stringcodecs.Base64;
 
 public class JingleParserTest {
 
@@ -431,7 +430,6 @@ public class JingleParserTest {
 	// http://xmpp.org/extensions/xep-0234.html#example-10
 	@Test
 	public void testParse_Xep0234_Example10() {
-		logger_.setLevel(Level.FINE);
 		DummyEventLoop eventLoop = new DummyEventLoop();
 		PayloadsParserTester parser = new PayloadsParserTester(eventLoop);
 		assertNotNull(parser.parse(

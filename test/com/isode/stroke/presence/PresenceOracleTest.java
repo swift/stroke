@@ -12,32 +12,24 @@
 package com.isode.stroke.presence;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Vector;
+
 import org.junit.Before;
+import org.junit.Test;
 
-import com.isode.stroke.elements.Presence;
-import com.isode.stroke.elements.Payload;
 import com.isode.stroke.client.DummyStanzaChannel;
-import com.isode.stroke.presence.DirectedPresenceSender;
-import com.isode.stroke.presence.StanzaChannelPresenceSender;
-import com.isode.stroke.presence.PayloadAddingPresenceSender;
-import com.isode.stroke.presence.PresenceOracle;
-import com.isode.stroke.presence.SubscriptionManager;
+import com.isode.stroke.elements.Presence;
+import com.isode.stroke.elements.StatusShow;
 import com.isode.stroke.jid.JID;
 import com.isode.stroke.roster.XMPPRoster;
 import com.isode.stroke.roster.XMPPRosterImpl;
-import com.isode.stroke.signals.SignalConnection;
-import com.isode.stroke.signals.Slot2;
-import com.isode.stroke.signals.Slot3;
 import com.isode.stroke.signals.Slot1;
-
-import java.util.Collection;
-import java.util.Vector;
+import com.isode.stroke.signals.Slot3;
 
 public class PresenceOracleTest {
 
@@ -91,6 +83,16 @@ public class PresenceOracleTest {
 		sentPresence.setFrom(jid);
 		return sentPresence;
 	}
+	
+	private Presence createPresence(JID jid, int priority, Presence.Type type, StatusShow.Type statusShow) {
+        Presence presence = new Presence();
+        presence.setFrom(jid);
+        presence.setPriority(priority);
+        presence.setType(type);
+        presence.setShow(statusShow);
+        assertEquals(statusShow,presence.getShow());
+        return presence;
+    }
 
 	@Before
 	public void setUp() {
@@ -222,5 +224,50 @@ public class PresenceOracleTest {
 		stanzaChannel_.setAvailable(true);
 
 		assertNull(oracle_.getLastPresence(user1));
-	}	
+	}
+	
+	@Test
+	public void testGetActivePresence() {
+        {
+            List<Presence> presenceList = new ArrayList<Presence>();
+            presenceList.add(createPresence(new JID("alice@wonderland.lit/resourceA"), 10, 
+                    Presence.Type.Available, StatusShow.Type.Away));
+            presenceList.add(createPresence(new JID("alice@wonderland.lit/resourceB"), 5, 
+                    Presence.Type.Available, StatusShow.Type.Online));
+            
+            assertEquals(StatusShow.Type.Online,PresenceOracle.getActivePresence(presenceList).getShow());
+        }
+
+        
+        {
+            List<Presence> presenceList = new ArrayList<Presence>();
+            presenceList.add(createPresence(new JID("alice@wonderland.lit/resourceA"), 10, 
+                    Presence.Type.Available, StatusShow.Type.Away));
+            presenceList.add(createPresence(new JID("alice@wonderland.lit/resourceB"), 5, 
+                    Presence.Type.Available, StatusShow.Type.DND));
+            
+            assertEquals(StatusShow.Type.DND,PresenceOracle.getActivePresence(presenceList).getShow());
+        }
+
+        {
+            List<Presence> presenceList = new ArrayList<Presence>();
+            presenceList.add(createPresence(new JID("alice@wonderland.lit/resourceA"), 0, 
+                    Presence.Type.Available, StatusShow.Type.Online));
+            presenceList.add(createPresence(new JID("alice@wonderland.lit/resourceB"), 0, 
+                    Presence.Type.Available, StatusShow.Type.DND));
+            
+            assertEquals(StatusShow.Type.Online,PresenceOracle.getActivePresence(presenceList).getShow());
+        }
+
+        {
+            List<Presence> presenceList = new ArrayList<Presence>();
+            presenceList.add(createPresence(new JID("alice@wonderland.lit/resourceA"), 1, 
+                    Presence.Type.Available, StatusShow.Type.Online));
+            presenceList.add(createPresence(new JID("alice@wonderland.lit/resourceB"), 0, 
+                    Presence.Type.Available, StatusShow.Type.Online));
+            
+            assertEquals(new JID("alice@wonderland.lit/resourceA"), PresenceOracle.getActivePresence(presenceList).getFrom());
+        }
+    }
+	
 }
