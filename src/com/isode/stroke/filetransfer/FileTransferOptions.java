@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013-2015 Isode Limited.
+ * Copyright (c) 2013-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -12,7 +12,7 @@
 package com.isode.stroke.filetransfer;
 
 public class FileTransferOptions {
-
+    
 	private boolean allowInBand_;
 	private boolean allowAssisted_;
 	private boolean allowProxied_;
@@ -23,6 +23,17 @@ public class FileTransferOptions {
 		allowAssisted_ = true;
 		allowProxied_ = true;
 		allowDirect_ = true;
+	}
+
+	/**
+	 * Copy constructor 
+	 * @param other {@link FileTransferOptions} to copy
+	 */
+	public FileTransferOptions(FileTransferOptions other) {
+	    this.allowInBand_ = other.allowInBand_;
+	    this.allowAssisted_ = other.allowAssisted_;
+	    this.allowProxied_ = other.allowProxied_;
+	    this.allowDirect_ = other.allowDirect_;
 	}
 
 	public FileTransferOptions withInBandAllowed(boolean b) {

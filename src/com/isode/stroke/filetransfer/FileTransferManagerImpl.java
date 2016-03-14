@@ -4,7 +4,7 @@
  * See Documentation/Licenses/BSD-simplified.txt for more information.
  */
 /*
- * Copyright (c) 2013-2015 Isode Limited.
+ * Copyright (c) 2013-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -32,11 +32,13 @@ import com.isode.stroke.base.IDGenerator;
 import com.isode.stroke.elements.DiscoInfo;
 import com.isode.stroke.elements.Presence;
 import com.isode.stroke.elements.JingleFileTransferFileInfo;
+
 import java.io.File;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.Vector;
 import java.util.Collection;
+import java.util.logging.Logger;
 
 public class FileTransferManagerImpl extends FileTransferManager {
 
@@ -50,6 +52,8 @@ public class FileTransferManagerImpl extends FileTransferManager {
 	private SOCKS5BytestreamRegistry bytestreamRegistry;
 	private SOCKS5BytestreamProxiesManager bytestreamProxy;
 	private SOCKS5BytestreamServerManager s5bServerManager;
+	
+	private final Logger logger = Logger.getLogger(this.getClass().getName());
 
 	public FileTransferManagerImpl(
 			final JID ownJID, 
@@ -152,6 +156,21 @@ public class FileTransferManagerImpl extends FileTransferManager {
 		}
 
 		assert(!iqRouter.getJID().isBare());
+
+		DiscoInfo capabilities = capsProvider.getCaps(receipient);
+
+		FileTransferOptions options = new FileTransferOptions(config);
+		    if (capabilities != null) {
+		        if (!capabilities.hasFeature(DiscoInfo.JingleTransportsS5BFeature)) {
+		            options = options.withAssistedAllowed(false).withDirectAllowed(false).withProxiedAllowed(false);
+		        }
+		        if (!capabilities.hasFeature(DiscoInfo.JingleTransportsIBBFeature)) {
+		            options = options.withInBandAllowed(false);
+		        }
+		    }
+		    else {
+		        logger.warning("No entity capabilities information for "+receipient.toString()+"\n");
+		    }
 
 		return outgoingFTManager.createOutgoingFileTransfer(iqRouter.getJID(), receipient, bytestream, fileInfo, config);
 	}
