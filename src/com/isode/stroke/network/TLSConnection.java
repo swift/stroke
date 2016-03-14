@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2015 Isode Limited.
+ * Copyright (c) 2011-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -122,6 +122,10 @@ public class TLSConnection extends Connection {
 
 	public HostAddressPort getLocalAddress() {
 		return connection.getLocalAddress();
+	}
+	
+	public TLSContext getContext() {
+	    return context;
 	}
 
 	private void handleRawConnectFinished(boolean error) {
