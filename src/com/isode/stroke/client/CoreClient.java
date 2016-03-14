@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.client;
@@ -347,11 +347,20 @@ public class CoreClient {
         }
         else {
             assert (connection_ == null);
-            connection_ = connection;
-
             assert (sessionStream_ == null);
-            sessionStream_ = new BasicSessionStream(StreamType.ClientStreamType, connection_, payloadParserFactories_, payloadSerializers_, networkFactories.getTLSContextFactory(), networkFactories.getTimerFactory(), options.tlsOptions);
-            if (certificate_ != null && !certificate_.isNull()) {
+            
+            if (certificate_ != null && certificate_.isNull()) {
+                // Certificate can not be read so do not initialise session
+                onDisconnected.emit(new ClientError(ClientError.Type.ClientCertificateLoadError));
+                return;
+            }
+            
+            connection_ = connection;
+            
+            sessionStream_ = 
+                    new BasicSessionStream(StreamType.ClientStreamType, connection_, payloadParserFactories_, payloadSerializers_, 
+                            networkFactories.getTLSContextFactory(), networkFactories.getTimerFactory(), options.tlsOptions);
+            if (certificate_ != null) {
                 sessionStream_.setTLSCertificate(certificate_);
             }
             sessionStreamDataReadConnection_ = sessionStream_.onDataRead.connect(new Slot1<SafeByteArray>() {
