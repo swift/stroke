@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -58,8 +58,14 @@ public class DummyConnection extends Connection implements EventOwner {
 		return localAddress;
 	}
 
-	public Signal1<SafeByteArray> onDataSent = new Signal1<SafeByteArray>();
+    @Override
+    public HostAddressPort getRemoteAddress() {
+        return remoteAddress;
+    }
 
-	public EventLoop eventLoop;
-	public HostAddressPort localAddress;
+    public Signal1<SafeByteArray> onDataSent = new Signal1<SafeByteArray>();
+
+    public EventLoop eventLoop;
+	public HostAddressPort localAddress = new HostAddressPort();
+	public HostAddressPort remoteAddress = new HostAddressPort(); 
 }

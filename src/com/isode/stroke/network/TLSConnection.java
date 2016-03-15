@@ -124,6 +124,11 @@ public class TLSConnection extends Connection {
 		return connection.getLocalAddress();
 	}
 	
+	@Override
+	public HostAddressPort getRemoteAddress() {
+	    return connection.getRemoteAddress();
+	}
+	
 	public TLSContext getContext() {
 	    return context;
 	}

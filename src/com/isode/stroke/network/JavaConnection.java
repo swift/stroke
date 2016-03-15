@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.network;
@@ -7,8 +7,10 @@ package com.isode.stroke.network;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -512,6 +514,31 @@ public class JavaConnection extends Connection implements EventOwner {
             return null;
         }
         return new HostAddressPort(new HostAddress(socket.getLocalAddress()), socket.getLocalPort());        
+    }
+    
+    @Override
+    public HostAddressPort getRemoteAddress() {
+        if (socketChannel_ == null) {
+            return null;
+        }
+        SocketAddress remoteAddress;
+        try {
+            remoteAddress = socketChannel_.getRemoteAddress();
+        } catch (ClosedChannelException e) {
+            return null;
+        } catch (IOException e) {
+            return null;
+        }
+        if (!(remoteAddress instanceof InetSocketAddress)) {
+            // SocketChannel.getRemoteAddress should return a
+            // InetSocketAddress if it is bound to an IP Socket
+            // Address so return null if it does not
+            return null;
+        }
+        InetSocketAddress remoteInetAddress = (InetSocketAddress) remoteAddress;
+        return new HostAddressPort(
+                new HostAddress(remoteInetAddress.getAddress()),
+                remoteInetAddress.getPort());
     }
     
     @Override

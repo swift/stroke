@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012-2015 Isode Limited.
+ * Copyright (c) 2012-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -176,7 +176,7 @@ public class SOCKS5BytestreamServerManager {
 			int port;
 			for (port = LISTEN_PORTS_BEGIN; port < LISTEN_PORTS_END; ++port) {
 				logger_.fine("Trying to start server on port " + port + "\n");
-				connectionServer = connectionServerFactory.createConnectionServer(new HostAddress("0.0.0.0"), port);
+				connectionServer = connectionServerFactory.createConnectionServer(new HostAddress("::"), port);
 				ConnectionServer.Error error = connectionServer.tryStart();
 				if (error == null) {
 					break;

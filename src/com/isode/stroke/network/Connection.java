@@ -4,7 +4,7 @@
  * See Documentation/Licenses/GPLv3.txt for more information.
  */
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.network;
@@ -33,6 +33,7 @@ public abstract class Connection {
     public abstract void write(SafeByteArray data);
 
     public abstract HostAddressPort getLocalAddress();
+    public abstract HostAddressPort getRemoteAddress();
     public final Signal1<Boolean /*error*/> onConnectFinished = new Signal1<Boolean>();
     public final Signal1<Error> onDisconnected = new Signal1<Error>();
     public final Signal1<SafeByteArray> onDataRead = new Signal1<SafeByteArray>();

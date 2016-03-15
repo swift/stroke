@@ -87,6 +87,11 @@ public abstract class ProxiedConnection extends Connection {
 	public HostAddressPort getLocalAddress() {
 		return connection_.getLocalAddress();
 	}
+	
+	@Override
+	public HostAddressPort getRemoteAddress() {
+	    return connection_.getRemoteAddress();
+	}
 
 	private void handleConnectFinished(Connection connection) {
 		cancelConnector();

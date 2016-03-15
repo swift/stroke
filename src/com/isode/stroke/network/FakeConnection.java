@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -15,6 +15,7 @@ import com.isode.stroke.eventloop.EventOwner;
 import com.isode.stroke.eventloop.EventLoop;
 import com.isode.stroke.eventloop.Event;
 import com.isode.stroke.base.SafeByteArray;
+
 import java.util.Vector;
 
 public class FakeConnection extends Connection {
@@ -39,6 +40,11 @@ public class FakeConnection extends Connection {
 
 	public HostAddressPort getLocalAddress() {
 		return new HostAddressPort();
+	}
+	
+	@Override
+	public HostAddressPort getRemoteAddress() {
+	    return new HostAddressPort();
 	}
 
 	public void setError(final Error e) {

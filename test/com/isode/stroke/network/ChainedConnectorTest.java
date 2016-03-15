@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -63,6 +63,12 @@ public class ChainedConnectorTest {
 		}
 
 		public HostAddressPort getLocalAddress()  { return new HostAddressPort(); }
+
+		@Override
+		public HostAddressPort getRemoteAddress() {
+		    return new HostAddressPort();
+		}
+		
 		public void disconnect() { assert(false); }
 		public void write(final SafeByteArray data) { assert(false); }
 
