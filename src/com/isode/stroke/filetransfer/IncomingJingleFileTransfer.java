@@ -113,6 +113,32 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 			}
 		});
 	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+	    try {
+	        destroy();
+	    }
+	    finally {
+	        super.finalize();
+	    }
+	}
+	
+	/**
+     * This replaces the C++ destructor.  After calling this object should not be used again.
+     * If any methods are called after they behaviour is undefined and they may throw expections.
+     */
+	public void destroy() {
+	    if (waitOnHashTimerTickedConnection != null) {
+            waitOnHashTimerTickedConnection.disconnect();
+            waitOnHashTimerTickedConnection = null;
+        }
+	    if (waitOnHashTimer != null) {
+	        waitOnHashTimer.stop();
+	        waitOnHashTimer = null;
+	    }
+	    hashCalculator = null;
+	}
 
 	/**
 	* IncomingFileTransferMethod.
@@ -494,6 +520,9 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 	}
 
 	private void handleWaitOnHashTimerTicked() {
+	    if (waitOnHashTimer == null) {
+	        return;
+	    }
 		logger_.fine("\n");
 		waitOnHashTimer.stop();
 		terminate(JinglePayload.Reason.Type.Success);

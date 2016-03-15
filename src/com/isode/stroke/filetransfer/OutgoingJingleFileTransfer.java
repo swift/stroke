@@ -88,6 +88,16 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 	private SignalConnection processedBytesConnection;
 	private SignalConnection transferFinishedConnection;
 	private Logger logger_ = Logger.getLogger(this.getClass().getName());
+	
+	/**
+	 * Connection to {@link Timer#onTick} of {@link #waitForRemoteTermination}
+	 */
+    private final SignalConnection onTickConnection;
+    
+    /**
+     * Connection to {@link ReadBytestream#onRead} of {@link #stream}
+     */
+    private SignalConnection streamReadConnection;
 
 	public OutgoingJingleFileTransfer(
 		final JID toJID,
@@ -112,19 +122,51 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 
 		// calculate both, MD5 and SHA-1 since we don't know which one the other side supports
 		hashCalculator = new IncrementalBytestreamHashCalculator(true, true, crypto);
-		stream.onRead.connect(new Slot1<ByteArray>() {
+		streamReadConnection = stream.onRead.connect(new Slot1<ByteArray>() {
 			@Override
 			public void call(ByteArray b) {
+			    if (hashCalculator == null) {
+			        return;
+			    }
 				hashCalculator.feedData(b);
 			}
 		});
 		waitForRemoteTermination = timerFactory.createTimer(5000);
-		waitForRemoteTermination.onTick.connect(new Slot() {
+		onTickConnection = waitForRemoteTermination.onTick.connect(new Slot() {
 			@Override
 			public void call() {
 				handleWaitForRemoteTerminationTimeout();
 			}
 		});
+	}
+	
+	@Override
+	protected void finalize() throws Throwable {
+	    try {
+	        destroy();
+	    }
+	    finally {
+	        super.finalize();
+	    }
+	}
+	
+	/**
+	 * This replaces the C++ destructor.  After calling this object should not be used again.
+	 * If any methods are called after they behaviour is undefined and they may throw expections.
+	 */
+	public void destroy() {
+	    if (onTickConnection != null) {
+	        onTickConnection.disconnect();
+	    }
+	    if (waitForRemoteTermination != null) {
+	        waitForRemoteTermination.stop();
+	        waitForRemoteTermination = null;
+	    }
+	    if (streamReadConnection != null) {
+	        streamReadConnection.disconnect();
+	    }
+	    hashCalculator = null;
+	    removeTransporter();
 	}
 
 	/**
@@ -383,6 +425,9 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 	}
 
 	private void handleWaitForRemoteTerminationTimeout() {
+	    if (waitForRemoteTermination == null) {
+	        return;
+	    }
 		assert(internalState.equals(State.WaitForTermination));
 		logger_.warning("Other party did not terminate session. Terminate it now.\n");
 		waitForRemoteTermination.stop();
