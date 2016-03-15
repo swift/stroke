@@ -32,6 +32,7 @@ import com.isode.stroke.jingle.JingleContentID;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.signals.Slot;
+
 import java.util.logging.Logger;
 import java.util.Vector;
 import java.util.Map;
@@ -41,6 +42,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 
 	private long fileSizeInBytes = 0; //FileTransferVariables
 	private String filename = ""; //FileTransferVariables
+	private String ft_description = ""; //FileTransferVariables
 
 	/**
 	* FileTransferMethod.
@@ -62,9 +64,10 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 	* FileTransferMethod.
 	*/
 	@Override
-	public void setFileInfo(final String name, long size) {
+	public void setFileInfo(final String name, long size, String description) {
 		this.filename = name;
 		this.fileSizeInBytes = size;
+		this.ft_description = description;
 	}
 
 	private JingleContentPayload initialContent;
@@ -99,7 +102,7 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 		this.description = initialContent.getDescription(new JingleFileTransferDescription());
 		assert(description != null);
 		JingleFileTransferFileInfo fileInfo = description.getFileInfo();
-		setFileInfo(fileInfo.getName(), fileInfo.getSize());
+		setFileInfo(fileInfo.getName(), fileInfo.getSize(), fileInfo.getDescription());
 		hashes = fileInfo.getHashes();
 
 		waitOnHashTimer = timerFactory.createTimer(5000);
@@ -501,4 +504,9 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 			terminate(JinglePayload.Reason.Type.MediaError);
 		}
 	}
+
+    @Override
+    public String getDescription() {
+        return ft_description;
+    }
 }

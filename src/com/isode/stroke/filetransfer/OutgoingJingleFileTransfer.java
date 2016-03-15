@@ -37,6 +37,7 @@ import com.isode.stroke.jingle.JingleContentID;
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot1;
 import com.isode.stroke.signals.Slot;
+
 import java.util.logging.Logger;
 import java.util.Vector;
 
@@ -44,6 +45,7 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 
 	private long fileSizeInBytes = 0; //FileTransferVariables
 	private String filename = ""; //FileTransferVariables
+	private String ft_description = ""; // FileTransferVariables
 
 	/**
 	* FileTransferMethod.
@@ -65,9 +67,10 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 	* FileTransferMethod.
 	*/
 	@Override
-	public void setFileInfo(final String name, long size) {
+	public void setFileInfo(final String name, long size, String description) {
 		this.filename = name;
 		this.fileSizeInBytes = size;
+		this.ft_description = description;
 	}
 
 	public static final int DEFAULT_BLOCK_SIZE = 4096;
@@ -105,7 +108,7 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 		this.contentID = new JingleContentID(idGenerator.generateID(), JingleContentPayload.Creator.InitiatorCreator);
 		this.internalState = State.Initial;
 		this.candidateAcknowledged = false;
-		setFileInfo(fileInfo.getName(), fileInfo.getSize());
+		setFileInfo(fileInfo.getName(), fileInfo.getSize(), fileInfo.getDescription());
 
 		// calculate both, MD5 and SHA-1 since we don't know which one the other side supports
 		hashCalculator = new IncrementalBytestreamHashCalculator(true, true, crypto);
@@ -448,5 +451,10 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 		assert(false);
 		return FileTransfer.State.Type.Initial;
 	}
+
+    @Override
+    public String getDescription() {
+        return ft_description;
+    }
 
 }

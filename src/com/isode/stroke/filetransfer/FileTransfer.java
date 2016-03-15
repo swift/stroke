@@ -63,8 +63,10 @@ public interface FileTransfer {
 
 	public long getFileSizeInBytes();
 
-	public void setFileInfo(final String name, long size);
+	public void setFileInfo(final String name, long size, String description);
 	
 	public State getState();
+	
+	public String getDescription();
 	
 }
