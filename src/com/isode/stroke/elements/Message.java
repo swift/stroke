@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 package com.isode.stroke.elements;
@@ -31,14 +31,20 @@ public class Message extends Stanza {
 
     public String getBody() {
         Body body = getPayload(new Body());
+        String bodyData = null;
         if (body != null) {
-            return body.getText();
+            bodyData = body.getText();
         }
-        return "";
+        return bodyData;
     }
 
     public void setBody(String body) {
-        updatePayload(new Body(body));
+        if (body != null) {
+            updatePayload(new Body(body));
+        }
+        else {
+            removePayload(new Body());
+        }
     }
 
     public boolean isError() {

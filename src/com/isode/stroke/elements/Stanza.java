@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 
@@ -8,6 +8,7 @@ package com.isode.stroke.elements;
 import com.isode.stroke.jid.JID;
 
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -39,6 +40,35 @@ public abstract class Stanza implements Element {
         }
         payloads_ = new Vector<Payload>(other.payloads_);
     }
+    
+    /**
+     * Indicates if a given Payload is of a given type
+     * @param <T> A type of payload
+     * @param <P> A Payload
+     * @param type An instance of the type of payload to check for
+     * @param payload the payload to check the type of
+     * @return {@code true} if the Payload is of the same type,
+     * {@code false} otherwise.
+     */
+    private static <T extends Payload,P extends Payload> boolean isPayloadOfType(T type,P payload) {
+        return payload.getClass().isAssignableFrom(type.getClass());
+    }
+    
+    /**
+     * Removes all the payloads of the given type from the stanza
+     * @param <T> The payload type
+     * @param type Object of the payload type to remove, should
+     * not be {@code null}
+     */
+    public <T extends Payload> void removePayload(T type) {
+        Iterator<Payload> payloadIterator = payloads_.iterator();
+        while (payloadIterator.hasNext()) {
+            Payload payload = payloadIterator.next();
+            if (isPayloadOfType(type, payload)) {
+                payloadIterator.remove();
+            }
+        }
+    }
 
     /**
      * Get the payload of the given type from the stanza
@@ -49,7 +79,7 @@ public abstract class Stanza implements Element {
     @SuppressWarnings("unchecked")
 	public <T extends Payload> T getPayload(T type) {
         for (Payload payload : payloads_) {
-            if (payload.getClass().isAssignableFrom(type.getClass())) {
+            if (isPayloadOfType(type, payload)) {
                 return (T)payload;
             }
         }
