@@ -171,16 +171,16 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 			}
 		});
 
-		if (initialContent.getTransport(new JingleS5BTransportPayload()) != null) {
-			JingleS5BTransportPayload s5bTransport = initialContent.getTransport(new JingleS5BTransportPayload());
+		JingleS5BTransportPayload s5bTransport = initialContent.getTransport(new JingleS5BTransportPayload());
+	    JingleIBBTransportPayload ibbTransport = initialContent.getTransport(new JingleIBBTransportPayload());
+		if (s5bTransport != null) {
 			logger_.fine("Got S5B transport as initial payload.\n");
 			setTransporter(transporterFactory.createResponderTransporter(getInitiator(), getResponder(), s5bTransport.getSessionID(), options));
 			transporter.addRemoteCandidates(s5bTransport.getCandidates(), s5bTransport.getDstAddr());
 			setInternalState(State.GeneratingInitialLocalCandidates);
 			transporter.startGeneratingLocalCandidates();
 		}
-		else if(initialContent.getTransport(new JingleIBBTransportPayload()) != null) {
-			JingleIBBTransportPayload ibbTransport = initialContent.getTransport(new JingleIBBTransportPayload());
+		else if(ibbTransport != null && options.isInBandAllowed()) {
 			logger_.fine("Got IBB transport as initial payload.\n");
 			setTransporter(transporterFactory.createResponderTransporter(getInitiator(), getResponder(), ibbTransport.getSessionID(), options));
 
@@ -189,8 +189,9 @@ public class IncomingJingleFileTransfer extends JingleFileTransfer implements In
 			session.sendAccept(getContentID(), initialContent.getDescriptions().get(0), ibbTransport);
 		}
 		else {
-			// Can't happen, because the transfer would have been rejected automatically
-			assert(false);
+		    // This might happen on incoming transfer which only list transport methods we are not allowed to use due to file-transfer options.
+		    session.sendTerminate(JinglePayload.Reason.Type.UnsupportedTransports);
+		    setFinishedState(FileTransfer.State.Type.Failed, new FileTransferError(FileTransferError.Type.PeerError));
 		}
 	}
 

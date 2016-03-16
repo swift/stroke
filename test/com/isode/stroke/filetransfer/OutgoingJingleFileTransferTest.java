@@ -98,20 +98,25 @@ public class OutgoingJingleFileTransferTest {
         assertNotNull(description);
         assertEquals(1048576,description.getFileInfo().getSize());
         
-        JingleS5BTransportPayload transport = null;
-        if (call.payload instanceof JingleS5BTransportPayload) {
-            transport = (JingleS5BTransportPayload) call.payload;
+        JingleIBBTransportPayload transport = null;
+        if (call.payload instanceof JingleIBBTransportPayload) {
+            transport = (JingleIBBTransportPayload) call.payload;
+        }
+        else {
+            System.out.println(call.payload.getClass().getName());
         }
         assertNotNull(transport);
     }
     
     @Test
     public void test_FallbackToIBBAfterFailingS5b() {
-        OutgoingJingleFileTransfer transfer = createTestling();
+        OutgoingJingleFileTransfer transfer = 
+                createTestling(new FileTransferOptions().withAssistedAllowed(true).withDirectAllowed(true).withProxiedAllowed(true));
         transfer.start();
         
         FakeJingleSession.InitiateCall call = getCall(FakeJingleSession.InitiateCall.class,0);
         
+        assertTrue(call.payload instanceof JingleS5BTransportPayload);
         fakeJingleSession.handleSessionAcceptReceived(call.id, call.description, call.payload);
         
         // Send candidate failure
@@ -211,13 +216,16 @@ public class OutgoingJingleFileTransferTest {
     }
     
     private OutgoingJingleFileTransfer createTestling() {
+        return createTestling(new FileTransferOptions().withAssistedAllowed(false).withDirectAllowed(false).withProxiedAllowed(false));
+    }
+    
+    private OutgoingJingleFileTransfer createTestling(FileTransferOptions options) {
         JID to = new JID("test@foo.com/bla");
         JingleFileTransferFileInfo fileInfo = new JingleFileTransferFileInfo();
         fileInfo.setDescription("some file");
         fileInfo.setName("test.bin");
         fileInfo.addHash(new HashElement("sha-1", new ByteArray()));
         fileInfo.setSize(1024 * 1024);
-        FileTransferOptions options = (new FileTransferOptions()).withAssistedAllowed(false).withDirectAllowed(false).withProxiedAllowed(false);
         return new OutgoingJingleFileTransfer(to, fakeJingleSession, stream, 
                 ftTransporterFactory, timeFactory, idGen, fileInfo, options, crypto);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Isode Limited.
+ * Copyright (c) 2015-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -51,13 +51,14 @@ class DummyFileTransferTransporter extends FileTransferTransporter {
 			TimerFactory timer,
 			CryptoProvider cryptoProvider,
 			IQRouter iqRouter,
-			final FileTransferOptions option) {
+			final FileTransferOptions ftOptions) {
 		initiator_ = initiator;
 		responder_ = responder;
 		role_ = role;
 		s5bRegistry_ = s5bRegistry;
 		crypto_ = cryptoProvider;
 		iqRouter_ = iqRouter;
+		ftOptions_ = new FileTransferOptions(ftOptions);
 	}
 
 	public void initialize() {
@@ -66,6 +67,12 @@ class DummyFileTransferTransporter extends FileTransferTransporter {
 
 	public void startGeneratingLocalCandidates() {
 		Vector<JingleS5BTransportPayload.Candidate> candidates = new Vector<JingleS5BTransportPayload.Candidate>();
+		if (ftOptions_.isDirectAllowed()) {
+            JingleS5BTransportPayload.Candidate candidate = new JingleS5BTransportPayload.Candidate();
+            candidate.cid = "123";
+            candidate.priority = 1235;
+            candidates.add(candidate);
+        }
 		onLocalCandidatesGenerated.emit(s5bSessionID_, candidates, getSOCKS5DstAddr());
 	}
 
@@ -147,6 +154,7 @@ class DummyFileTransferTransporter extends FileTransferTransporter {
 	private CryptoProvider crypto_;
 	private String s5bSessionID_;
 	private IQRouter iqRouter_;
+	private final FileTransferOptions ftOptions_;
 };
 
 public class DummyFileTransferTransporterFactory implements FileTransferTransporterFactory {

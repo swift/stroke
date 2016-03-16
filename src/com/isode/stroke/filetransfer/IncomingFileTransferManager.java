@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -15,6 +15,7 @@ import com.isode.stroke.signals.Signal1;
 import com.isode.stroke.jingle.IncomingJingleSessionHandler;
 import com.isode.stroke.jingle.JingleSessionManager;
 import com.isode.stroke.jingle.JingleSession;
+import com.isode.stroke.elements.JingleIBBTransportPayload;
 import com.isode.stroke.elements.JinglePayload;
 import com.isode.stroke.elements.JingleContentPayload;
 import com.isode.stroke.elements.JingleFileTransferDescription;
@@ -24,6 +25,7 @@ import com.isode.stroke.network.TimerFactory;
 import com.isode.stroke.crypto.CryptoProvider;
 import com.isode.stroke.queries.IQRouter;
 import com.isode.stroke.jid.JID;
+
 import java.util.logging.Logger;
 import java.util.Vector;
 
@@ -55,7 +57,8 @@ public class IncomingFileTransferManager implements IncomingJingleSessionHandler
 			final JID recipient) {
 		if (Jingle.getContentWithDescription(contents, new JingleFileTransferDescription()) != null) {
 			JingleContentPayload content = Jingle.getContentWithDescription(contents, new JingleFileTransferDescription());
-			if (content.getTransport(new JingleS5BTransportPayload()) != null) {
+			if ( (content.getTransport(new JingleS5BTransportPayload()) != null)
+			        || (content.getTransport(new JingleIBBTransportPayload()) != null) ) {
 				JingleFileTransferDescription description = content.getDescription(new JingleFileTransferDescription());
 				if (description != null) {
 					IncomingJingleFileTransfer transfer = new IncomingJingleFileTransfer(

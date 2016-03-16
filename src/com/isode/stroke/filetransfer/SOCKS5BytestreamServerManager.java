@@ -126,6 +126,10 @@ public class SOCKS5BytestreamServerManager {
 			forwardPortRequest.stop();
 			forwardPortRequest = null;
 		}
+		if (unforwardPortRequest != null) {
+		    unforwardPortRequest.stop();
+		    unforwardPortRequest = null;
+		}
 		if (server != null) {
 			server.stop();
 			server = null;

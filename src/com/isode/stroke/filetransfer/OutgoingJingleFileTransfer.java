@@ -179,10 +179,19 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 			logger_.warning("Incorrect state\n");
 			return;
 		}
-
-		setTransporter(transporterFactory.createInitiatorTransporter(getInitiator(), getResponder(), options));
-		setInternalState(State.GeneratingInitialLocalCandidates);
-		transporter.startGeneratingLocalCandidates();
+		
+		if (!options.isInBandAllowed() && !options.isDirectAllowed() 
+		        && !options.isAssistedAllowed() && !options.isProxiedAllowed()) {
+		    // Started outgoing file transfer while not supporting transport methods.
+		    setFinishedState(FileTransfer.State.Type.Failed, 
+		            new FileTransferError(FileTransferError.Type.UnknownError));
+		}
+		else {
+		    setTransporter(transporterFactory.createInitiatorTransporter(getInitiator(), getResponder(), options));
+		    setInternalState(State.GeneratingInitialLocalCandidates);
+		    transporter.startGeneratingLocalCandidates();
+		}
+		
 	}
 
 	/**
@@ -217,6 +226,13 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 			setInternalState(State.TryingCandidates);
 			transporter.startTryingRemoteCandidates();
 		}
+		else if (transportPayload instanceof JingleIBBTransportPayload) {
+		    JingleIBBTransportPayload ibbPayload = (JingleIBBTransportPayload) transportPayload;
+		    int blockSize = ibbPayload.getBlockSize() != null ? 
+		            ibbPayload.getBlockSize().intValue() : DEFAULT_BLOCK_SIZE;
+		    startTransferring(transporter.createIBBSendSession(ibbPayload.getSessionID(),
+		            blockSize, stream));
+	    }
 		else {
 			logger_.fine("Unknown transport payload. Falling back.\n");
 			fallback();
@@ -310,14 +326,25 @@ public class OutgoingJingleFileTransfer extends JingleFileTransfer implements Ou
 		fileInfo.addHash(new HashElement("md5", new ByteArray()));
 		description.setFileInfo(fileInfo);
 
-		JingleS5BTransportPayload transport = new JingleS5BTransportPayload();
-		transport.setSessionID(s5bSessionID);
-		transport.setMode(JingleS5BTransportPayload.Mode.TCPMode);
-		transport.setDstAddr(dstAddr);
-		for(JingleS5BTransportPayload.Candidate candidate : candidates) {
-			transport.addCandidate(candidate);
-			logger_.fine("\t" + "S5B candidate: " + candidate.hostPort.toString() + "\n");
-		}
+		JingleTransportPayload transport = null;
+	    if (candidates.isEmpty()) {
+	        logger_.fine("no S5B candidate generated. Send IBB transport candidate.\n");
+	        JingleIBBTransportPayload ibbTransport = new JingleIBBTransportPayload();
+	        ibbTransport.setBlockSize(DEFAULT_BLOCK_SIZE);
+	        ibbTransport.setSessionID(idGenerator.generateID());
+	        transport = ibbTransport;
+	    }
+	    else {
+	        JingleS5BTransportPayload s5bTransport =  new JingleS5BTransportPayload();
+	        s5bTransport.setSessionID(s5bSessionID);
+	        s5bTransport.setMode(JingleS5BTransportPayload.Mode.TCPMode);
+	        s5bTransport.setDstAddr(dstAddr);
+	        for (JingleS5BTransportPayload.Candidate candidate : candidates) {
+              s5bTransport.addCandidate(candidate);
+              logger_.fine("\tS5B candidate: "+candidate.hostPort +"\n");
+	        }
+	        transport = s5bTransport;
+	    }
 		setInternalState(State.WaitingForAccept);
 		session.sendInitiate(contentID, description, transport);
 	}
