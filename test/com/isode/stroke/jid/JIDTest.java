@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -33,6 +33,7 @@ public class JIDTest {
 		assertEquals("bar", testling.getDomain());
 		assertEquals("baz", testling.getResource());
 		assertFalse(testling.isBare());
+		assertTrue(testling.isValid());
 	}
 
 
@@ -44,6 +45,7 @@ public class JIDTest {
 		assertEquals("bar", testling.getDomain());
 		assertEquals("", testling.getResource());
 		assertTrue(testling.isBare());
+		assertTrue(testling.isValid());
 	}
 
 
@@ -64,6 +66,7 @@ public class JIDTest {
 		assertEquals("bar", testling.getDomain());
 		assertEquals("baz", testling.getResource());
 		assertFalse(testling.isBare());
+		assertTrue(testling.isValid());
 	}
 
 
@@ -75,6 +78,7 @@ public class JIDTest {
 		assertEquals("bar", testling.getDomain());
 		assertEquals("", testling.getResource());
 		assertTrue(testling.isBare());
+		assertTrue(testling.isValid());
 	}
 
 		
@@ -98,6 +102,7 @@ public class JIDTest {
 		JID testling = new JID("FoΩ");
 
 		assertEquals("foω", testling.getDomain());
+		assertTrue(testling.isValid());
 	}
 
 	
@@ -106,6 +111,7 @@ public class JIDTest {
 		JID testling = new JID("bar/FoΩ");
 
 		assertEquals(testling.getResource(), "FoΩ");
+		assertTrue(testling.isValid());
 	}
 
 
@@ -139,6 +145,7 @@ public class JIDTest {
 		assertEquals("foo", testling.getNode());
 		assertEquals("bar", testling.getDomain());
 		assertEquals("baz", testling.getResource());
+		assertTrue(testling.isValid());
 	}
 
 
@@ -179,6 +186,7 @@ public class JIDTest {
 		assertEquals("", testling.toBare().getNode());
 		assertEquals("bar", testling.toBare().getDomain());
 		assertTrue(testling.toBare().isBare());
+		assertTrue(testling.isValid());
 	}
 
 
