@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2015 Isode Limited.
+ * Copyright (c) 2010-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -20,9 +20,11 @@ public class ByteArrayWriteBytestream extends WriteBytestream {
 	public ByteArrayWriteBytestream() {
 	}
 
-	public void write(final ByteArray bytes) {
+	@Override
+    public boolean write(final ByteArray bytes) {
 		data.append(bytes);
 		onWrite.emit(bytes);
+		return true;
 	}
 
 	public ByteArray getData() {

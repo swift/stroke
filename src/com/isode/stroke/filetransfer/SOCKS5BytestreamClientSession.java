@@ -116,7 +116,6 @@ public class SOCKS5BytestreamClientSession extends SOCKS5AbstractBytestreamSessi
 			state = State.Reading;
 			writeBytestream = writeStream;
 			writeBytestream.write(unprocessedData);
-			//onBytesReceived(unprocessedData.size());
 			unprocessedData.clear();
 		} else {
 			logger_.fine("Session isn't ready for transfer yet!\n");

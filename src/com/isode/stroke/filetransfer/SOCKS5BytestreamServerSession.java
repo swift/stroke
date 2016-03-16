@@ -82,7 +82,7 @@ public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSess
 	}
 
 	public void stop() {
-		finish(false);
+		finish();
 	}
 
 	public void startSending(ReadBytestream stream) {
@@ -124,8 +124,12 @@ public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSess
 		return streamID;
 	}
 
-	private void finish(boolean error) {
-		logger_.fine(error + " " + state + "\n");
+	private void finish() {
+	    finish(null);
+	}
+	
+	private void finish(FileTransferError error) {
+		logger_.fine("state: " + state + "\n");
 		if (State.Finished.equals(state)) {
 			return;
 		}
@@ -140,11 +144,7 @@ public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSess
 		}
 		readBytestream = null;
 		state = State.Finished;
-		if (error) {
-			onFinished.emit(new FileTransferError(FileTransferError.Type.PeerError));
-		} else {
-			onFinished.emit(null);
-		}
+		onFinished.emit(error);
 	}
 
 	private void process() {
@@ -193,7 +193,7 @@ public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSess
 					if (!hasBytestream) {
 						logger_.fine("Readstream or Wrtiestream with ID " + streamID + " not found!\n");
 						connection.write(result);
-						finish(true);
+						finish(new FileTransferError(FileTransferError.Type.PeerError));
 					}
 					else {
 						logger_.fine("Found stream. Sent OK.\n");
@@ -210,14 +210,15 @@ public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSess
 			unprocessedData.append(data);
 			process();
 		} else {
-			writeBytestream.write(new ByteArray(data));
-			// onBytesReceived(data.size());
+			if (!writeBytestream.write(new ByteArray(data))) {
+			    finish(new FileTransferError(FileTransferError.Type.WriteError));
+			}
 		}
 	}
 
 	private void handleDisconnected(final Connection.Error error) {
 		logger_.fine((error != null ? (error.equals(Connection.Error.ReadError) ? "Read Error" : "Write Error") : "No Error") + "\n");
-		finish(error != null ? true : false);
+		finish(error != null ? new FileTransferError(FileTransferError.Type.PeerError) : null);
 	}
 
 	private void handleDataAvailable() {
@@ -244,7 +245,7 @@ public class SOCKS5BytestreamServerSession  extends SOCKS5AbstractBytestreamSess
 			//}
 		}
 		else {
-			finish(false);
+			finish();
 		}
 	}
 }
