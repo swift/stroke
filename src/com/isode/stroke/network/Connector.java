@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2014, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -62,6 +62,13 @@ public class Connector {
     }
 
     public void stop() {
+        if (currentConnectionConnectFinishedConnection != null) {
+            currentConnectionConnectFinishedConnection.disconnect();
+            currentConnectionConnectFinishedConnection = null;
+        }
+        if (currentConnection != null) {
+            currentConnection.disconnect();
+        }
         finish(null);
     }
 

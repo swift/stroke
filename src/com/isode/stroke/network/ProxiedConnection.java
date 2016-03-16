@@ -11,6 +11,8 @@
 
 package com.isode.stroke.network;
 
+import java.util.logging.Logger;
+
 import com.isode.stroke.signals.SignalConnection;
 import com.isode.stroke.signals.Slot2;
 import com.isode.stroke.signals.Slot1;
@@ -30,6 +32,7 @@ public abstract class ProxiedConnection extends Connection {
 	private SignalConnection onDataReadConnection_;
 	private SignalConnection onDisconnectedConnection_;
 	private SignalConnection onConnectFinishedConnection;
+	private Logger logger_ = Logger.getLogger(this.getClass().getName());
 
 	public ProxiedConnection(DomainNameResolver resolver, ConnectionFactory connectionFactory, TimerFactory timerFactory, final String proxyHost, int proxyPort) {
 		this.resolver_ = resolver;
@@ -49,7 +52,7 @@ public abstract class ProxiedConnection extends Connection {
 				onDisconnectedConnection_.disconnect();
 			}
 			if (connected_) {
-				System.err.println("Warning: Connection was still established.");
+				logger_.warning("Warning: Connection was still established.");
 			}
 		}
 		finally {
@@ -76,8 +79,11 @@ public abstract class ProxiedConnection extends Connection {
 	}
 
 	public void disconnect() {
+	    cancelConnector();
 		connected_ = false;
-		connection_.disconnect();
+		if (connection_ != null) {
+		    connection_.disconnect();
+		}
 	}
 
 	public void write(final SafeByteArray data) {
