@@ -29,6 +29,11 @@ public class VCardManager {
     public final Signal2<JID, VCard> onVCardChanged = new Signal2<JID, VCard>();
 
     /**
+     * Emitted when we received an error on looking up a vCard.
+     */
+    public final Signal2<JID,ErrorPayload> onVCardRetrievalError = new Signal2<JID,ErrorPayload>();
+    
+    /**
      * Emitted when our own vcard changes.
      *
      * onVCardChanged will also be emitted.
@@ -90,6 +95,9 @@ public class VCardManager {
             requestedVCards.remove(actualJID);
             JID jid = actualJID.isValid() ? actualJID : ownJID.toBare();
             setVCard(jid, vcard);
+        }
+        else {
+            onVCardRetrievalError.emit(actualJID, error);
         }
     }
 
