@@ -38,7 +38,6 @@ public class FormParser extends GenericPayloadParser<Form> {
     private String currentText_ = "";
     private String currentFieldRef_ = "";
     private boolean parsingItem_ = false;
-    private boolean parseStarted_ = false;
     private boolean hasReportedRef_ = false;
     private FormText currentTextElement_;
     private FormReportedRef currentReportedRef_;
@@ -242,15 +241,15 @@ public class FormParser extends GenericPayloadParser<Form> {
                 else {
                     if (currentPages_.size() > 0) {
                         for (FormPage page : currentPages_) {
-                            for (String pRef : page.getFieldRefs()) {
-                                if (pRef.equals(currentField_.getName())) {
+                            for (String pageRef : page.getFieldRefs()) {
+                                if (pageRef.equals(currentField_.getName())) {
                                     page.addField(currentField_);
                                 }
                             }
                         }
                         for (FormSection section : currentSections_) {
-                            for (String sRef : section.getFieldRefs()) {
-                                if (sRef.equals(currentField_.getName())) {
+                            for (String sectionRef : section.getFieldRefs()) {
+                                if (sectionRef.equals(currentField_.getName())) {
                                     section.addField(currentField_);
                                 }
                             }
@@ -270,7 +269,7 @@ public class FormParser extends GenericPayloadParser<Form> {
                     sectionStack_.remove(sectionStack_.size()-1);
                 }
                 else if (sectionStack_.size() == 1) {
-                    // Add the remaining section on the stack to it's parent page
+                    // Add the remaining section on the stack to its parent page
                     currentPage_.addChildSection(sectionStack_.get(sectionStack_.size()-1));
                     sectionStack_.remove(sectionStack_.size()-1);
                 }

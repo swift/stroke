@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Isode Limited.
+ * Copyright (c) 2015-2016 Isode Limited.
  * All rights reserved.
  * See the COPYING file for more information.
  */
@@ -21,7 +21,6 @@ import java.util.Vector;
 public class FormPage {
 
 	private String label_ = "";
-	private String xmlns_ = "";
 	private Vector<FormText> textElements_ = new Vector<FormText>();
 	private Vector<FormReportedRef> reportedRefs_ = new Vector<FormReportedRef>();
 	private Vector<FormSection> childSections_ = new Vector<FormSection>();
@@ -32,7 +31,7 @@ public class FormPage {
 	* Default Constructor.
 	*/
 	public FormPage() {
-		this.xmlns_ = "http://jabber.org/protocol/xdata-layout";
+	    
 	}
 
 	/**
@@ -48,13 +47,6 @@ public class FormPage {
 	*/
 	public String getLabel() {
 		return label_;
-	}
-
-	/**
-	* @return xmlns, Not Null.
-	*/
-	public String getXMLNS() {
-		return xmlns_;
 	}
 
 	/**

@@ -153,7 +153,7 @@ public class FormSerializer extends GenericPayloadSerializer<Form> {
 
     private XMLElement pageToXML(FormPage page) {
         XMLElement pageElement = new XMLElement("page");
-        pageElement.setAttribute("xmlns", page.getXMLNS());
+        pageElement.setAttribute("xmlns","http://jabber.org/protocol/xdata-layout");
         if (!page.getLabel().isEmpty()) {
             pageElement.setAttribute("label", page.getLabel());
         }
