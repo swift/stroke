@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2012, Isode Limited, London, England.
+ * Copyright (c) 2010-2016, Isode Limited, London, England.
  * All rights reserved.
  */
 /*
@@ -14,12 +14,12 @@
 
 package com.isode.stroke.jid;
 
-import com.isode.stroke.idn.ICUConverter;
-import com.isode.stroke.idn.IDNConverter;
-import com.ibm.icu.text.StringPrepParseException;
-import com.isode.stroke.base.NotNull;
 import java.util.Arrays;
 import java.util.List;
+
+import com.isode.stroke.base.NotNull;
+import com.isode.stroke.idn.ICUConverter;
+import com.isode.stroke.idn.IDNConverter;
 
 /**
  * JID helper.
@@ -147,6 +147,9 @@ public class JID implements Comparable<JID> {
 		NotNull.exceptIfNull(domain, "domain");
 		valid_ = true;
 		hasResource_ = (resource != null);
+		if (hasResource_ && resource.isEmpty()) {
+		    valid_ = false;
+		}
 		nameprepAndSetComponents(node, domain, resource);
 	}
 

@@ -12,12 +12,10 @@
 package com.isode.stroke.jid;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
-import com.isode.stroke.jid.JID;
 
 public class JIDTest {
 
@@ -154,6 +152,12 @@ public class JIDTest {
 		JID testling = new JID("foo", "", "baz");
 
 		assertFalse(testling.isValid());
+	}
+	
+	@Test
+	public void testConstructorWithStrings_EmptyResource() {
+	    JID testling = new JID("foo","bar","");
+	    assertFalse(testling.isValid());
 	}
 
 	
