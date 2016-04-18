@@ -7,10 +7,8 @@ package com.isode.stroke.network;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.CancelledKeyException;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ClosedSelectorException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -47,6 +45,10 @@ public class JavaConnection extends Connection implements EventOwner {
         
         private boolean isWriteNeeded() {
             return (!writeBuffer_.isEmpty());
+        }
+        
+        public HostAddressPort getRemoteAddress() {
+            return address_;
         }
 
         public void run() {
@@ -518,27 +520,7 @@ public class JavaConnection extends Connection implements EventOwner {
     
     @Override
     public HostAddressPort getRemoteAddress() {
-        if (socketChannel_ == null) {
-            return null;
-        }
-        SocketAddress remoteAddress;
-        try {
-            remoteAddress = socketChannel_.getRemoteAddress();
-        } catch (ClosedChannelException e) {
-            return null;
-        } catch (IOException e) {
-            return null;
-        }
-        if (!(remoteAddress instanceof InetSocketAddress)) {
-            // SocketChannel.getRemoteAddress should return a
-            // InetSocketAddress if it is bound to an IP Socket
-            // Address so return null if it does not
-            return null;
-        }
-        InetSocketAddress remoteInetAddress = (InetSocketAddress) remoteAddress;
-        return new HostAddressPort(
-                new HostAddress(remoteInetAddress.getAddress()),
-                remoteInetAddress.getPort());
+        return worker_.getRemoteAddress();
     }
     
     @Override
