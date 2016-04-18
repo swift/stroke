@@ -1,15 +1,22 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 
 package com.isode.stroke.signals;
 
-
 public class SignalConnection {
-    public final Signal onDestroyed = new Signal();
-
+    interface DisconnectListener {
+        void onSignalConnectionDisconnect(SignalConnection connection);
+    }
+    
+    private final DisconnectListener listener;
+    
+    SignalConnection(DisconnectListener listener) {
+        this.listener = listener;
+    }
+    
     public void disconnect() {
-        onDestroyed.emit();
+        listener.onSignalConnectionDisconnect(this);
     }
 }

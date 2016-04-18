@@ -1,36 +1,25 @@
 /*
- * Copyright (c) 2010, Isode Limited, London, England.
+ * Copyright (c) 2010-2015, Isode Limited, London, England.
  * All rights reserved.
  */
 
 package com.isode.stroke.signals;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * An approximation of the boost::signals system, although a little more warty.
  */
-public class Signal1<T1> {
-    private final Map<SignalConnection, Slot1<T1> > binds_ = Collections.synchronizedMap(new HashMap<SignalConnection, Slot1<T1> >());
+public final class Signal1<T1> extends BaseSignal {
     public SignalConnection connect(Slot1<T1> bind) {
-        final SignalConnection connection = new SignalConnection();
-        binds_.put(connection, bind);
-        connection.onDestroyed.connect(new Slot() {
-           public void call() {
-               binds_.remove(connection);
-           }
-        });
-        return connection;
+        return addBind(bind);
     }
 
+    @SuppressWarnings("unchecked")
     public void emit(T1 p1) {
-        ArrayList<Slot1<T1>> binds = new ArrayList<Slot1<T1>>();
-        binds.addAll(binds_.values());
-        for (Slot1<T1> bind : binds) {
-            bind.call(p1);
+        final BaseSlot[] binds = getBinds();
+        if (binds == null) {return;}
+        for (BaseSlot bind : binds) {
+            ((Slot1<T1>)bind).call(p1);
         }
     }
 
@@ -40,9 +29,5 @@ public class Signal1<T1> {
                 target.emit(p1);
             }
         });
-    }
-
-    public void disconnectAll() {
-        binds_.clear();
     }
 }

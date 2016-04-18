@@ -12,7 +12,7 @@ package com.isode.stroke.signals;
  * @param <T3> Type 3
  * @param <T4> Type 4
  */
-public interface Slot4<T1, T2, T3, T4> {
+public interface Slot4<T1, T2, T3, T4> extends BaseSlot {
     /**
      * This method will be called on notification from a signal
      * @param p1 parameter value 1

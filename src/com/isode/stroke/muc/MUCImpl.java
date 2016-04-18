@@ -724,7 +724,7 @@ public class MUCImpl extends MUC {
 	@Override
 	public void disconnect() {
 		if (scopedConnection_ != null) {
-			scopedConnection_.onDestroyed.emit();
+			scopedConnection_.disconnect();
 			scopedConnection_ = null;
 		}
 	}

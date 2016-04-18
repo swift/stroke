@@ -8,6 +8,6 @@ package com.isode.stroke.signals;
 /**
  * Bind class for connecting to a signal.
  */
-public interface Slot1<T1> {
+public interface Slot1<T1> extends BaseSlot {
     void call(T1 p1);
 }
