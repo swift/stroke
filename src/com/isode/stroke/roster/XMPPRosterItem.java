@@ -5,6 +5,7 @@
 package com.isode.stroke.roster;
 
 import java.util.Collection;
+import java.util.ArrayList;
 
 import com.isode.stroke.elements.RosterItemPayload;
 import com.isode.stroke.jid.JID;
@@ -20,6 +21,15 @@ public class XMPPRosterItem {
         this.name = name;
         this.groups = groups;
         this.subscription = subscription;
+    }
+    
+    // Copy constructor
+    public XMPPRosterItem(XMPPRosterItem from) {
+    	this(from.jid, from.name, null, from.subscription);
+    	if (from.groups != null) {
+    		groups = new ArrayList<String>(from.groups.size());
+    		groups.addAll(from.groups);
+    	}
     }
 
     public final JID getJID() {

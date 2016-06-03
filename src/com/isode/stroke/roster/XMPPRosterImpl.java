@@ -73,7 +73,11 @@ public class XMPPRosterImpl extends XMPPRoster {
 
 	@Override
 	public Collection<XMPPRosterItem> getItems() {
-		return entries_.values();
+		Collection<XMPPRosterItem> items = new ArrayList<XMPPRosterItem>(entries_.size());
+		for (XMPPRosterItem item : entries_.values()) {
+			items.add(new XMPPRosterItem(item));
+		}
+		return items;
 	}
 
 	@Override
