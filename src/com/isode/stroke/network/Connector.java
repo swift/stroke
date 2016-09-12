@@ -218,9 +218,9 @@ public class Connector {
 		addressQuery.onResult.disconnectAll();
 		addressQuery = null;
 	}
-	if (currentConnection != null) {
+	if (currentConnectionConnectFinishedConnection != null) {
 		currentConnectionConnectFinishedConnection.disconnect();
-		currentConnection = null;
+		currentConnectionConnectFinishedConnection = null;
 	}
 
 	onConnectFinished.emit(connection, (connection != null || foundSomeDNS) ? null : new DomainNameResolveError());
