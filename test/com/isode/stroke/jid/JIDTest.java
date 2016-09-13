@@ -51,7 +51,7 @@ public class JIDTest {
 	public void testConstructorWithString_EmptyResource() {
 		JID testling = new JID("bar/");
 
-		assertTrue(testling.isValid());
+		assertFalse(testling.isValid());
 		assertFalse(testling.isBare());
 	}
 

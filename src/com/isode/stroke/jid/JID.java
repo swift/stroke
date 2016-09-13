@@ -46,10 +46,9 @@ public class JID implements Comparable<JID> {
 	};
 
 	private boolean valid_ = true;
-	private boolean hasResource_ = true;
 	private String node_ = "";
 	private String domain_ = "";
-	private String resource_ = "";
+	private String resource_ = null;
 	private static IDNConverter idnConverter = new ICUConverter();
 
 	/**
@@ -81,8 +80,7 @@ public class JID implements Comparable<JID> {
 	 * @param jid String representation. Invalid JID if null or invalid.
 	 */
 	public JID(String jid) {
-		NotNull.exceptIfNull(jid, "jid");		
-		valid_ = true;
+		NotNull.exceptIfNull(jid, "jid");
 		initializeFromString(jid);
 	}
 
@@ -91,7 +89,7 @@ public class JID implements Comparable<JID> {
 			valid_ = false;
 			node_ = "";
 			domain_ = "";
-			resource_ = "";
+			resource_ = null;
 			return;
 		}
 
@@ -102,7 +100,6 @@ public class JID implements Comparable<JID> {
 			bare = parts[0];
 			resource = parts[1];
 		} else {
-			hasResource_ = false;
 			resource = null;
 			bare = jid;
 		}
@@ -145,11 +142,6 @@ public class JID implements Comparable<JID> {
 	public JID(String node, String domain, String resource) {
 		NotNull.exceptIfNull(node, "node");
 		NotNull.exceptIfNull(domain, "domain");
-		valid_ = true;
-		hasResource_ = (resource != null);
-		if (hasResource_ && resource.isEmpty()) {
-		    valid_ = false;
-		}
 		nameprepAndSetComponents(node, domain, resource);
 	}
 
@@ -167,12 +159,15 @@ public class JID implements Comparable<JID> {
 			valid_ = false;
 			return;
 		}
+		if (resource_ != null && resource_.isEmpty()) {
+		    valid_ = false;
+		}
 		if (domain_.isEmpty()) {
 			valid_ = false;
 			return;
 		}
 	}
-
+	
 	/**
 	 * @return Is a correctly-formatted JID.
 	 */
@@ -209,7 +204,7 @@ public class JID implements Comparable<JID> {
 	 * @return true if the resource part of JID is null, false if not
 	 */
 	public boolean isBare() {
-		return !hasResource_;
+		return resource_ == null;
 	}
 
 	/**
@@ -309,9 +304,6 @@ public class JID implements Comparable<JID> {
 
 	@Override
 	public String toString() {
-        if (!valid_) {
-            return "";
-        }
 		String string = new String();
 		if (node_.length()!=0) {
 			string += node_ + "@";
@@ -348,14 +340,12 @@ public class JID implements Comparable<JID> {
 			return domain_.compareTo(o.domain_);
 		}
 		if (compareType == CompareType.WithResource) {
-			String res1 = resource_;
-			String res2 = o.resource_;
-			if(res1 != null && res2 != null) {
-				return res1.compareTo(res2);
+			if (isBare() != o.isBare()) {
+				return !isBare() ? 1 : -1;
 			}
-			if(res1 == null && res2 == null) { return 0; }
-            if (res1 == null) { return -1; }
-            if (res2 == null) { return 1; }
+			if (!isBare()) {
+				return resource_.compareTo(o.resource_);
+			}
 		}
 		return 0;
 	}
