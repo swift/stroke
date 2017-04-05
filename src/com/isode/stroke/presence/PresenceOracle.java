@@ -199,10 +199,14 @@ public class PresenceOracle {
 	 * @return The relevant presence.
      */
 	public static Presence getActivePresence(Collection<? extends Presence> presences) {
+		
+		PresenceAccountCmp comparator = new PresenceAccountCmp();
+		int size = presences.size();
+		if (size < 1) size = 1;
         
-	    PriorityQueue<Presence> online = new PriorityQueue<Presence>(presences.size(),new PresenceAccountCmp());
-	    PriorityQueue<Presence> away = new PriorityQueue<Presence>(presences.size(),new PresenceAccountCmp());
-	    PriorityQueue<Presence> offline = new PriorityQueue<Presence>(presences.size(),new PresenceAccountCmp());
+	    PriorityQueue<Presence> online = new PriorityQueue<Presence>(size, comparator);
+	    PriorityQueue<Presence> away = new PriorityQueue<Presence>(size, comparator);
+	    PriorityQueue<Presence> offline = new PriorityQueue<Presence>(size, comparator);
 
 	    for (Presence presence : presences) {
 	        switch (presence.getShow()) {
