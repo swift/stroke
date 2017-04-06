@@ -11,11 +11,9 @@
 
 package com.isode.stroke.serializer.payloadserializers;
 
-import com.isode.stroke.serializer.GenericPayloadSerializer;
-import com.isode.stroke.serializer.xml.XMLTextNode;
-import com.isode.stroke.serializer.xml.XMLElement;
 import com.isode.stroke.elements.CarbonsEnable;
-import com.isode.stroke.base.NotNull;
+import com.isode.stroke.serializer.GenericPayloadSerializer;
+import com.isode.stroke.serializer.xml.XMLElement;
 
 public class CarbonsEnableSerializer extends GenericPayloadSerializer<CarbonsEnable> {
 
